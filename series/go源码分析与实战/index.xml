@@ -69,7 +69,7 @@
       <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
       
       <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/</guid>
-      <description>本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool</description>
+      <description>本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</description>
     </item>
     
   </channel>
