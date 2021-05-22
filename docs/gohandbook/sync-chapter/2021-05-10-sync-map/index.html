@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>sync.Map | Go 源码分析与实战 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex &#43; Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Docs",
+      "item":"https://www.haohongfan.com/docs/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Go 源码分析与实战",
+      "item":"https://www.haohongfan.com/docs/gohandbook/"},{
+      "@type": "ListItem",
+      "position": 3 ,
+      "name":"并发原语",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
+      "@type": "ListItem",
+      "position": 4 ,
+      "name":"sync.Map",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/"
+    },
+    "headline": "sync.Map | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "dateModified": "2021-04-01T09:57:16+08:00",
+    "wordCount":  2058 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex \u002b Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() \/\/ double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完"
+}
+</script><meta property="og:title" content="sync.Map | Go 源码分析与实战 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" />
+
+
+
+
+<meta property="og:description" content="hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex &#43; Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="docs" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="lg:pt-12">
+    <div class="flex flex-col md:flex-row bg-secondary-bg rounded">
+        <div class="md:w-1/4 lg:w-1/5 border-r">
+            <div class="sticky top-16 pt-6">
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="sidebar-title" class="md:hidden mx-4 px-2 pt-4 pb-2 md:border-b text-tertiary-text md:text-primary-text">
+    <span class="font-semibold">目录</span>
+    <i class="fas fa-caret-right ml-1"></i>
+</div>
+
+<div id="sidebar-toc"
+    class="hidden md:block overflow-y-auto mx-6 md:mx-0 pr-6 pt-2 md:max-h-doc-sidebar bg-primary-bg md:bg-transparent">
+    <div class="flex flex-wrap ml-4 -mr-2 p-2 bg-secondary-bg md:bg-primary-bg rounded">
+        <a class=" hover:text-eureka"
+            href="https://www.haohongfan.com/docs/gohandbook/">Go 源码分析与实战</a>
+        
+        
+        
+
+
+    </div>
+    
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class=" pb-2 ">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/">并发原语</a>
+        </div>
+        
+        
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">Mutex</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">Cond</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">WaitGroup</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" text-eureka  hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">sync.Pool</a>
+        </div>
+        
+    </li>
+    
+    
+</ul>
+
+        
+    </li>
+    
+    
+</ul>
+
+</div>
+
+
+
+
+
+
+
+            </div>
+
+        </div>
+        <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
+            <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
+                <h1 class="font-bold text-3xl text-primary-text">sync.Map</h1>
+                <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+            </div>
+            <div class="flex">
+                <div class="w-full lg:w-3/4 px-6">
+                    
+                    
+                    <div class="content">
+                        <p>hi, 大家好，我是 haohongfan。</p>
+<p>本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map  来使用。</p>
+<p>下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。</p>
+<pre><code class="language-go">instance, ok := instanceMap[name]
+if ok {
+    return instance, nil
+}
+
+initLock.Lock()
+defer initLock.Unlock()
+
+// double check
+instance, ok = instanceMap[name]
+if ok {
+    return instance, nil
+}
+</code></pre>
+<p>这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完全包含了这个逻辑。可能写 Java 的同学看着上面这段代码很眼熟，但确实是用错了，关于为什么用错了以及会造成什么影响，请大家关注后续的文章。</p>
+<p>我大概分析了下大家宁愿使用 Mutex + Map，也不愿使用 sync.Map 的原因：</p>
+<ol>
+<li>sync.Map 本身就很难用，使用起来并不像一个 Map。失去了 map 应有的特权语法，如：make,  map[1] 等</li>
+<li>sync.Map 方法较多。让一个简单的 Map 使用起来有了较高的学习成本。</li>
+</ol>
+<p>不管什么样的原因吧，当你读过这篇文章后，在某些特定的并发场景下，建议使用 sync.Map 代替 Map + Mutex 的。</p>
+<h2 id="用法全解">用法全解</h2>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;sync&quot;
+)
+
+func main() {
+	var syncMap sync.Map
+	syncMap.Store(&quot;11&quot;, 11)
+	syncMap.Store(&quot;22&quot;, 22)
+
+	fmt.Println(syncMap.Load(&quot;11&quot;)) // 11
+	fmt.Println(syncMap.Load(&quot;33&quot;)) // 空
+
+	fmt.Println(syncMap.LoadOrStore(&quot;33&quot;, 33)) // 33
+	fmt.Println(syncMap.Load(&quot;33&quot;)) // 33
+	fmt.Println(syncMap.LoadAndDelete(&quot;33&quot;)) // 33
+	fmt.Println(syncMap.Load(&quot;33&quot;)) // 空
+
+	syncMap.Range(func(key, value interface{}) bool {
+		fmt.Printf(&quot;key:%v value:%v\n&quot;, key, value)
+		return true
+	})
+    // key:22 value:22
+	// key:11 value:11
+}
+</code></pre>
+<p>其实 sync.Map 并不复杂，只是将普通 map 的相关操作转成对应函数而已。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>普通 map</th>
+<th>sync.Map</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>map 获取某个 key</td>
+<td>map[1]</td>
+<td>sync.Load(1)</td>
+</tr>
+<tr>
+<td>map 添加元素</td>
+<td>map[1] = 10</td>
+<td>sync.Store(1, 10)</td>
+</tr>
+<tr>
+<td>map 删除一个 key</td>
+<td>delete(map, 1)</td>
+<td>sync.Delete(1)</td>
+</tr>
+<tr>
+<td>遍历 map</td>
+<td>for&hellip;range</td>
+<td>sync.Range()</td>
+</tr>
+</tbody>
+</table>
+<p>sync.Map 两个特有的函数，不过从字面就能理解是什么意思了。
+LoadOrStore：sync.Map 存在就返回，不存在就插入
+LoadAndDelete：sync.Map 获取某个 key，如果存在的话，同时删除这个 key</p>
+<h2 id="源码解析">源码解析</h2>
+<pre><code class="language-go">type Map struct {
+	mu Mutex
+	read atomic.Value // readOnly  read map
+	dirty map[interface{}]*entry  // dirty map
+	misses int
+}
+</code></pre>
+<p><img src="https://images.haohongfan.com/sync_map_all1.png" alt="sync map 全景图"></p>
+<p><img src="https://images.haohongfan.com/sync_map_load.png" alt="Load"></p>
+<p><img src="https://images.haohongfan.com/sync_map_store.png" alt="store"></p>
+<p><img src="https://images.haohongfan.com/sync_map_delete.png" alt="Delete"></p>
+<h3 id="read-map-的值是什么时间更新的-">read map 的值是什么时间更新的 ？</h3>
+<ol>
+<li>Load/LoadOrStore/LoadAndDelete 时，当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map</li>
+<li>Store/LoadOrStore 时，当 read map 中存在这个key，则更新</li>
+<li>Delete/LoadAndDelete 时，如果 read map 中存在这个key，则设置这个值为 nil</li>
+</ol>
+<h3 id="dirty-map-的值是什么时间更新的-">dirty map 的值是什么时间更新的 ？</h3>
+<ol>
+<li>完全是一个新 key， 第一次插入 sync.Map，必先插入 dirty map</li>
+<li>Store/LoadOrStore 时，当 read map 中不存在这个key，在 dirty map 存在这个key，则更新</li>
+<li>Delete/LoadAndDelete 时，如果 read map 中不存在这个key，在 dirty map 存在这个key，则从 dirty map 中删除这个key</li>
+<li>当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map，同时设置 dirty map 为 nil</li>
+</ol>
+<p><strong>疑问：当 dirty map 复制到 read map 后，将 dirty map 设置为 nil，也就是 dirty map 中就不存在这个 key 了。如果又新插入某个 key，多次访问后达到了 dirty map 往 read map 复制的条件，如果直接用 read map 覆盖 dirty map，那岂不是就丢了之前在 read map 但不在 dirty map 的 key ?</strong></p>
+<p>答：其实并不会。当 dirty map 向 read map 复制后，readOnly.amended 等于了 false。当新插入了一个值时，会将 read map 中的值，重新给 dirty map 赋值一遍，也就是 read map 也会向 dirty map 中复制。</p>
+<pre><code class="language-go">func (m *Map) dirtyLocked() {
+	if m.dirty != nil {
+		return
+	}
+
+	read, _ := m.read.Load().(readOnly)
+	m.dirty = make(map[interface{}]*entry, len(read.m))
+	for k, e := range read.m {
+		if !e.tryExpungeLocked() {
+			m.dirty[k] = e
+		}
+	}
+}
+</code></pre>
+<h3 id="read-map-和-dirty-map-是什么时间删除的">read map 和 dirty map 是什么时间删除的？</h3>
+<ul>
+<li>当 read map 中存在某个 key 的时候，这个时候只会删除 read map， 并不会删除 dirty map（因为 dirty map 不存在这个值）</li>
+<li>当 read map 中不存在时，才会去删除 dirty map 里面的值</li>
+</ul>
+<p><strong>疑问：如果按照这个删除方式，那岂不是 dirty map 中会有残余的 key，导致没删除掉？</strong></p>
+<p>答：其实并不会。当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map。这个过程中还附带了另外一个操作：将 dirty map 置为 nil。</p>
+<pre><code class="language-go">func (m *Map) missLocked() {
+	m.misses++
+	if m.misses &lt; len(m.dirty) {
+		return
+	}
+	m.read.Store(readOnly{m: m.dirty})
+	m.dirty = nil
+	m.misses = 0
+}
+</code></pre>
+<h3 id="read-map-与-dirty-map-的关系-">read map 与 dirty map 的关系 ？</h3>
+<ol>
+<li>在 read map 中存在的值，在 dirty map 中可能不存在。</li>
+<li>在 dirty map 中存在的值，在 read map 中也可能存在。</li>
+<li>当访问多次，发现 dirty map 中存在，read map  中不存在，导致 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map。</li>
+<li>当出现 dirty map 向 read map 复制后，dirty map 会被置成 nil。</li>
+<li>当出现 dirty map 向 read map 复制后，readOnly.amended 等于了 false。当新插入了一个值时，会将 read map 中的值，重新给 dirty map 赋值一遍</li>
+</ol>
+<h3 id="readdirty-map-中的值一定是有效的吗">read/dirty map 中的值一定是有效的吗？</h3>
+<p>并不一定。放入到 read/dirty map 中的值总共有 3 种类型：</p>
+<ul>
+<li>nil：如果获取到的 value 是 nil，那说明这个 key 是已经删除过的。既不在 read map，也不在 dirty map</li>
+<li>expunged：这个 key 在 dirty map 中是不存在的</li>
+<li>valid：其实就正常的情况，要么这个值存在在 read map 中，要么存在在 dirty map 中</li>
+</ul>
+<h2 id="syncmap-是如何提高性能的">sync.Map 是如何提高性能的？</h2>
+<p>通过源码解析，我们知道 sync.Map 里面有两个普通 map，read map主要是负责读，dirty map 是负责读和写（加锁）。在读多写少的场景下，read map 的值基本不发生变化，可以让 read map 做到无锁操作，就减少了使用 Mutex + Map 必须的加锁/解锁环节，因此也就提高了性能。</p>
+<p>不过也能够看出来，read map 也是会发生变化的，如果某些 key 写操作特别频繁的话，sync.Map 基本也就退化成了 Mutex + Map（有可能性能还不如 Mutex + Map）。</p>
+<p>所以，不是说使用了 sync.Map 就一定能提高程序性能，我们日常使用中尽量注意拆分粒度来使用 sync.Map。</p>
+<p>关于如何分析 sync.Map 是否优化了程序性能，同样可以使用 pprof。具体过程可以参考 《这可能是最容易理解的 Go Mutex 源码剖析》</p>
+<h2 id="syncmap-应用场景">sync.Map 应用场景</h2>
+<ol>
+<li>读多写少</li>
+<li>写操作也多，但是修改的 key 和读取的 key 特别不重合。</li>
+</ol>
+<p>关于第二点我觉得挺扯的，毕竟我们很难把控这一点，不过由于是官方的注释还是放在这里。</p>
+<p>实际开发中我们要注意使用场景和擅用 pprof 来分析程序性能。</p>
+<h2 id="syncmap-使用注意点">sync.Map 使用注意点</h2>
+<p>和 Mutex 一样， sync.Map 也同样不能被复制，因为 atomic.Value 是不能被复制的。</p>
+<p><img src="https://images.haohongfan.com/hhf11.png" alt="gzh"></p>
+
+                    </div>
+                    
+                    <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+                    
+                    
+                    <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/hhf11.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+                    
+
+                    
+
+
+
+                    
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="block">WaitGroup</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" class="block">sync.Pool</a>
+        
+    </div>
+</div>
+
+                    
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+                </div>
+                
+                <div class="hidden lg:block lg:w-1/4">
+                    
+                    <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-secondary-bg pt-16 -mt-16 ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6  pt-10 -mt-10 border-l ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#用法全解">用法全解</a></li>
+    <li><a href="#源码解析">源码解析</a>
+      <ul>
+        <li><a href="#read-map-的值是什么时间更新的-">read map 的值是什么时间更新的 ？</a></li>
+        <li><a href="#dirty-map-的值是什么时间更新的-">dirty map 的值是什么时间更新的 ？</a></li>
+        <li><a href="#read-map-和-dirty-map-是什么时间删除的">read map 和 dirty map 是什么时间删除的？</a></li>
+        <li><a href="#read-map-与-dirty-map-的关系-">read map 与 dirty map 的关系 ？</a></li>
+        <li><a href="#readdirty-map-中的值一定是有效的吗">read/dirty map 中的值一定是有效的吗？</a></li>
+      </ul>
+    </li>
+    <li><a href="#syncmap-是如何提高性能的">sync.Map 是如何提高性能的？</a></li>
+    <li><a href="#syncmap-应用场景">sync.Map 应用场景</a></li>
+    <li><a href="#syncmap-使用注意点">sync.Map 使用注意点</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+                    
+                </div>
+                
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        hljs.initHighlightingOnLoad();
+        changeSidebarHeight();
+        switchDocToc();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>一次错误使用 go-cache 导致出现的线上问题 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"一次错误使用 go-cache 导致出现的线上问题",
+      "item":"https://www.haohongfan.com/posts/2020-03-11-go-cache/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-03-11-go-cache/"
+    },
+    "headline": "一次错误使用 go-cache 导致出现的线上问题 | HHFCodeRv","datePublished": "2020-03-11T16:30:35+08:00",
+    "dateModified": "2020-03-11T16:30:35+08:00",
+    "wordCount":  1965 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说"
+}
+</script><meta property="og:title" content="一次错误使用 go-cache 导致出现的线上问题 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-03-11-go-cache/" />
+
+
+
+
+<meta property="og:description" content="话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-03-11T16:30:35&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-03-11T16:30:35&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="cache" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">一次错误使用 go-cache 导致出现的线上问题</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-03-11</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了.</p>
+<h2 id="排查过程">排查过程</h2>
+<ol>
+<li>查看服务器的监控系统, CPU, 内存, 负载等指标正常</li>
+<li>排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒</li>
+<li>查看数据库, codis 监控, 各项指标正常</li>
+</ol>
+<p>不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因</p>
+<p><img src="https://images.haohongfan.com/go-cache.png" alt="go-cache"></p>
+<p>这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说 40 多万 goroutine 在发生很严重的锁竞争. 这就让人觉得很意外了.</p>
+<p>幸好当时在压测接口的时候, 为了避免 go-cache 的影响结果的影响, 引入了一个配置项来控制是否开启 go-cache, 于是立马线上关闭 go-cache, 接口响应恢复正常.</p>
+<h2 id="问题来了">问题来了</h2>
+<p>虽说问题解决了, 但是是由于什么原因造成的呢?</p>
+<ol>
+<li>为什么 go-cache 会发生这么严重的锁竞争 ?</li>
+<li>是由于 go-cache 有代码 bug 吗 ?</li>
+<li>如何才能稳定复现呢 ?</li>
+</ol>
+<h2 id="go-cache-源码剖析">go-cache 源码剖析</h2>
+<p>为了探究这个 bug 引起的原因, 我将整个 go-cache的源码读了一遍, 其实 go-cache 相对于 freecache, bigcache 还是相对简单许多.</p>
+<pre><code class="language-go">type cache struct {
+	defaultExpiration time.Duration
+	items             map[string]Item
+	mu                sync.RWMutex
+	onEvicted         func(string, interface{})
+	janitor           *janitor
+}
+</code></pre>
+<p>从结构体上, go-cache 主要还是由 map + RWMutex 组成.</p>
+<h3 id="set----go-cache-最重要的函数">Set &ndash; go-cache 最重要的函数</h3>
+<pre><code class="language-go">// Add an item to the cache, replacing any existing item. If the duration is 0
+// (DefaultExpiration), the cache's default expiration time is used. If it is -1
+// (NoExpiration), the item never expires.
+func (c *cache) Set(k string, x interface{}, d time.Duration) {
+	// &quot;Inlining&quot; of set
+	var e int64
+	if d == DefaultExpiration {
+		d = c.defaultExpiration
+	}
+	if d &gt; 0 {
+		e = time.Now().Add(d).UnixNano()
+	}
+	c.mu.Lock()
+	c.items[k] = Item{
+		Object:     x,
+		Expiration: e,
+	}
+	// TODO: Calls to mu.Unlock are currently not deferred because defer
+	// adds ~200 ns (as of go1.)
+	c.mu.Unlock()
+}
+</code></pre>
+<p>Set 需要三个参数: key, value, d(过期时间). 如果 d 为 0, 则使用 go-cache 默认过期时间, 这个默认过期时间是go-cache.New()时设置的. 如果 d 为 -1, 那么这个 key 不会过期</p>
+<p>实现过程:</p>
+<ol>
+<li>RWMutex.Lock</li>
+<li>设置过期时间, 将 value 放入 map 中</li>
+<li>RWMutex.Unlock</li>
+</ol>
+<p>还有另外几个衍生函数: SetDefault, Add, Replace, 这里就不做具体介绍</p>
+<h3 id="get-go-cache-最重要的函数">Get go-cache 最重要的函数</h3>
+<pre><code class="language-go">func (c *cache) Get(k string) (interface{}, bool) {
+	c.mu.RLock()
+	// &quot;Inlining&quot; of get and Expired
+	item, found := c.items[k]
+	if !found {
+		c.mu.RUnlock()
+		return nil, false
+	}
+	if item.Expiration &gt; 0 {
+		if time.Now().UnixNano() &gt; item.Expiration {
+			c.mu.RUnlock()
+			return nil, false
+		}
+	}
+	c.mu.RUnlock()
+	return item.Object, true
+}
+</code></pre>
+<ol>
+<li>RWMutex.RLock</li>
+<li>判断是否存在</li>
+<li>判断是否过期</li>
+<li>RLock.RUnlock</li>
+</ol>
+<h3 id="incrementdecrement">Increment/Decrement</h3>
+<p>go-cache 对数值类型的值是比较友好的, 提供大量函数 <code>Increment</code>, <code>IncrementFloat</code>等函数, 能够轻松对内存中的各种数值进行加减, 其实现也简单</p>
+<pre><code class="language-go">func (c *cache) IncrementUint16(k string, n uint16) (uint16, error) {
+	c.mu.Lock()
+	v, found := c.items[k]
+	if !found || v.Expired() {
+		c.mu.Unlock()
+		return 0, fmt.Errorf(&quot;Item %s not found&quot;, k)
+	}
+	rv, ok := v.Object.(uint16)
+	if !ok {
+		c.mu.Unlock()
+		return 0, fmt.Errorf(&quot;The value for %s is not an uint16&quot;, k)
+	}
+	nv := rv + n
+	v.Object = nv
+	c.items[k] = v
+	c.mu.Unlock()
+	return nv, nil
+}
+</code></pre>
+<ol>
+<li>RWMutex.Lock</li>
+<li>判断某个 key 在 map 中是否存在</li>
+<li>判断是否这个 key 是否过期</li>
+<li>对这个值加 n</li>
+<li>RWMutex.Unlock</li>
+</ol>
+<h3 id="落盘恢复方案">落盘/恢复方案</h3>
+<p>go-cache 自带落盘/恢复方案, 将内存中的值进行落盘, 同时将文件中的内容恢复. 不过我感觉这个功能挺鸡肋的, 没必要在生产环境中使用. 这里就不做过多的介绍了.</p>
+<h3 id="go-cache-过期清理方案">go-cache 过期清理方案</h3>
+<pre><code class="language-go">
+func (c *cache) DeleteExpired() {
+	log.Printf(&quot;start check at:%v&quot;, time.Now())
+	var evictedItems []keyAndValue
+	now := time.Now().UnixNano()
+	c.mu.Lock()
+	for k, v := range c.items {
+		// &quot;Inlining&quot; of expired
+		if v.Expiration &gt; 0 &amp;&amp; now &gt; v.Expiration {
+			ov, evicted := c.delete(k)
+			if evicted {
+				evictedItems = append(evictedItems, keyAndValue{k, ov})
+			}
+		}
+	}
+	c.mu.Unlock()
+	for _, v := range evictedItems {
+		c.onEvicted(v.key, v.value)
+	}
+}
+
+func (j *janitor) Run(c *cache) {
+	ticker := time.NewTicker(j.Interval)
+	for {
+		select {
+		case &lt;-ticker.C:
+			c.DeleteExpired()
+		case &lt;-j.stop:
+			ticker.Stop()
+			return
+		}
+	}
+}
+
+func runJanitor(c *cache, ci time.Duration) {
+	j := &amp;janitor{
+		Interval: ci,
+		stop:     make(chan bool),
+	}
+	c.janitor = j
+	go j.Run(c)
+}
+
+func newCacheWithJanitor(de time.Duration, ci time.Duration, m map[string]Item) *Cache {
+	c := newCache(de, m)
+	// This trick ensures that the janitor goroutine (which--granted it
+	// was enabled--is running DeleteExpired on c forever) does not keep
+	// the returned C object from being garbage collected. When it is
+	// garbage collected, the finalizer stops the janitor goroutine, after
+	// which c can be collected.
+	C := &amp;Cache{c}
+	if ci &gt; 0 {
+		runJanitor(c, ci)
+		runtime.SetFinalizer(C, stopJanitor)
+	}
+	return C
+}
+</code></pre>
+<p>可以看到 go-cache 每过一段时间(j.Interval, 这个值也是通过 go-cache.New 设置), 就会启动清理工作.</p>
+<p>清理时原理:</p>
+<ol>
+<li>RWMutex.Lock()</li>
+<li>遍历整个map, 检查 map 中的 value 是否过期</li>
+<li>RWMutex.Unlock()</li>
+</ol>
+<p>同时, 还利用了 runtime.SetFinalizer 在 go-cache 生命周期结束时, 主动完成对过期清理协程的终止</p>
+<h2 id="源码分析总结">源码分析总结</h2>
+<p>遍览整个 go-cache 源码, 会发现 go-cache 完全靠着 RWMutex 保证数据的正确性.</p>
+<p>考虑下面的问题:</p>
+<ol>
+<li>当 go-cache.New() 时设置的定时清理的时间过长, 同时 Set 的 key 的过期时间比较长, 这样会不会导致 go-cache.map 中的元素过多?</li>
+<li>会不会当清理启动时, 锁定了 go-cache.map (注意这个时候是写锁), 由于 go-cache.map 中元素过多, 导致 map 一直被锁定, 那么这个时候所有的 Set 函数是不是就会产生 Lock 竞争?</li>
+<li>使用 go-cache 的时候, 当某个接口的 QPS 很高, 程序里由于使用问题, 将某些不该往 go-cache 存的 value 也存了进去, 那么会不会导致 Set 之间的 Lock 竞争呢?</li>
+</ol>
+<h2 id="场景还原">场景还原</h2>
+<p>利用下面的程序可以轻松还原上面的问题场景. 上面提出的问题, 都会造成 go-cache lock 竞争. 这里利用 pprof 查看程序的指标</p>
+<pre><code class="language-go">var goroutineNums = flag.Int(&quot;gn&quot;, 2, &quot;goroutine nums&quot;)
+func main() {
+	flag.Parse()
+	go func() {
+		log.Println(http.ListenAndServe(&quot;localhost:6060&quot;, nil))
+	}()
+
+	rand.Seed(time.Now().Unix())
+	lc := cache.New(time.Minute*5, time.Minute*2)
+	log.Printf(&quot;start at:%v&quot;, time.Now())
+	aaaKey := &quot;aaa:%d:buy:cnt&quot;
+	log.Println(&quot;set run over&quot;)
+
+	for i := 0; i &lt; *goroutineNums; i++ {
+		go func(idx int) {
+			for {
+				key := fmt.Sprintf(aaaKey, rand.Int())
+				newKey := fmt.Sprintf(&quot;%s:%d&quot;, key, rand.Int())
+				v := rand.Int()
+				lc.Set(newKey, v, time.Millisecond)
+			}
+		}(i)
+	}
+
+	// 查看 go-cache 中 key 的数量
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		for {
+			select {
+			case &lt;-ticker.C:
+				log.Printf(&quot;lc size:%d&quot;, lc.ItemCount())
+			}
+		}
+	}()
+	select {}
+}
+</code></pre>
+<h3 id="模拟接口高qps">模拟接口高QPS</h3>
+<pre><code>./go-cache-test -gn 2000
+2020/03/12 00:32:33 start at:2020-03-12 00:32:33.949073 +0800 CST m=+0.001343027
+2020/03/12 00:32:34 lc size:538398
+2020/03/12 00:32:35 lc size:1149109
+</code></pre>
+<p><img src="https://images.haohongfan.com/hqps.png" alt="high-qps"></p>
+<p>瞬间就会出现锁竞争</p>
+<h3 id="模拟-go-cache-启动清理时的情形">模拟 go-cache 启动清理时的情形</h3>
+<pre><code>./go-cache-test -gn 2   
+2020/03/12 00:37:33 start at:2020-03-12 00:37:33.171238 +0800 CST m=+0.001457393
+...
+2020/03/12 00:40:35 lc size:54750220
+2020/03/12 00:40:35 start clear at:2020-03-12 00:40:35.103586 +0800 CST m=+120.005547323
+2020/03/12 00:41:51 lc size:33
+2020/03/12 00:41:51 lc size:50
+</code></pre>
+<p><img src="https://images.haohongfan.com/gocache-clear.png" alt="clear"></p>
+<p>会看到当清理 map 的时候, 如果 map 中的数据过多就会造成 Lock 竞争, 造成其他数据无法写入 map</p>
+<h2 id="总结">总结</h2>
+<h3 id="我使用的问题">我使用的问题</h3>
+<p>背景: 某接口 QPS 有点高</p>
+<ol>
+<li>当时考虑到用户购买状态(这个状态可能随时变化)如果能够在本地缓存中缓存 10s, 那么用户再次点进来的时候能从本地取了, 就造成大量的数据都写入了 map 中</li>
+<li>由于接口 QPS 比较高, 设置用户购买状态时就可能造成竞争, 造成接口响应超时</li>
+</ol>
+<h3 id="go-cache-使用注意点">go-cache 使用注意点</h3>
+<ol>
+<li>尽量存放那些相对不怎么变化的数据, 适用于所有的 local cache(包括 map, sync.map)</li>
+<li>go-cache 的过期检查时间要设置相对较小, 也不能过小</li>
+<li>那些高 QPS 的接口尽量不要去直接 Set 数据, 如果必须 Set 可以采用异步操作</li>
+<li>监控 go-cache 里面 key 的数量, 如果过多时, 需要及时调整参数</li>
+</ol>
+<h2 id="资料">资料</h2>
+<ol>
+<li><a href="https://github.com/patrickmn/go-cache">go-cache</a></li>
+<li><a href="https://github.com/allegro/bigcache">bigcache</a></li>
+<li><a href="https://github.com/coocood/freecache">freecache</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/76504936">runtime.SetFinalizer</a></li>
+</ol>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/cache/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#cache</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" class="block">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-01-06-redigo-codis/" class="block">如何用 Redigo 访问 Codis</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/">打造 Zap 开箱即用日志组件</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/">Golang是否真的没有指针运算?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/">Logrus源码阅读(1)--基本用法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

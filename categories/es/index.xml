@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>es on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/categories/es/</link>
+    <description>Recent content in es on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Thu, 27 Sep 2018 11:44:44 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/es/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ES简单使用</title>
+      <link>https://www.haohongfan.com/posts/2018-09-28-es-simple/</link>
+      <pubDate>Thu, 27 Sep 2018 11:44:44 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2018-09-28-es-simple/</guid>
+      <description>常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;</description>
+    </item>
+    
+  </channel>
+</rss>

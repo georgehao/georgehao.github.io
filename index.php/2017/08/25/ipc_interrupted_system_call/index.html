@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>使用System V信号量同步引起的Interrupted system call坑 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程. 本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了. 先看Monitor代码: 然后gdb去调试的时候, 总是出现 我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"使用System V信号量同步引起的Interrupted system call坑",
+      "item":"https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/"
+    },
+    "headline": "使用System V信号量同步引起的Interrupted system call坑 | HHFCodeRv","datePublished": "2017-08-25T11:54:11+00:00",
+    "dateModified": "2017-08-25T11:54:11+00:00",
+    "wordCount":  1188 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程. 本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了. 先看Monitor代码: 然后gdb去调试的时候, 总是出现 我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样"
+}
+</script><meta property="og:title" content="使用System V信号量同步引起的Interrupted system call坑 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/" />
+
+
+
+
+<meta property="og:description" content="使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程. 本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了. 先看Monitor代码: 然后gdb去调试的时候, 总是出现 我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2017-08-25T11:54:11&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2017-08-25T11:54:11&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">使用System V信号量同步引起的Interrupted system call坑</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-25</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程.</p>
+<p>本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后<strong>坑</strong>就这么产生了.</p>
+<p>先看Monitor代码:</p>
+<p><img src="http://images.haohongfan.com/1595110-3a9524f1f428ae78.png?imageView2/2/w/800/h/500" alt=""></p>
+<p>然后gdb去调试的时候, 总是出现</p>
+<p><img src="http://images.haohongfan.com/1595110-f1ac6dee7f647d67.png?imageView2/2/w/800/h/500" alt="error"></p>
+<p>我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样用的呀. 一番查找下, 我就确定我这样用是没错的, 就去Google了一下, 发现了真相.</p>
+<p>原来GDB在调试的时候是会发生这种情况的.<a href="https://sourceware.org/gdb/onlinedocs/gdb/Interrupted-System-Calls.html">具体的内容自己查看</a></p>
+<h3 id="gdb-引起interrupted-system-call原因">GDB 引起Interrupted system call原因</h3>
+<ul>
+<li>必须是多线程</li>
+<li>其中一个线程必须因为system call阻塞(例如程序中的semop)</li>
+<li>而另外一个程序由于断点或者其他什么原因, 就会引起正在阻塞的线程提前结束</li>
+</ul>
+<p>文档中还说明了, GDB使用内核中断的方式监测线程库, 例如线程的创建、销毁等情况. 如果当这些情况发生时,尽管程序在我们的预想中不能结束, 但是系统调用可能提前结束, 就导致出现Interrupted system call</p>
+<p>尽管文档没有详细说明引起的原因, 但是已经够了. 我知道了我的程序出错的原因, 我把另外一个线程注释掉, 然后再调这个线程, 这没有这个问题发生了.</p>
+<p>PS:如果不注释掉另外一个线程, 但是不用GDB去跑, 也不会发生Interrupted system call, 这和文档说明的情况是一样的.</p>
+<p><strong>add:2016-9-22</strong></p>
+<p>今天才发现原来《UNIX网络编程&ndash;进程间通信》[P230]中也有说明</p>
+<p>&ldquo;当一个线程被投入睡眠以等待某个信号量操作完成之时(我们将看到该线程既可以等待改信号量的值变为0, 也可等待它变为大于0), 如果它捕获了一个信号, 那么其信号处理程序的返回将中断引起睡眠的semop函数, 该函数于是返回一个EINTR错误.按照UNPv1的术语定义, <strong>semop是需被所捕获的信号中断的慢系统调用</strong>&rdquo;</p>
+<h3 id="解决方法">解决方法:</h3>
+<p>解决方法其实很简单,就是我们要接受一下Interrupted system call(EINTR)信号就可以了</p>
+<p>比如上面的代码,修改如下</p>
+<p><img src="http://images.haohongfan.com/1595110-0992de709b14ca83.png?imageView2/2/w/800/h/500" alt=""></p>
+<h3 id="semop用法">semop用法</h3>
+<p><code>int semop(int semid, struct sembuf *opstr, size_t nops)</code></p>
+<blockquote>
+<p>semval: 信号量当前值</p>
+</blockquote>
+<pre><code>struct sembuf {
+    short sem_num;
+    short sem_op;
+    sem_flag;
+}
+</code></pre>
+<ul>
+<li>sem_op是正数, 其值就加到semval上, 对应于释放由某个信号控制的资源</li>
+<li>sem_op是0, 如果调用者希望等待到semval为0, 如果semval已经是0, 那么立即返回; 如果semval不为0, 调用线程则被阻塞到semval变为0</li>
+<li>如果sem_op是负数,那么调用者希望等待semval变为大于或者等于semop的绝对值.</li>
+<li>如果semval大于或者等于sem_op的绝对值, 那就从semval中减掉sem_op的绝对值.</li>
+<li>如果semval小于sem_op的绝对值, 那么调用线程就阻塞到semval变为大于或者等于sem_op的绝对值. 到线程解除阻塞, 还将从semval中减掉sem_op的绝对值.</li>
+</ul>
+<h3 id="代码">代码</h3>
+<p>有关详细封装的代码请查看我的<a href="https://github.com/georgehao/wheel/tree/master/shared_buffer">github</a></p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/" class="block">有关LD_LIBRARY_PATH与ld.so.conf</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/index.php/2017/08/25/system_time/" class="block">修改系统时间导致的坑</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

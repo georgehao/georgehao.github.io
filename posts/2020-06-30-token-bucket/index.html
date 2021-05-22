@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>限流器系列(2) -- Token Bucket 令牌桶 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket &ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"限流器系列(2) -- Token Bucket 令牌桶",
+      "item":"https://www.haohongfan.com/posts/2020-06-30-token-bucket/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-06-30-token-bucket/"
+    },
+    "headline": "限流器系列(2) -- Token Bucket 令牌桶 | HHFCodeRv","datePublished": "2020-06-30T18:38:23+08:00",
+    "dateModified": "2020-06-30T18:38:23+08:00",
+    "wordCount":  2133 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket \u0026ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器"
+}
+</script><meta property="og:title" content="限流器系列(2) -- Token Bucket 令牌桶 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-06-30-token-bucket/" />
+
+
+
+
+<meta property="og:description" content="上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket &ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-06-30T18:38:23&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-06-30T18:38:23&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="kratos" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-03-11-go-cache/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">限流器系列(2) -- Token Bucket 令牌桶</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-30</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p><a href="https://www.haohongfan.com/post/2020-06-27-leaky-bucket/">上一篇</a>说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket &ndash; 令牌桶</p>
+<h2 id="什么是-token-bucket">什么是 Token Bucket</h2>
+<p>漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景.</p>
+<p>试想这样的场景, 尽管服务器的 QPS 已经达到限速阈值了, 但是并不想将所有的流量都拒之门外, 仍然让部分流量能够正常通过限流器. 这样我们的服务器在面对突发流量时能够有一定的伸缩空间, 而不是一直处于不可用状态.</p>
+<p>基于上面的场景需求, 令牌桶采用跟漏斗桶截然不同的做法.</p>
+<p><img src="https://images.haohongfan.com/token_bucket.png?imageView2/2/w/500/h/500" alt="令牌桶"></p>
+<p>令牌桶也有自己的固定大小, 我们设置 QPS 为 100, 在初始化令牌桶的时候, 就会立即生成 100 个令牌放到桶里面, 同时还按照一定的速率, 每隔一定的时间产生固定数量的令牌放入到桶中. 如果桶溢出了, 则舍弃生成的令牌.</p>
+<p>只要有请求能够拿到令牌, 就能保证其通过限流器. 当然拿不到令牌的请求只能被无情拒绝了(或者等待令牌产生), 这个请求的命不好~</p>
+<p>面对突然爆发的流量, 可能大部分流量都被限流器给挡住了, 但是也有部分流量刚好拿到了刚刚生成的 Token, 就这样在千军万马中通过了限流器. 相对于漏斗桶来说, 令牌桶更适合现在互联网行业的需要, 是被广泛使用的限流算法</p>
+<p><strong>如何设置令牌桶的大小和产生令牌的速率?</strong></p>
+<p>答: 多进行生产环境的压测, 根据集群的实际承受能力设置相应桶的大小和产生令牌的速率. 血的经验告诉我, 周期性的线上压测是一件很重要的事情(使用local cache的程序, 压测的时候一定要记得先临时关闭它)</p>
+<h2 id="jujuratelimit">juju/ratelimit</h2>
+<p><a href="https://github.com/juju/ratelimit">juju/ratelimit</a> 是大部分项目都在使用的 golang 令牌桶的实现方案. 下面会结合其用法, 源码剖析令牌桶的实现的方案.</p>
+<h3 id="gin-中间件">gin 中间件</h3>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;log&quot;
+	&quot;net/http&quot;
+	&quot;time&quot;
+
+	&quot;github.com/gin-gonic/gin&quot;
+	&quot;github.com/juju/ratelimit&quot;
+)
+
+var limiter = ratelimit.NewBucketWithQuantum(time.Second, 10, 10)
+
+func tokenRateLimiter() gin.HandlerFunc {
+	fmt.Println(&quot;token create rate:&quot;, limiter.Rate())
+	fmt.Println(&quot;available token :&quot;, limiter.Available())
+	return func(context *gin.Context) {
+		if limiter.TakeAvailable(1) == 0 {
+			log.Printf(&quot;available token :%d&quot;, limiter.Available())
+			context.AbortWithStatusJSON(http.StatusTooManyRequests, &quot;Too Many Request&quot;)
+		} else {
+			context.Writer.Header().Set(&quot;X-RateLimit-Remaining&quot;, fmt.Sprintf(&quot;%d&quot;, limiter.Available()))
+			context.Writer.Header().Set(&quot;X-RateLimit-Limit&quot;, fmt.Sprintf(&quot;%d&quot;, limiter.Capacity()))
+			context.Next()
+		}
+	}
+}
+
+func main() {
+	e := gin.Default()
+	e.GET(&quot;/test&quot;, tokenRateLimiter(), func(context *gin.Context) {
+		context.JSON(200, true)
+	})
+	e.Run(&quot;:9091&quot;)
+}
+
+</code></pre>
+<p>Output:</p>
+<pre><code>token create rate: 100
+available token : 100
+[GIN] 2020/07/03 - 17:34:37 | 200 |     157.505µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |     310.898µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |       61.64µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |       8.677µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |       6.145µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |      23.576µs |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:34:37 | 200 |       5.617µs |       127.0.0.1 | GET      /test
+.....
+[GIN] 2020/07/03 - 17:35:03 | 429 |    6.193792ms |       127.0.0.1 | GET      /test
+[GIN] 2020/07/03 - 17:35:03 | 200 |       8.509µs |       127.0.0.1 | GET      /test &lt;----- 看这里
+[GIN] 2020/07/03 - 17:35:03 | 429 |      10.324µs |       127.0.0.1 | GET      /test
+....
+</code></pre>
+<p>有下面特点:</p>
+<ol>
+<li>令牌桶初始化后里面就有 100 个令牌</li>
+<li>每秒钟会产生 100 个令牌, 保证每秒最多有 100 个请求通过限流器, 也就是说 QPS 的上限是 100</li>
+<li>流量过大时能够启动限流, 在限流过程中, 仍然能让部分流量通过</li>
+</ol>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="初始化">初始化</h4>
+<p>建议使用初始化函数有下面三种:</p>
+<ul>
+<li>NewBucket(fillInterval time.Duration, capacity int64): 默认的初始化函数, 每一个周期内生成 1 个令牌, 默认 quantum = 1</li>
+<li>NewBucketWithQuantum(fillInterval time.Duration, capacity, quantum int64) : 跟 NewBucket 类似, 每个周期内生成 quantum 个令牌</li>
+<li>NewBucketWithRate(rate float64, capacity int64): 每秒中产生 rate 速率的令牌</li>
+</ul>
+<p>其实初始化函数还有很多种, 但基本上大同小异, 最后都是调用 <code>NewBucketWithQuantumAndClock</code>.</p>
+<pre><code class="language-go">func NewBucketWithQuantumAndClock(fillInterval time.Duration, capacity, quantum int64, clock Clock) *Bucket {
+	// ....
+	return &amp;Bucket{
+		clock:           clock,
+		startTime:       clock.Now(),
+		latestTick:      0,            // 上一次产生token的记录点
+		fillInterval:    fillInterval, // 产生token的间隔
+		capacity:        capacity,     // 桶的大小
+		quantum:         quantum,      // 每秒产生token的速率
+		availableTokens: capacity,     // 桶内可用的令牌的个数
+	}
+}
+</code></pre>
+<h4 id="rate">Rate</h4>
+<pre><code class="language-go">func (tb *Bucket) Rate() float64 {
+	return 1e9 * float64(tb.quantum) / float64(tb.fillInterval)
+}
+</code></pre>
+<p><code>time.Duration</code> 实际的是以 <code>nanosecond</code> 试试呈现的, 就是 <code>1e9</code>, 1e9 / float64(tb.fillInterval) 的结果就是 1/tb.fillInterval 秒.</p>
+<p>于是令牌桶产生令牌的速率是: 每秒内产生 float64(tb.quantum) / float64(tb.fillInterval)</p>
+<h4 id="takeavailable">TakeAvailable</h4>
+<pre><code class="language-go">func (tb *Bucket) currentTick(now time.Time) int64 {
+	// 由于 tb.quantum 是每秒产生的token的数量. 于是计算从bucket初始化的startTime到现在now的时间间隔 t,
+	// t/tb.fillInterval * tb.quantum 计算的是从开始到现在应该产生的 token 数量
+	return int64(now.Sub(tb.startTime) / tb.fillInterval)
+}
+
+func (tb *Bucket) adjustavailableTokens(tick int64) {
+	if tb.availableTokens &gt;= tb.capacity { // 如果令牌的可用数量已经达到桶的容量, 直接返回
+		return
+	}
+	
+	// tick * tb.quantum 是从bucket初始化到本次请求应该产生的 token的数量
+	// tb.latestTick 是从bucket初始化到上次请求应该产生的 token的数量
+	// tick * tb.quantum - tb.latestTick 计算出两次请求间应该产生的token数量
+	// tb.availableTokens += (tick - tb.latestTick) * tb.quantum: 桶内剩余的token数量 + 新产生的token数量
+	tb.availableTokens += (tick - tb.latestTick) * tb.quantum
+	if tb.availableTokens &gt; tb.capacity {
+		tb.availableTokens = tb.capacity // 如果产生的令牌数量超过了桶的容量, 则桶内剩余的令牌数量等于桶的size
+	}
+	tb.latestTick = tick
+	return
+}
+
+func (tb *Bucket) takeAvailable(now time.Time, count int64) int64 {
+	if count &lt;= 0 {
+		return 0
+	}
+	tb.adjustavailableTokens(tb.currentTick(now))
+	if tb.availableTokens &lt;= 0 { // 如果桶内剩余token数量小于等于0, 直接返回0
+		return 0
+	}
+	if count &gt; tb.availableTokens {
+		count = tb.availableTokens
+	}
+	tb.availableTokens -= count
+	return count
+}
+
+// 如果返回值是0, 代表桶内已经没有令牌了
+func (tb *Bucket) TakeAvailable(count int64) int64 {
+	tb.mu.Lock()
+	defer tb.mu.Unlock()
+	return tb.takeAvailable(tb.clock.Now(), count)
+}
+</code></pre>
+<p>TakeAvailable 是 Token Bucket的核心函数. 从这个实现我们能看到</p>
+<ol>
+<li>jujue/ratelimit 计算出请求间隔中应该产生的token的数量, 并不是另外启动一个 goroutine 专门定时产生固定数量的token</li>
+<li>桶内令牌在产生过程中是累加的, 同时减去每次调用消耗的数量</li>
+<li>初始化后桶内的令牌数量就是桶的大小</li>
+</ol>
+<p><img src="https://images.haohongfan.com/token_bucket_rate.png?imageView2/2/w/700/h/700" alt="示意图"></p>
+<h2 id="token-bucket的缺陷">Token Bucket的缺陷</h2>
+<p>令牌桶算法能满足绝大部分服务器限流的需要, 是被广泛使用的限流算法, 不过其也有一些缺点:</p>
+<ol>
+<li>令牌桶是没有优先级的，无法让重要的请求先通过</li>
+<li>OP可能因为硬件故障去调整资源, 系统负载也会随着在变化, 如果对服务限流进行缩容和扩容，需要人为手动去修改，运维成本比较大</li>
+<li>令牌桶只能对局部服务端的限流, 无法掌控全局资源</li>
+</ol>
+<p>下一篇我们看<code>alibaba/Sentinel</code>, kratos 的 bbr 算法是如何做到系统自适应限流</p>
+<h2 id="参考">参考</h2>
+<p>[1] <a href="https://www.infoq.cn/article/Qg2tX8fyw5Vt-f3HH673">分布式服务限流实战，已经为你排好坑了</a></p>
+<p>[2] <a href="https://en.wikipedia.org/wiki/Token_bucket">维基百科&ndash;Token_bucket</a></p>
+<p>[3] <a href="https://github.com/juju/ratelimit">juju/ratelimit</a></p>
+<p>[4] <a href="https://www.infoq.cn/article/zRuGHM_SsQ0lk7gWyBgG">B 站在微服务治理中的探索与实践</a></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/kratos/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#kratos</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-07-05-bbr/" class="block">限流器系列(3)--自适应限流</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" class="block">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/">一次错误使用 go-cache 导致出现的线上问题</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

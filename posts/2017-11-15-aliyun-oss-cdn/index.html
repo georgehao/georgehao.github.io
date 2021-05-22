@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>使用阿里云OSS &#43; CDN遇到的问题及解决方式 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="一. OSS 配置 CDN加速 CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上 优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"使用阿里云OSS + CDN遇到的问题及解决方式",
+      "item":"https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/"
+    },
+    "headline": "使用阿里云OSS \u002b CDN遇到的问题及解决方式 | HHFCodeRv","datePublished": "2017-11-15T12:05:39+00:00",
+    "dateModified": "2017-11-15T12:05:39+00:00",
+    "wordCount":  2131 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "一. OSS 配置 CDN加速 CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上 优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击"
+}
+</script><meta property="og:title" content="使用阿里云OSS &#43; CDN遇到的问题及解决方式 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/" />
+
+
+
+
+<meta property="og:description" content="一. OSS 配置 CDN加速 CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上 优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2017-11-15T12:05:39&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2017-11-15T12:05:39&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">使用阿里云OSS &#43; CDN遇到的问题及解决方式</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-11-15</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/ops/" class="hover:text-eureka">ops</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h3 id="一-oss-配置-cdn加速">一. OSS 配置 CDN加速</h3>
+<p>CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上</p>
+<p>优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击, 攻击的都是CDN节点.</p>
+<ol>
+<li>你需要一个已经备案的域名, 否则是设置不上的</li>
+<li>进入OSS 管理控制台 (需要使用主账号), 点击需要配置CDN加速的Bucket, 单击域名管理页签, 单击绑定用户域名(不在阿里云解析的域名, 不需要选择<code>自动添加 CNAME</code>)</li>
+<li><code>用户域名</code>填入你要绑定的域名; 选择<code>阿里云 CDN 加速</code>.  点击提交即可
+<img src="http://images.haohongfan.com/oss-cdn.png?imageView2/2/w/800/h/500" alt=""></li>
+<li>然后选择<code>CDN管理控制台</code>, 点击域名管理, 点击<code>你刚才添加的域名</code></li>
+<li>由于我们域名解析没有使用阿里云的, 所以需要额外一步, 将这个域名的<code>cname</code>到域名解析中.
+<img src="http://images.haohongfan.com/cname.png?imageView2/2/w/800/h/500" alt=""></li>
+</ol>
+<p>经过这样的配置之后, 你就可以通过CDN访问到Bucket内容上.</p>
+<p>如:
+私有Bucket的文件URL:</p>
+<pre><code>http://dev.oss-cn-beijing.aliyuncs.com/111/composer.json?Expires=1510751768&amp;OSSAccessKeyId=TMP.AQHdtru_W-NPJvuyWoWnMIzWzLrZq2gDOSbda_-Bc9HMFcmLMFWrSkeDUC8eMC4CFQCE-ERdOvcmBw1-zDtvU-ZrDrS0YQIVALnZ49WNhS84cNjogplHVKExsIpz&amp;Signature=kYEs8RouE%2FKJTs2%2F1jMFaj8sYLc%3D
+</code></pre>
+<p>配置的域名为: <code>test.cn</code></p>
+<p>那么通过CDN访问这个文件的方式是:</p>
+<pre><code>http://test.cn/111/composer.json?Expires=1510751768&amp;OSSAccessKeyId=TMP.AQHdtru_W-NPJvuyWoWnMIzWzLrZq2gDOSbda_-Bc9HMFcmLMFWrSkeDUC8eMC4CFQCE-ERdOvcmBw1-zDtvU-ZrDrS0YQIVALnZ49WNhS84cNjogplHVKExsIpz&amp;Signature=kYEs8RouE%2FKJTs2%2F1jMFaj8sYLc%3D
+</code></pre>
+<p>详细配置请参考<a href="https://help.aliyun.com/document_detail/31902.html?spm=5176.8466035.bucket-domain-name.1.27656022shGzEb">官方文档</a></p>
+<h3 id="二-cdn-配置-https">二. CDN 配置 HTTPS</h3>
+<ol>
+<li>选择<code>CDN管理控制台</code>, 点击域名管理, 点击<code>点击你添加HTTPS的域名</code></li>
+<li>选择<code>HTTPS设置</code>, 点击<code>修改配置</code>, 添加证书, 即可开启改<code>HTTPS</code></li>
+<li>强制跳转: 默认: http-&gt;http, https-&gt;https.
+<img src="http://images.haohongfan.com/https.png?imageView2/2/w/800/h/500" alt=""></li>
+</ol>
+<p>这里遇到一个问题:
+<img src="http://images.haohongfan.com/https_error.png?imageView2/2/w/800/h/500" alt="">
+<img src="http://images.haohongfan.com/https_cname.png?imageView2/2/w/800/h/500" alt=""></p>
+<p>如果没有把<code>CDN的域名</code>的<code>CNAME</code>添加到这个域名的<code>CNAME</code>解析上, 那么就会出现设置HTTPS不成功.就会出现上面的情况</p>
+<h3 id="三-cdn-配置-缓存">三. CDN 配置 缓存</h3>
+<p>CDN缓存配置就很简单了, 对于静态资源缓存的时间尽量长些</p>
+<p>需要注意的是:
+CDN的缓存不会自动刷新, 需要手动刷新. 假如你更新某个文件的资源, 但是文件的名字没有改变, 那么需要手动刷新CDN, 不然客户端是访问不到更新的资源的.</p>
+<p><img src="http://images.haohongfan.com/cache.png?imageView2/2/w/700/h/500" alt=""></p>
+<h3 id="四-cdn-使用过程中遇到的问题">四. CDN 使用过程中遇到的问题</h3>
+<p>1.使用CDN访问OSS内容</p>
+<p>经过<code>OSS 配置 CDN加速</code>后就可以访问OSS上的内容了. 但是有个问题</p>
+<ol>
+<li>对于公开Bucket来说, 其实没有什么影响.</li>
+<li>对于私有Bucket来说, 通过CDN访问OSS的文件仍然需要私有Bucket的签名.</li>
+</ol>
+<p>如这样一个URL</p>
+<pre><code>http://ling-pro.oss-cn-beijing.aliyuncs.com/analysis/1.zip?Expires=1510753112&amp;OSSAccessKeyId=TMP.AQHdtru_W-NPJvuyWoWnMIzWzLrZq2gDOSbda_-Bc9HMFcmLMFWrSkeDUC8eMC4CFQCE-ERdOvcmBw1-zDtvU-ZrDrS0YQIVALnZ49WNhS84cNjogplHVKExsIpz&amp;Signature=vMHILFGRV%2BsmjyYn2mRRgUNJkeg%3D
+</code></pre>
+<p>我配置的CDN域名为:<code>test.cn</code></p>
+<p>我们不能通过<code>test.cn/lanalysis/1.zip</code>访问到这个资源, 仍然需要签名才可以.</p>
+<pre><code>http://test.cn/analysis/1.zip?Expires=1510753112&amp;OSSAccessKeyId=TMP.AQHdtru_W-NPJvuyWoWnMIzWzLrZq2gDOSbda_-Bc9HMFcmLMFWrSkeDUC8eMC4CFQCE-ERdOvcmBw1-zDtvU-ZrDrS0YQIVALnZ49WNhS84cNjogplHVKExsIpz&amp;Signature=vMHILFGRV%2BsmjyYn2mRRgUNJkeg%3D
+</code></pre>
+<p>如果你的程序是这么用CDN的, 那么基本上你的CDN只是把流量接进CDN了, 但是CDN完全没有起上效果.
+也就是说CDN在计费, 却没有产生效益.</p>
+<p>还有一个问题需要引起注意:
+使用URL带签名时, 是需要在每次请求的时候都去阿里云获取这样一个签名, 当网络中流量比较大的时候, 这件事情是值得优化的地方(虽说阿里云比较牛逼, 但是这不是我们设计这个功能的方式)</p>
+<p>2.开启CDN鉴权</p>
+<blockquote>
+<p>URL鉴权功能旨在保护用户站点的内容资源不被非法站点下载盗用. 用户使用加密后的 URL 向加速节点发起请求，加速节点对加密 URL 中的权限信息进行验证以判断请求的合法性，对合法请求给予正常响应，拒绝非法请求，从而有效保护CDN客户站点资源。</p>
+</blockquote>
+<p>上面这段是官方的说法, 看起来挺莫名其妙的. 简单来说, 开启CDN鉴权URL后, 通过CDN访问资源的时候, 需要通过CDN提供的三种鉴权方式(A, B, C)的其中一种算出一个带鉴权信息的URL, 来保证资源安全.</p>
+<p>其中三种鉴权方式的详细信息: <a href="https://help.aliyun.com/document_detail/27135.html?spm=5176.doc27125.2.12.vzBC5A">详细文档</a></p>
+<p>其中, <code>鉴权加密KEY</code>是需要保密的, 也是需要定期更换的. 这个<code>KEY</code>计算CDN鉴权URL需要的加密字段.</p>
+<p>这里使用鉴权A的方式说下如何计算这个URL的:</p>
+<ol>
+<li>文件在位置: oss的dev bucket上(dev/111/composer.json)</li>
+</ol>
+<pre><code>http://dev.oss-cn-beijing.aliyuncs.com/111/composer.json?Expires=1510801016&amp;OSSAccessKeyId=TMP.AQHgrFafuBeu4Jxpn7p8Zn6KbQR71DaxHxHHxZXnvVoKLHGE2IPPcLyvxDBfMC4CFQCGqYgJjFp8aIoqfbs4RNbtpGgugQIVAJmy4UIzI92bCOLbAfilBBkxPO4B&amp;Signature=2KRA6asAm4fs5G8OTMaSVQJgF8A%3D
+</code></pre>
+<ol start="2">
+<li>
+<p>鉴权A URL格式
+<code>http://DomainName/Filename?auth_key=timestamp-rand-uid-md5hash</code></p>
+</li>
+<li>
+<p>DomianName
+CDN的域名: <code>test.cn</code></p>
+</li>
+<li>
+<p>Filename
+OSS Bucket中改文件的路径: <code>111/composer.json</code></p>
+</li>
+<li>
+<p>auth_key
+公式:</p>
+</li>
+</ol>
+<pre><code>sstring = &quot;URI-Timestamp-rand-uid-PrivateKey&quot; 
+HashValue = md5sum(sstring)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URI</td>
+<td>即Filename <code>111/composer.json</code></td>
+</tr>
+<tr>
+<td>Timestamp</td>
+<td>过期时间, 如1800秒</td>
+</tr>
+<tr>
+<td>rand</td>
+<td>0</td>
+</tr>
+<tr>
+<td>uid</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PrivateKey</td>
+<td>即<code>鉴权加密KEY</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>生成的URL</strong>:</p>
+<pre><code>md5hash = md5(&quot;111/composer.json-1800-0-0-abcdefg&quot;) = `5095b8fa1f2c15e4bd1bd999b0834ace`
+url = &quot;http://test.cn/111/composer.json?auth_key=1800-0-0-5095b8fa1f2c15e4bd1bd999b0834ace&quot;
+</code></pre>
+<p><img src="http://images.haohongfan.com/auth.png?imageView2/2/w/700/h/500" alt=""></p>
+<p>计算鉴权方式的三种方式的<a href="https://help.aliyun.com/document_detail/27277.html?spm=5176.doc27135.2.4.blEp4l">示例代码</a></p>
+<p>3.CDN 开启私有Bucket回源</p>
+<blockquote>
+<p>是否开启了CDN鉴权, 就可以不需要OSS的签名, 就可以通过CDN直接访问OSS的资源了呢?</p>
+</blockquote>
+<p>答案是否定的
+如果用<code>http://test.cn/111/composer.json?auth_key=1800-0-0-5095b8fa1f2c15e4bd1bd999b0834ace</code>访问<code>111/composer.json</code>, 会提示下面错误:</p>
+<blockquote>
+<p>403 Forbidden
+You don&rsquo;t have permission to access the URL on this server.</p>
+</blockquote>
+<p>这需要开启CDN 私有Bucket回源功能, 不然仍然需要使用签名来访问资源. <a href="https://help.aliyun.com/document_detail/57653.html?spm=5176.8232292.domaindetail.23.5dd5c833ftTkfO">详细资料</a></p>
+<p>配置:
+<img src="http://images.haohongfan.com/huiyuan1.png?imageView2/2/w/800/h/500" alt="">
+<img src="http://images.haohongfan.com/huiyuan.png?imageView2/2/w/800/h/500" alt=""></p>
+<h3 id="五-私有bucket使用cdn加速后是否支持断点续传">五. 私有Bucket使用CDN加速后是否支持断点续传?</h3>
+<p><img src="http://images.haohongfan.com/duandian.png?imageView2/2/w/800/h/500" alt=""></p>
+<p>从测试结果来看, 是支持的</p>
+<h3 id="六-私有bucket静态资源缓存策略">六. 私有Bucket静态资源缓存策略</h3>
+<p>① 将鉴权加密key, 下发给客户端, 客户端跟鉴权方式(A, B, C)计算URL
+这么做好处是:</p>
+<ol>
+<li>客户端获取到的是一个不变URL, 有利于他们自己做缓存.</li>
+<li>服务器端业务也不用关注URL的时效性, 业务简单</li>
+</ol>
+<p>坏处:</p>
+<ol>
+<li>加密key需要设计如何下发</li>
+<li>加密key需要动态变化</li>
+</ol>
+<p>结果: pass</p>
+<p>② 不将鉴权加密key下发, 服务器端做缓存. 在一定时间段内, 客户端获取到是一样的URL
+这么做好处:</p>
+<ol>
+<li>客户端业务简单</li>
+<li>加密key不下发</li>
+</ol>
+<p>坏处:
+服务端业务复杂</p>
+<p>结果: pass</p>
+<p>③ 终极方案:
+服务端下发的URL如下:</p>
+<pre><code>http://dev.ling.cn/111/%E5%8A%AA%E5%8A%9B.png?auth_key=1510737594-0-0-03f44227da0a4b9b492e1ed652f523c3&amp;timestamp=1234567
+</code></pre>
+<p>这个URL的组成:
+APP端采用URI+ timestamp 联合做KEY的方式, 缓存.</p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="block">Golang命名规范</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2017-10-03-spider-jd/" class="block">爬虫小试-抓取JD图片</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

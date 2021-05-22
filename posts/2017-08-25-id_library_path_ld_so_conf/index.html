@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>有关LD_LIBRARY_PATH与ld.so.conf | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="我之前写过一篇关于LD_LIBRARY_PATH与gcc/g&#43;&#43; -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了&mdash;ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"有关LD_LIBRARY_PATH与ld.so.conf",
+      "item":"https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/"
+    },
+    "headline": "有关LD_LIBRARY_PATH与ld.so.conf | HHFCodeRv","datePublished": "2017-08-25T11:55:53+00:00",
+    "dateModified": "2017-08-25T11:55:53+00:00",
+    "wordCount":  1699 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "我之前写过一篇关于LD_LIBRARY_PATH与gcc\/g\u002b\u002b -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在\/home\/.bashrc里添加了export LD_LIBRARY_PATH=\/usr\/loca\/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了\u0026mdash;ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时"
+}
+</script><meta property="og:title" content="有关LD_LIBRARY_PATH与ld.so.conf | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/" />
+
+
+
+
+<meta property="og:description" content="我之前写过一篇关于LD_LIBRARY_PATH与gcc/g&#43;&#43; -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了&mdash;ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2017-08-25T11:55:53&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2017-08-25T11:55:53&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">有关LD_LIBRARY_PATH与ld.so.conf</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-25</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/cmake/" class="hover:text-eureka">cmake</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>我之前写过一篇关于<a href="http://www.jianshu.com/p/f0f4700d5611">LD_LIBRARY_PATH与gcc/g++ -L的关系的文章</a>. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export <code>LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH</code>, 这个不够优美, 经过一番寻找终于找到了&mdash;ld.so.conf可以完美解决这个问题。
+ </p>
+<h3 id="为什么ld_library_path不行">为什么LD_LIBRARY_PATH不行？</h3>
+<p><a href="http://xahlee.info/UnixResource_dir/_/ldpath.html">可以看看老外是怎么说的</a></p>
+<p>升级共享库时，替换之前先测试一下类似的，升级后的某个程序可能依赖于一些动态链接库，如果你将某个链接库替换了，程序可能就无法工作了。这时候，你可以使用LD_LIBRARY_PATH指向存有备份的一个目录，然后，你可以没有顾忌地替换系统版本了。万一出错，拷贝回去就是了</p>
+<p>感觉LD_LIBRARY_PATH就是临时使用的，为什么呢？</p>
+<p>因为LD_LIBRARY_PATH如果设置成全局的话，如果被破坏掉的，那么就会出现大规模的破坏。不要说这个变量不会改，但是这样做就是不妥的办法，网上大家可以找到许许多多的关于LD_LIBRARY_PATH不好的文章。这里就不再多说
+ 
+如果不让用LD_LIBRARY_PATH，我们该怎么办呢？Linux系统为大家已经想好了办法，我们使用ld.so.conf来解决。</p>
+<p>我们已经知道linux在加载动态库的时候，会去标准路径下(/lib,/usr/lib)下去寻找应用程序用到的动态库。但对于我们那些不标准的路径下我们安装了lib库，例如我把我的库安装到了/usr/local/lib下了，我们怎么办呢?
+ 
+Linux的通常做法是：将非标准路经加入 /etc/ld.so.conf，然后运行 ldconfig 生成 ld.so.cache。 Linux在加载共享库的时候，会从 ld.so.cache 查找。</p>
+<p>所以，我们在安装了库，但是编译程序后，ldd发现链接不到库，那么我们就要查看你安装的库是否是非标准路径，如果是那么就把你的非标准路径加入到/etc/ld.so.conf文件中，然后调用ldconfig生成下ld.so.cache，就可以了。想查看下你的库是否已经在ld.so.cache中，可以这样 ldconfig -p | grep lib**就可以了。
+ 
+对于，Ubuntu来说，还与其他的LINUX系统不一样，在/etc/ld.so.conf中只有一句include /etc/ld.so.conf.d/<em>.conf，也就是说它我们不能在/etc/ld.so.conf下添加，但是我们可以在/etc/ld.so.conf.d下新建一个</em>.conf在这里面添加你的非标准路径就可以了，记得调用sudo ldconfig 生成ld.so.cache文件就可以了
+ 
+<em><strong>补充：</strong></em>
+ 
+说说今天又遇到的问题：（cmake之后出现的问题）
+问题1：<code>/usr/bin/ld: warning: libboost_system.so.1.55.0, need by /usr/local/lib/libboost_thread.so, may conflict with libboost_system.so.1.48.0</code></p>
+<p>问题2: <code>.text._ZN5boost16exceptions_detail10bad_alloc_D2Ev' refereced section .text._ZN5boost16exceptions_detail10bad_alloc_D1Ev'..... of /usr/lib/gcc/x86_64-linux-gnu/4.8.2/../../../libboost_thread.a(thread.o)</code>
+ 
+这两个问题折腾我了一下午，这两个问题的变现不一样，其实他们都是一个问题造成的。
+首先说说为什么会这样？
+第一个问题：是由于系统里面在/usr/lib下面有一个libboost_system.so.1.48.0，而在/usr/local/lib下我安装了一个libboost_system.so.1.55.0，造成了g++链接时的冲突
+第二个问题：是由于在/usr/lib下有一个libboost_thread.a，而我在/usr/local/lib下安装了libboost_thread.so.1.55.0，造成了g++链接的冲突错误。
+ 
+现在问题来了，他们为什么会冲突呢？为什么呢？我们在编译程序的时候，gcc/g++是怎样搜索链接库呢？
+经过仔细寻找，我们使用 ld &ndash;verbose | grep SEARCH_DIR会出现下面的内容
+SEARCH_DIR(&quot;/usr/i686-linux-gnu/lib32&quot;); SEARCH_DIR(&quot;=/usr/local/lib32&quot;); SEARCH_DIR(&quot;=/lib32&quot;); SEARCH_DIR(&quot;=/usr/lib32&quot;);SEARCH_DIR(&quot;=/usr/local/lib/i386-linux-gnu&quot;); SEARCH_DIR(&quot;=/usr/local/lib&quot;); SEARCH_DIR(&quot;=/lib/i386-linux-gnu&quot;); SEARCH_DIR(&quot;=/lib&quot;);SEARCH_DIR(&quot;=/usr/lib/i386-linux-gnu&quot;); SEARCH_DIR(&quot;=/usr/lib&quot;);
+ 
+这就是gcc再编译的时候，所搜寻的库文件所在的路径，所以就出现了上面的问题。当gcc/g++在/usr/lib中发现这些库之后，就不再搜索了，然后就让gcc/g++链接了这些库，而我需要的正确的库应该在/usr/local/lib下，这就造成了链接了错误的库文件。
+解决方法就是：删除掉/usr/lib下同名的不需要的或者版本过低的库文件（目前是这样做的，也许有更好的方法，知道的请告诉我）
+ 
+上面查看gcc/g++/ld搜索路径还有其他方法：</p>
+<pre><code>gcc -Wl,  --verbose 
+gcc --print-search-dirs
+</code></pre>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2017-08-25-ld_library_path/" class="block">LD_LIBRARY_PATH与-L的关系以及延伸</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/" class="block">使用System V信号量同步引起的Interrupted system call坑</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

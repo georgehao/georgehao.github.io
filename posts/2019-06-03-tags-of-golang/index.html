@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>[每日一译] Tags in Golang | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"[每日一译] Tags in Golang",
+      "item":"https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/"
+    },
+    "headline": "[每日一译] Tags in Golang | HHFCodeRv","datePublished": "2019-06-03T22:22:15+08:00",
+    "dateModified": "2019-06-03T22:22:15+08:00",
+    "wordCount":  1879 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require"
+}
+</script><meta property="og:title" content="[每日一译] Tags in Golang | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/" />
+
+
+
+
+<meta property="og:description" content="原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-06-03T22:22:15&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-06-03T22:22:15&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="每日一译" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">[每日一译] Tags in Golang</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-06-03</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/" class="hover:text-eureka">每日一译</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <blockquote>
+<p>原文地址: <a href="https://medium.com/golangspec/tags-in-golang-3e5db0b8ef3e">Tags in Golang</a></p>
+</blockquote>
+<p>我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为<code>tag</code>. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束</p>
+<h2 id="struct-type">Struct type</h2>
+<p>struct是一系列的字段的组合. 每一个字段都由一个<code>optional</code>名字和<code>required</code>type组成</p>
+<pre><code class="language-go">package main
+
+import &quot;fmt&quot;
+
+type T1 struct {
+    f1 string
+}
+
+type T2 struct {
+    T1
+    f2     int64
+    f3, f4 float64
+}
+
+func main() {
+    t := T2{T1{&quot;foo&quot;}, 1, 2, 3}
+    fmt.Println(t.f1)    // foo
+    fmt.Println(t.T1.f1) // foo
+    fmt.Println(t.f2)    // 1
+}
+</code></pre>
+<blockquote>
+<p>T1 被称为embedded field, 因为它只有类型没有名字 (hhf: 关于这个可以看我另外一篇文章: <a href="http://www.haohongfan.com/post/2017-07-24-golang_oop/">golang面向对象分析</a>)</p>
+</blockquote>
+<p>字段可以用一个类型声明多个标识符, 就像T2的f3, f4一样</p>
+<p>golang语言声明每个字段声明后面跟着分号, 但是我们在写的时候可以忽略分号(hhf:https://golang.org/doc/effective_go.html#semicolons, if the newline comes after a token that could end a statement, insert a semicolon). 当多个字段放在同一行时, 需要用分号分割</p>
+<pre><code class="language-go">package main
+
+import &quot;fmt&quot;
+
+type T struct {
+    f1 int64; f2 float64
+}
+
+func main() {
+    t := T{1, 2}
+    fmt.Println(t.f1, t.f2)  // 1 2
+}
+
+</code></pre>
+<h2 id="tag">Tag</h2>
+<p>Struct的字段声明时, 如果后面跟着可选的<code>tag</code>时, 那么<code>tag</code>将相对应的那些字段的属性</p>
+<pre><code class="language-go">type T struct {
+    f1     string &quot;f one&quot; // 解释字符串
+    f2     string
+    f3     string `f three` // 原始字符串
+    f4, f5 int64  `f four and five`
+}
+</code></pre>
+<blockquote>
+<p>tag可以使用原始字符串或者解释字符串, 下面描述的传统格式的例子需要使用原始字符串. 原始字符串和解释字符串
+在<a href="https://golang.org/ref/spec#String_literals">spec</a>有详细解释</p>
+</blockquote>
+<p>struct字段同一个type声明多个标识符(例如上面的f4,f5), 那么tag对f4,f5都是有效的</p>
+<h2 id="reflection">Reflection</h2>
+<p>Tags是可以通过<code>reflect</code>被访问到的.</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+type T struct {
+    f1     string &quot;f one&quot;
+    f2     string
+    f3     string `f three`
+    f4, f5 int64  `f four and five`
+}
+
+func main() {
+    t := reflect.TypeOf(T{})
+    f1, _ := t.FieldByName(&quot;f1&quot;)
+    fmt.Println(f1.Tag) // f one
+    f4, _ := t.FieldByName(&quot;f4&quot;)
+    fmt.Println(f4.Tag) // f four and five
+    f5, _ := t.FieldByName(&quot;f5&quot;)
+    fmt.Println(f5.Tag) // f four and five
+}
+</code></pre>
+<p>设置空tag和不使用tag的效果时一样的</p>
+<pre><code class="language-go">type T struct {
+    f1 string ``
+    f2 string
+}
+func main() {
+    t := reflect.TypeOf(T{})
+    f1, _ := t.FieldByName(&quot;f1&quot;)
+    fmt.Printf(&quot;%q\n&quot;, f1.Tag) // &quot;&quot;
+    f2, _ := t.FieldByName(&quot;f2&quot;)
+    fmt.Printf(&quot;%q\n&quot;, f2.Tag) // &quot;&quot;
+}
+</code></pre>
+<h2 id="conventional-format">Conventional format</h2>
+<p><a href="https://github.com/golang/go/commit/25733a94fde4f4af4b6ac5ba01b7212a3ef0f013">reflect: support for struct tag use by multiple packages</a>的介绍中允许为每个package设置元信息. 这提供了简单的命名空间. Tags被格式化成key-value键值对, Key可以是像<code>json</code>包这样的名字. 键值对可以被空格分开(这是可选的)&ndash;<code>key1:&quot;value1&quot; key2:&quot;value2&quot; key3:&quot;value3&quot;</code>. 如果使用传统格式，那么我们可以使用两种struct tag方法&ndash;<code>Get or Lookup</code>, 他们返回key对应的value</p>
+<p><code>Lookup</code>返回两个值: 与key关联的值, bool值(是否找到那个key)</p>
+<pre><code class="language-go">type T struct {
+    f string `one:&quot;1&quot; two:&quot;2&quot;blank:&quot;&quot;`
+}
+func main() {
+    t := reflect.TypeOf(T{})
+    f, _ := t.FieldByName(&quot;f&quot;)
+    fmt.Println(f.Tag) // one:&quot;1&quot; two:&quot;2&quot;blank:&quot;&quot;
+    v, ok := f.Tag.Lookup(&quot;one&quot;)
+    fmt.Printf(&quot;%s, %t\n&quot;, v, ok) // 1, true
+    v, ok = f.Tag.Lookup(&quot;blank&quot;)
+    fmt.Printf(&quot;%s, %t\n&quot;, v, ok) // , true
+    v, ok = f.Tag.Lookup(&quot;five&quot;)
+    fmt.Printf(&quot;%s, %t\n&quot;, v, ok) // , false
+}
+</code></pre>
+<p><code>Get</code>是对<code>LookUp</code>的简单封装, 但是他舍弃掉了bool值</p>
+<pre><code class="language-go">func (tag StructTag) Get(key string) string {
+    v, _ := tag.Lookup(key)
+    return v
+}
+</code></pre>
+<blockquote>
+<p>当Tag不是传统格式时, 那么<code>Lookup</code>和<code>Get</code>不会返回指定的值 (hhf:这句话是什么意思呢 Return value of Get or Lookup is unspecified if tag doesn’t have conventional format.)</p>
+</blockquote>
+<p>不管tag是任何字符串(原始字符串或者解释字符串), 只有value包含在双引号之间, 那么<code>LookUp</code>和<code>Get</code>会返回key对应的值.</p>
+<pre><code class="language-go">type T struct {
+    f string &quot;one:`1`&quot;
+}
+func main() {
+    t := reflect.TypeOf(T{})
+    f, _ := t.FieldByName(&quot;f&quot;)
+    fmt.Println(f.Tag) // one:`1`
+    v, ok := f.Tag.Lookup(&quot;one&quot;)
+    fmt.Printf(&quot;%s, %t\n&quot;, v, ok) // , false
+}
+</code></pre>
+<p><strong>hhf: 从这里可以看出来, 只有value包含在&quot;&ldquo;之中才能得到相关的值</strong></p>
+<p>可以在双引号中使用转义的解释字符串, 但是这个可读性要差很多</p>
+<pre><code class="language-go">type T struct {
+    f string &quot;one:\&quot;1\&quot;&quot;
+}
+func main() {
+    t := reflect.TypeOf(T{})
+    f, _ := t.FieldByName(&quot;f&quot;)
+    fmt.Println(f.Tag) // one:&quot;1&quot;
+    v, ok := f.Tag.Lookup(&quot;one&quot;)
+    fmt.Printf(&quot;%s, %t\n&quot;, v, ok) // 1, true
+}
+</code></pre>
+<h2 id="conversion">Conversion</h2>
+<p>当一个struct向另外一个转换时, 需要对应字段的类型是相同的. 但是这些字段的tag是被忽略的</p>
+<pre><code class="language-go">type T1 struct {
+     f int `json:&quot;foo&quot;`
+ }
+ type T2 struct {
+     f int `json:&quot;bar&quot;`
+ }
+ t1 := T1{10}
+ var t2 T2
+ t2 = T2(t1)
+ fmt.Println(t2) // {10}
+</code></pre>
+<h2 id="使用struct-tag的例子">使用struct tag的例子</h2>
+<h3 id="unmarshaling">(Un)marshaling</h3>
+<p>golang使用tag最多的地方可能就是<a href="https://en.wikipedia.org/wiki/Marshalling_%28computer_science%29">marshalling</a>
+让我们看一下来自json包的函数Marshal是如何使用的</p>
+<pre><code class="language-go">import (
+    &quot;encoding/json&quot;
+    &quot;fmt&quot;
+)
+func main() {
+    type T struct {
+       F1 int `json:&quot;f_1&quot;`
+       F2 int `json:&quot;f_2,omitempty&quot;`
+       F3 int `json:&quot;f_3,omitempty&quot;`
+       F4 int `json:&quot;-&quot;`
+    }
+    t := T{1, 0, 2, 3}
+    b, err := json.Marshal(t)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Printf(&quot;%s\n&quot;, b) // {&quot;f_1&quot;:1,&quot;f_3&quot;:2}
+}
+</code></pre>
+<p><code>xml</code>包也使用了tag的特性—https://golang.org/pkg/encoding/xml/#MarshalIndent.</p>
+<h3 id="orm">ORM</h3>
+<p>像gorm广泛使用tag <a href="https://github.com/jinzhu/gorm/blob/58e34726dfc069b558038efbaa25555f182d1f7a/multi_primary_keys_test.go#L10">example</a></p>
+<p>*hhf: 我觉得最好用的orm</p>
+<h3 id="other">Other</h3>
+<p>其他潜在的用法可能就是<code>配置管理</code>, <code>struct默认值</code>, <code>validation</code>, <code>命令行参数</code>, 例如https://github.com/golang/go/wiki/Well-known-struct-tags</p>
+<h3 id="go-vet">go vet</h3>
+<p>Go编译器不强制执行结构标记的传统格式，但是去看看它是否值得使用它，例如作为CI管道的一部分</p>
+<pre><code class="language-go">package main
+type T struct {
+    f string &quot;one two three&quot;
+}
+func main() {}
+&gt; go vet tags.go
+tags.go:4: struct field tag `one two three` not compatible with reflect.StructTag.Get: bad syntax for struct tag pair
+</code></pre>
+<p><em>hhf: 一般IDE都直接提示:  bad syntax for struct tag</em></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#每日一译</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" class="block">[每日一译]golang range与iteration之间的关系</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/" class="block">gin源码阅读之四 -- gin的路由算法</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

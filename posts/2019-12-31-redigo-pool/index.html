@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Redigo Pool 源码解析 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Redigo Pool 源码解析",
+      "item":"https://www.haohongfan.com/posts/2019-12-31-redigo-pool/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-12-31-redigo-pool/"
+    },
+    "headline": "Redigo Pool 源码解析 | HHFCodeRv","datePublished": "2019-12-31T16:57:33+08:00",
+    "dateModified": "2019-12-31T16:57:33+08:00",
+    "wordCount":  2234 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "Redigo Pool 最重要的结构 type Pool struct { \/\/ 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) \/\/ 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error \/\/ 最多有多少个空闲连接保留, 一般必填 MaxIdle int \/\/ 最多有多少活跃的连接数, 一般必填 MaxActive int \/\/ 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration \/\/ Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, \/\/ 那么 Get() 将要"
+}
+</script><meta property="og:title" content="Redigo Pool 源码解析 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-12-31-redigo-pool/" />
+
+
+
+
+<meta property="og:description" content="Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-12-31T16:57:33&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-12-31T16:57:33&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Redigo Pool 源码解析</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-12-31</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="redigo-pool-最重要的结构">Redigo Pool 最重要的结构</h2>
+<pre><code class="language-go">type Pool struct {
+	// 真正获取跟redis-server连接的函数, 必填参数
+	Dial func() (Conn, error)  
+
+	// 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的
+	TestOnBorrow func(c Conn, t time.Time) error 
+
+	// 最多有多少个空闲连接保留, 一般必填
+	MaxIdle int
+
+	// 最多有多少活跃的连接数, 一般必填
+	MaxActive int
+
+	// 空闲连接最长空闲时间, 一般必填
+	IdleTimeout time.Duration
+
+	// Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, 
+	// 那么 Get() 将要等待一个连接放到 Pool中, 才会返回一个连接给使用方
+	Wait bool
+
+	// 设置连接最大存活时间
+	MaxConnLifetime time.Duration
+	
+	chInitialized uint32 // set to 1 when field ch is initialized
+	mu     sync.Mutex    // mu protects the following fields
+	closed bool          // 设置 Pool 是否关闭
+	active int           // 当前 Pool 的活跃连接数
+	ch     chan struct{} // 配合 Wait 为 true 使用
+	idle   idleList      // 空闲队列
+}
+</code></pre>
+<h2 id="redigo-第二重要的结构-idlelist">Redigo 第二重要的结构: idleList</h2>
+<p>idleList 是个<code>双向链表</code>. 实现很简单. 只有三个方法: <code>pushFront</code>, <code>popFront</code>, <code>popBack</code></p>
+<h3 id="初始化-idlelist">初始化 idlelist</h3>
+<pre><code class="language-go">type idleList struct {
+	count       int
+	front, back *poolConn
+}
+</code></pre>
+<p>使用 Pool 不会明确的初始化 idle, 故当初始化<code>&amp;Pool{....}</code>后, idle 就是默认值. 即: <code>count = 0, front = nil, back = nil.</code> 如下图:</p>
+<p><img src="https://images.haohongfan.com/redigoidlelist01.png" alt="first_node"></p>
+<h3 id="头部插入">头部插入</h3>
+<p>idleList 只提供 pushFront 方法. 将 idleList 的 front 指针, 指向新的 Conn. 然后将新 Conn 与 之前节点连接即可, 如下图</p>
+<p><img src="https://images.haohongfan.com/redigoidlelist02.png" alt="pushFront"></p>
+<h3 id="从头部删除">从头部删除</h3>
+<p><img src="https://images.haohongfan.com/redigoidlelist03.png" alt="popFront"></p>
+<h3 id="从尾部删除">从尾部删除</h3>
+<p><img src="https://images.haohongfan.com/redigoidlelist04.png" alt="popBack"></p>
+<h2 id="conn">Conn</h2>
+<p>整个 Pool 有两个 Conn: activeConn, errorConn, 他们都实现了 <code>redis.Conn</code> 接口.</p>
+<pre><code class="language-go">type Conn interface {
+	// Close closes the connection.
+	Close() error
+	// Err returns a non-nil value when the connection is not usable.
+	Err() error
+	// Do sends a command to the server and returns the received reply.
+	Do(commandName string, args ...interface{}) (reply interface{}, err error)
+	// Send writes the command to the client's output buffer.
+	Send(commandName string, args ...interface{}) error
+	// Flush flushes the output buffer to the Redis server.
+	Flush() error
+	// Receive receives a single reply from the Redis server
+	Receive() (reply interface{}, err error)
+}
+</code></pre>
+<p>不过 errorConn 实现的所有的函数都会返回 err. 所以我们在使用 Get() 获取链接时, 尽量要去判断拿到的连接是否可用(不过这也不是绝对, 我们也可以在使用 Conn 函数的时候去判断).</p>
+<p>activeConn 一般来说是可用的连接, 我们也可以通过 <code>activeConn.Err()</code> 来判断获取的连接是否可用.</p>
+<p>activeConn 的函数都是调用 redis.Conn 的函数实现的. 唯一不同的地方在于, 所有的命令都会执行<code>LookupCommandInfo</code>这个函数.</p>
+<pre><code class="language-go">func LookupCommandInfo(commandName string) CommandInfo {
+	if ci, ok := commandInfos[commandName]; ok {
+		return ci
+	}
+	return commandInfos[strings.ToUpper(commandName)]
+}
+</code></pre>
+<pre><code class="language-go">func (ac *activeConn) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	pc := ac.pc
+	if pc == nil {
+		return nil, errConnClosed
+	}
+	ci := internal.LookupCommandInfo(commandName)
+	ac.state = (ac.state | ci.Set) &amp;^ ci.Clear
+	return pc.c.Do(commandName, args...)
+}
+</code></pre>
+<p>以<code>Multi</code>, <code>EXEC</code>举例:</p>
+<p>使用 Pool 获取到的连接, 发送 <code>Multi</code>完, 由于某种原因导致程序执行了 <code>defer activeConn.Close()</code>, 由于 redis-server 没有得到<code>Exec</code>, 那么接下来的命令 redis-server 都会把其当成事务的一部分. 所以通过 LookupCommandInfo 函数能够计算当前某条命令执行后 activeConn 的当前状态, 当执行到 <code>activeConn.Close()</code> 时发现还没有发送 <code>EXEC</code>, 那么就会发送 <code>DISCARD</code> 命令来将事务取消.</p>
+<p>LookupCommandInfo 支持的命令有: <code>WATCH</code>, <code>UNWATCH</code>, <code>MULTI</code>, <code>EXEC</code>, <code>DISCARD</code>, <code>PSUBSCRIBE</code>, <code>SUBSCRIBE</code>, <code>MONITOR</code></p>
+<h2 id="redigo-灵魂函数----get">Redigo 灵魂函数 &ndash; get()</h2>
+<p>get() 主要提供给 Get() 函数调用, 是从 Pool 中获取连接, Get()是我们使用者调用的函数. 可以看到 Get() 由 <code>errorConn</code>, <code>activeConn</code> 组成.</p>
+<pre><code class="language-go">func (p *Pool) Get() Conn {
+	pc, err := p.get(nil)
+	if err != nil {
+		return errorConn{err}
+	}
+	return &amp;activeConn{p: p, pc: pc}
+}
+</code></pre>
+<h4 id="wait-配合-maxactive-使用-来保证-get-将要等待一个连接放到-pool中-才会返回一个连接给使用方">Wait 配合 MaxActive 使用, 来保证 Get() 将要等待一个连接放到 Pool中, 才会返回一个连接给使用方</h4>
+<pre><code class="language-go">if p.Wait &amp;&amp; p.MaxActive &gt; 0 {
+	p.lazyInit()
+	if ctx == nil {
+		&lt;-p.ch // &lt;--- 这里会阻塞
+	} else { 
+		// 下面的代码不需要关于, Get() 传递下来的参数是 gnil
+		select {
+		case &lt;-p.ch:
+		case &lt;-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+}
+</code></pre>
+<p>设置 Wait 为 true 并且 MaxActive 设置有最大数时, 如果时第一次获取 Get(), 那么会调用<code>lazyInit()</code>进行初始化.</p>
+<p>初始化一个 MaxActive 的 channel. 利用 channel 来保证当 Get() 获取到的连接数大于 MaxActive时, 阻塞 Get() 函数, 直到有连接使用完毕放入到 Pool 中.</p>
+<h4 id="循环idlelist-关闭空闲队列中连接时长大于-idletimeout-的连接">循环idleList, 关闭空闲队列中连接时长大于 IdleTimeout 的连接</h4>
+<pre><code class="language-go">// Prune stale connections at the back of the idle list.
+if p.IdleTimeout &gt; 0 {
+	n := p.idle.count
+	for i := 0; i &lt; n &amp;&amp; p.idle.back != nil &amp;&amp; p.idle.back.t.Add(p.IdleTimeout).Before(nowFunc()); i++ {
+		pc := p.idle.back
+		p.idle.popBack()
+		p.mu.Unlock()
+		pc.c.Close()
+		p.mu.Lock()
+		p.active--
+	}
+}
+</code></pre>
+<p>这段代码会遍历整个 idleList, 从尾部拿出 <code>activeConn</code>,  activeConn.t 加上 IdleTimeout 时间, 跟当前时间比较. 如果比 time.Now() 小, 则从 idleList 的尾部 <code>pop</code> 这个conn. 同时关闭这个 activeConn, 让 Pool.active&ndash;</p>
+<p>不过这段代码看上去比较奇怪, 需要耐心去看. 可以做个变形</p>
+<pre><code class="language-go">for i := 0; i &lt; n ; i++ {
+	if p.idle.back != nil &amp;&amp; p.idle.back.t.Add(p.IdleTimeout).Before(nowFunc()) {
+		pc := p.idle.back
+		p.idle.popBack()
+		p.mu.Unlock()
+		pc.c.Close()
+		p.mu.Lock()
+		p.active--
+	}
+}
+</code></pre>
+<h4 id="当-idlelist-不为空时-从头部获取-activeconn">当 idleList 不为空时, 从头部获取 activeConn</h4>
+<pre><code class="language-go">for p.idle.front != nil {
+	pc := p.idle.front
+	p.idle.popFront()
+	p.mu.Unlock()
+	if (p.TestOnBorrow == nil || p.TestOnBorrow(pc.c, pc.t) == nil) &amp;&amp;
+		(p.MaxConnLifetime == 0 || nowFunc().Sub(pc.created) &lt; p.MaxConnLifetime) {
+		return pc, nil
+	}
+	pc.c.Close()
+	p.mu.Lock()
+	p.active--
+}
+</code></pre>
+<p>这段代码比较简单.当 idleList 不为空时, 从头部 pop 出一个 activeConn, 还有另外两个功能:</p>
+<ol>
+<li>通过 <code>TestOnBorrow()</code> 函数判断当前连接是否能正常使用</li>
+<li>通过 <code>MaxConnLifetime</code> 参数判断这个连接是否在 MaxConnLifetime 内</li>
+</ol>
+<h4 id="判断-pool-是否关闭">判断 Pool 是否关闭</h4>
+<pre><code class="language-go">if p.closed {
+	p.mu.Unlock()
+	return nil, errors.New(&quot;redigo: get on closed pool&quot;)
+}
+</code></pre>
+<p>当发现 Pool 被调用 Pool.Close() 关闭了, 那么这里就会返回 <code>errors.New(&quot;redigo: get on closed pool&quot;)</code>错误</p>
+<pre><code>顺带说一句在 `pool.go` 里面总共有两个 Close() 函数:
+
+1. func (p *Pool) Close() error {...}
+
+这个函数是关闭 redigo 连接池的. 理论上可以不调用. 如果确实不放心, 需要在 main.go 里面 `defer pool.Close()` 
+来调用
+
+2. func (ac *activeConn) Close() error { ...}
+
+这个函数是用来将从 Pool 中获取到的 activeConn 放回到 Pool 里面. 
+
+这个函数是我们需要频繁调用的函数. 如果程序里Get() 之后没有 Close(), 那么就会造成 redis 连接泄漏.
+更严重的情况, 如果Wait, MaxActive 都没有设置, 那么你的程序就会将 redis 搞瘫痪, 这是很危险的
+</code></pre>
+<h4 id="真正从-redis-server-获取连接">真正从 redis-server 获取连接</h4>
+<pre><code class="language-go">// Handle limit for p.Wait == false.
+if !p.Wait &amp;&amp; p.MaxActive &gt; 0 &amp;&amp; p.active &gt;= p.MaxActive {
+	p.mu.Unlock()
+	return nil, ErrPoolExhausted
+}
+
+p.active++
+p.mu.Unlock()
+c, err := p.Dial()
+if err != nil {
+	c = nil
+	p.mu.Lock()
+	p.active--
+	if p.ch != nil &amp;&amp; !p.closed {
+		p.ch &lt;- struct{}{}
+	}
+	p.mu.Unlock()
+}
+return &amp;poolConn{c: c, created: nowFunc()}, err
+</code></pre>
+<ol>
+<li>判断 pool 的 active 是否达到 MaxActive</li>
+<li>通过参数 p.Dial() 去 redis-server 获取连接</li>
+</ol>
+<h2 id="redigo-灵魂函数----put">Redigo 灵魂函数 &ndash; put()</h2>
+<p>put 函数主要提供给 activeConn.Close() 调用</p>
+<p>Close() 函数就不在详细说明,  主要根据 activeConn 的 stat, 判断在关闭连接之前是否发送过<code>WATCH</code>, <code>MULTI</code>, <code>PSUBSCRIBE</code>, <code>SUBSCRIBE</code>, <code>MONITOR</code> 这些命令. 如果发送过就会把这些命令结束(具体原因上面已经说过)</p>
+<pre><code class="language-go">func (p *Pool) put(pc *poolConn, forceClose bool) error {
+	p.mu.Lock()
+	// 判断 pool 是否关闭, 并且该命令是否需要强制关闭
+	if !p.closed &amp;&amp; !forceClose { 
+		pc.t = nowFunc()
+		// 将该 activeConn 压入 idleList 中
+		p.idle.pushFront(pc)
+		// 如果 idleList 的 count 已经大于 MaxIdle, 那么会将 idleList 的尾部的 activeConn pop 掉
+		if p.idle.count &gt; p.MaxIdle {
+			pc = p.idle.back
+			p.idle.popBack()
+		} else {
+			pc = nil
+		}
+	}
+
+	// 如果是需要强制关闭或者是从尾部 pop 掉的 conn, 那么就会真正的关闭这个连接
+	if pc != nil {
+		p.mu.Unlock()
+		pc.c.Close()
+		p.mu.Lock()
+		p.active--
+	}
+
+	// 如果开启了 Wait = true, 那么往 channel 里面发送一个struct{}{}, 代表等待的客户端可以获取连接了
+	if p.ch != nil &amp;&amp; !p.closed {
+		p.ch &lt;- struct{}{}
+	}
+	p.mu.Unlock()
+	return nil
+}
+</code></pre>
+<h2 id="结尾">结尾</h2>
+<p>至此, redigo Pool 的源码基本都过了一遍. 为什么我会心血来潮把其源码读一遍呢?</p>
+<p>思考下面几个问题:</p>
+<ol>
+<li>redigo 是否能够用于 codis?</li>
+<li>codis 的 golang 客户端如何实现 ?</li>
+<li>如果不经过任何加工, 直接用 redigo 去访问 codis, 会出现什么样的问题?</li>
+</ol>
+<p>这些问题就是促使我读redigo源码的原因, 后续文章我会一一解答这些问题</p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-01-06-redigo-codis/" class="block">如何用 Redigo 访问 Codis</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" class="block">打造 Zap 开箱即用日志组件</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/">打造 Zap 开箱即用日志组件</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/">Golang是否真的没有指针运算?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/">Logrus源码阅读(1)--基本用法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

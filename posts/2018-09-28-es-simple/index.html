@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>ES简单使用 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &quot;query&quot; : { &quot;match&quot; : { &quot;testField&quot; : &quot;abc&quot; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &quot;query&quot; : { &quot;bool&quot; : { &quot;must&quot;: [ { &quot;match&quot; : { &quot;testField&quot; : &quot;abc&quot; } }, { &quot;match&quot; : { &quot;testField2&quot; : &quot;xyz&quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt;">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"ES简单使用",
+      "item":"https://www.haohongfan.com/posts/2018-09-28-es-simple/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2018-09-28-es-simple/"
+    },
+    "headline": "ES简单使用 | HHFCodeRv","datePublished": "2018-09-27T11:44:44+08:00",
+    "dateModified": "2018-09-27T11:44:44+08:00",
+    "wordCount":  2022 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200\/_cat\/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200\/story 查看type curl -u *:* -XGET 127.0.0.1:9200\/story\/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200\/luka\/_mapping?pretty 创建index curl -u *:* -H \u0027Content-Type:application\/json\u0027 -XPUT 127.0.0.1:9200\/luka?pretty 模糊查询 curl -u *:* -XGET \u0027127.0.0.1:9200\/story\/_search?q=mary\u0026amp;pretty\u0027 查询 https:\/\/www.elastic.co\/guide\/en\/elasticsearch\/reference\/current\/query-dsl.html Match查询 curl -XGET \u0027localhost:9200\/my_index\/my_type\/_search\u0027 -d \u0027{ \u0026quot;query\u0026quot; : { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } } }\u0027 $data = [ \u0027body\u0027 =\u0026gt; [ \u0027query\u0027 =\u0026gt; [ \u0027match\u0027 =\u0026gt; [ \u0027title\u0027 =\u0026gt; \u0027黑猫\u0027, ] ], ] ]; Bool查询 curl -XGET \u0027localhost:9200\/my_index\/my_type\/_search\u0027 -d \u0027{ \u0026quot;query\u0026quot; : { \u0026quot;bool\u0026quot; : { \u0026quot;must\u0026quot;: [ { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } }, { \u0026quot;match\u0026quot; : { \u0026quot;testField2\u0026quot; : \u0026quot;xyz\u0026quot; } } ] } } }\u0027 $data = [ \u0027body\u0027 =\u0026gt; [ \u0027query\u0027 =\u0026gt; [ \u0027bool\u0027 =\u0026gt;"
+}
+</script><meta property="og:title" content="ES简单使用 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2018-09-28-es-simple/" />
+
+
+
+
+<meta property="og:description" content="常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &quot;query&quot; : { &quot;match&quot; : { &quot;testField&quot; : &quot;abc&quot; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &quot;query&quot; : { &quot;bool&quot; : { &quot;must&quot;: [ { &quot;match&quot; : { &quot;testField&quot; : &quot;abc&quot; } }, { &quot;match&quot; : { &quot;testField2&quot; : &quot;xyz&quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt;" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-09-27T11:44:44&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2018-09-27T11:44:44&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="es" />
+
+<meta property="article:tag" content="elasticsearch" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">ES简单使用</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-09-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/es/" class="hover:text-eureka">es</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="常用命令">常用命令</h2>
+<ol>
+<li>查看有哪些indexes</li>
+</ol>
+<pre><code>curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices
+</code></pre>
+<ol start="2">
+<li>删除索引</li>
+</ol>
+<pre><code>curl -u *:* -XDELETE 127.0.0.1:9200/story 
+</code></pre>
+<ol start="3">
+<li>查看type</li>
+</ol>
+<pre><code>curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty
+</code></pre>
+<ol start="4">
+<li>查看结构</li>
+</ol>
+<pre><code>curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty
+</code></pre>
+<ol start="5">
+<li>创建index</li>
+</ol>
+<pre><code>curl -u *:*  -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty
+</code></pre>
+<ol start="6">
+<li>模糊查询</li>
+</ol>
+<pre><code>curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary&amp;pretty'
+</code></pre>
+<h1 id="查询">查询</h1>
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html</a></p>
+<h3 id="match查询">Match查询</h3>
+<pre><code>curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{
+    &quot;query&quot; : {
+        &quot;match&quot; : {
+            &quot;testField&quot; : &quot;abc&quot;
+        }
+    }
+}'
+</code></pre>
+<pre><code>$data = [
+    'body' =&gt; [
+        'query' =&gt; [
+            'match' =&gt; [
+                'title' =&gt; '黑猫',
+            ]
+        ],
+    ]
+];
+</code></pre>
+<h3 id="bool查询">Bool查询</h3>
+<pre><code>curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{
+    &quot;query&quot; : {
+        &quot;bool&quot; : {
+            &quot;must&quot;: [
+                {
+                    &quot;match&quot; : { &quot;testField&quot; : &quot;abc&quot; }
+                },
+                {
+                    &quot;match&quot; : { &quot;testField2&quot; : &quot;xyz&quot; }
+                }
+            ]
+        }
+    }
+}'
+</code></pre>
+<pre><code> $data = [
+    'body' =&gt; [
+        'query' =&gt; [
+            'bool' =&gt; [
+                'must' =&gt; [
+                    ['match' =&gt; ['title' =&gt; '黑猫',]],
+                    ['match' =&gt; ['anchor_nickname' =&gt; '可乐']],
+                ]
+            ]
+        ],
+    ]
+];
+</code></pre>
+<pre><code>curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{
+    &quot;query&quot; : {
+        &quot;bool&quot; : {
+            &quot;filter&quot; : {
+                &quot;term&quot; : { &quot;my_field&quot; : &quot;abc&quot; }
+            },
+            &quot;should&quot; : {
+                &quot;match&quot; : { &quot;my_other_field&quot; : &quot;xyz&quot; }
+            }
+        }
+    }
+}'
+</code></pre>
+<h3 id="query-dsl">Query DSL</h3>
+<p>Match Query</p>
+<pre><code>GET /_search
+{
+    &quot;query&quot;: {
+        &quot;match&quot; : {
+            &quot;message&quot; : &quot;this is a test&quot;
+        }
+    }
+}
+</code></pre>
+<pre><code>GET /_search
+{
+    &quot;query&quot;: {
+        &quot;match&quot; : {
+            &quot;message&quot; : {
+                &quot;query&quot; : &quot;this is a test&quot;,
+                &quot;operator&quot; : &quot;and&quot;
+            }
+        }
+    }
+}
+</code></pre>
+<p>Term Query</p>
+<pre><code>POST _search
+{
+  &quot;query&quot;: {
+    &quot;term&quot; : { &quot;user&quot; : &quot;Kimchy&quot; } 
+  }
+}
+</code></pre>
+<p>Exists Query</p>
+<pre><code>GET /_search
+{
+    &quot;query&quot;: {
+        &quot;exists&quot; : { &quot;field&quot; : &quot;user&quot; }
+    }
+}
+</code></pre>
+<p>Prefix Query</p>
+<pre><code>GET /_search
+{ &quot;query&quot;: {
+    &quot;prefix&quot; : { &quot;user&quot; : &quot;ki&quot; }
+  }
+}
+</code></pre>
+<h3 id="join-query">Join Query</h3>
+<p>Nested Query</p>
+<pre><code>PUT /my_index
+{
+    &quot;mappings&quot;: {
+        &quot;type1&quot; : {
+            &quot;properties&quot; : {
+                &quot;obj1&quot; : {
+                    &quot;type&quot; : &quot;nested&quot;
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<pre><code>GET /_search
+{
+    &quot;query&quot;: {
+        &quot;nested&quot; : {
+            &quot;path&quot; : &quot;obj1&quot;,
+            &quot;score_mode&quot; : &quot;avg&quot;,
+            &quot;query&quot; : {
+                &quot;bool&quot; : {
+                    &quot;must&quot; : [
+                    { &quot;match&quot; : {&quot;obj1.name&quot; : &quot;blue&quot;} },
+                    { &quot;range&quot; : {&quot;obj1.count&quot; : {&quot;gt&quot; : 5}} }
+                    ]
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>Has Child Query</p>
+<pre><code>GET /_search
+{
+    &quot;query&quot;: {
+        &quot;has_child&quot; : {
+            &quot;type&quot; : &quot;blog_tag&quot;,
+            &quot;query&quot; : {
+                &quot;term&quot; : {
+                    &quot;tag&quot; : &quot;something&quot;
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="bool联合查询-mustshouldmust_not">bool联合查询: must,should,must_not</h3>
+<p>如果我们想要请求&quot;content中带宝马，但是tag中不带宝马&quot;这样类似的需求，就需要用到bool联合查询。
+联合查询就会使用到must,should,must_not三种关键词。</p>
+<p>这三个可以这么理解</p>
+<p>must: 文档必须完全匹配条件
+should: should下面会带一个以上的条件，至少满足一个条件，这个文档就符合should
+must_not: 文档必须不匹配条件</p>
+<pre><code>{
+  &quot;query&quot;: {
+    &quot;bool&quot;: {
+      &quot;must&quot;: {
+        &quot;term&quot;: {
+          &quot;content&quot;: &quot;宝马&quot;
+        }
+      },
+      &quot;must_not&quot;: {
+        &quot;term&quot;: {
+          &quot;tags&quot;: &quot;宝马&quot;
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<pre><code>{
+    &quot;index&quot;: {
+        &quot;analysis&quot;: {
+            &quot;analyzer&quot;: {
+                &quot;ik_pinyin_analyzer&quot;: {
+                    &quot;type&quot;: &quot;custom&quot;,
+                    &quot;tokenizer&quot;: &quot;ik_max_word&quot;,
+                    &quot;filter&quot;: [&quot;my_pinyin&quot;, &quot;word_delimiter&quot;]
+                }
+            },
+            &quot;filter&quot;: {
+                &quot;my_pinyin&quot;: {
+                    &quot;type&quot;: &quot;pinyin&quot;,
+                    &quot;first_letter&quot;: &quot;prefix&quot;,
+                    &quot;padding_char&quot;: &quot; &quot;
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="multi-match">multi match</h3>
+<pre><code>{
+  &quot;query&quot;: {
+    &quot;multi_match&quot;: {
+        &quot;query&quot; : &quot;我的宝马多少马力&quot;,
+        &quot;fields&quot; : [&quot;title&quot;, &quot;content&quot;]
+    }
+  }
+}
+</code></pre>
+<p>我们希望完全匹配的文档占的评分比较高，则需要使用best_fields</p>
+<pre><code>{
+  &quot;query&quot;: {
+    &quot;multi_match&quot;: {
+      &quot;query&quot;: &quot;我的宝马发动机多少&quot;,
+      &quot;type&quot;: &quot;best_fields&quot;,
+      &quot;fields&quot;: [
+        &quot;tag&quot;,
+        &quot;content&quot;
+      ],
+      &quot;tie_breaker&quot;: 0.3
+    }
+  }
+}
+</code></pre>
+<p>意思就是完全匹配&quot;宝马 发动机&quot;的文档评分会比较靠前，如果只匹配宝马的文档评分乘以0.3的系数</p>
+<p>我们希望越多字段匹配的文档评分越高，就要使用most_fields</p>
+<pre><code>{
+  &quot;query&quot;: {
+    &quot;multi_match&quot;: {
+      &quot;query&quot;: &quot;我的宝马发动机多少&quot;,
+      &quot;type&quot;: &quot;most_fields&quot;,
+      &quot;fields&quot;: [
+        &quot;tag&quot;,
+        &quot;content&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+<h3 id="嵌套查询">嵌套查询</h3>
+<pre><code>GET /my_index/blogpost/_search
+{
+    &quot;query&quot;:{
+        &quot;bool&quot;:{
+            &quot;must&quot;:[
+                {
+                    &quot;match&quot;:{
+                        &quot;title&quot;:&quot;eggs&quot;
+                    }
+                },
+                {
+                    &quot;nested&quot;:{
+                        &quot;path&quot;:&quot;comments&quot;,
+                        &quot;query&quot;:{
+                            &quot;bool&quot;:{
+                                &quot;must&quot;:[
+                                    {
+                                        &quot;match&quot;:{
+                                            &quot;comments.name&quot;:&quot;john&quot;
+                                        }
+                                    },
+                                    {
+                                        &quot;match&quot;:{
+                                            &quot;comments.age&quot;:28
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+</code></pre>
+<h1 id="es同义词配置">ES同义词配置</h1>
+<h2 id="创建index">创建index</h2>
+<pre><code>{
+  &quot;index&quot;: {
+    &quot;analysis&quot;: {
+      &quot;analyzer&quot;: {
+        &quot;by_smart&quot;: {
+          &quot;type&quot;: &quot;custom&quot;,
+          &quot;tokenizer&quot;: &quot;ik_smart&quot;,
+          &quot;filter&quot;: [&quot;by_tfr&quot;,&quot;by_sfr&quot;],
+          &quot;char_filter&quot;: [&quot;by_cfr&quot;]
+        },
+        &quot;by_max_word&quot;: {
+          &quot;type&quot;: &quot;custom&quot;,
+          &quot;tokenizer&quot;: &quot;ik_max_word&quot;,
+          &quot;filter&quot;: [&quot;by_tfr&quot;,&quot;by_sfr&quot;],
+          &quot;char_filter&quot;: [&quot;by_cfr&quot;]
+        }
+      },
+      &quot;filter&quot;: {
+        &quot;by_tfr&quot;: {
+          &quot;type&quot;: &quot;stop&quot;,
+          &quot;stopwords&quot;: [&quot; &quot;]
+        },
+        &quot;by_sfr&quot;: {
+          &quot;type&quot;: &quot;synonym&quot;,
+          &quot;synonyms_path&quot;: &quot;analysis/synonyms.txt&quot;
+        }
+      },
+      &quot;char_filter&quot;: {
+        &quot;by_cfr&quot;: {
+          &quot;type&quot;: &quot;mapping&quot;,
+          &quot;mappings&quot;: [&quot;| =&gt; |&quot;]
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="创建type">创建type</h2>
+<pre><code>{
+	&quot;properties&quot;: {
+	    &quot;title&quot;: {
+	    	&quot;type&quot;: &quot;text&quot;,
+	    	&quot;fields&quot;: {
+		    	&quot;keyword&quot;: {
+		        	&quot;type&quot;: &quot;keyword&quot;,
+		        	&quot;ignore_above&quot;: 256
+		    	}
+	    	},
+			&quot;index&quot;: &quot;analyzed&quot;,
+		    &quot;analyzer&quot;: &quot;by_max_word&quot;,
+		    &quot;search_analyzer&quot;: &quot;by_smart&quot;
+    	},
+    	&quot;authors&quot;: {
+    		&quot;properties&quot;:{
+    			&quot;name&quot;: {
+    				&quot;type&quot;: &quot;text&quot;,
+			    	&quot;fields&quot;: {
+				    	&quot;keyword&quot;: {
+				        	&quot;type&quot;: &quot;keyword&quot;,
+				        	&quot;ignore_above&quot;: 256
+				    	}
+			    	},
+					&quot;index&quot;: &quot;analyzed&quot;,
+				    &quot;analyzer&quot;: &quot;by_max_word&quot;,
+				    &quot;search_analyzer&quot;: &quot;by_smart&quot;		
+    			}
+    		}
+    	}
+	}
+}
+</code></pre>
+<h1 id="分页">分页</h1>
+<h2 id="from-size浅分页">from-size&quot;浅&quot;分页</h2>
+<p>可以理解为简单意义上的分页。它的原理很简单，就是查询前20条数据，然后截断前10条，只返回10-20的数据。这样其实白白浪费了前10条的查询。</p>
+<pre><code>{
+    &quot;from&quot; : 0,
+    &quot;size&quot; : 10,
+    &quot;query&quot; : {
+        &quot;term&quot; : { &quot;user&quot; : &quot;kimchy&quot; }
+    }
+}
+</code></pre>
+<p>其中，from定义了目标数据的偏移值，size定义当前返回的事件数目。
+默认from为0，size为10，即所有的查询默认仅仅返回前10条数据。</p>
+<p>做过测试，越往后的分页，执行的效率越低。</p>
+<h2 id="scroll深分页">scroll“深”分页</h2>
+<p>可以把 scroll 理解为关系型数据库里的 cursor，因此，scroll 并不适合用来做实时搜索，而更适用于后台批处理任务，比如群发。</p>
+<p>可以把 scroll 分为初始化和遍历两步，初始化时将所有符合搜索条件的搜索结果缓存起来，可以想象成快照，在遍历时，从这个快照里取数据，也就是说，在初始化后对索引插入、删除、更新数据都不会影响遍历结果。</p>
+<pre><code>POST ip:port/my_index/my_type/_search?scroll=1m
+{
+	&quot;query&quot;: { &quot;match_all&quot;: {}}
+}
+
+POST /_search?scroll=1m
+{
+    &quot;scroll_id&quot;:&quot;xxxxxx&quot;
+}
+</code></pre>
+<h1 id="分组查询">分组查询</h1>
+<pre><code>{
+  &quot;size&quot;: 20,
+   &quot;query&quot;: {
+      &quot;match&quot;: {
+        &quot;title&quot; : {
+            &quot;query&quot; : &quot;黑猫&quot;
+        }
+    }
+  },
+  &quot;aggs&quot;: {
+    &quot;group_by_title&quot;: {
+      &quot;terms&quot;: {
+        &quot;field&quot;: &quot;title.keyword&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h1 id="遇到的问题">遇到的问题</h1>
+<h2 id="match-和-term-的区别">match 和 term 的区别</h2>
+<ul>
+<li><code>term</code>再搜索前不会对单词进行分词, 会直接进行进行搜索</li>
+<li><code>match</code>在搜索前会对单词进行分词, 然后进行搜索</li>
+</ul>
+<h2 id="keyword与text的区别">keyword与text的区别</h2>
+<ul>
+<li>keyword：存储数据时候，不会分词建立索引</li>
+<li>text：存储数据时候，会自动分词，并生成索引（这是很智能的，但在有些字段里面是没用的，所以对于有些字段使用text则浪费了空间）</li>
+</ul>
+<h1 id="中文分词">中文分词</h1>
+<ul>
+<li><code>ik_smart</code>会将<code>清华大学</code>整个分为一个词，</li>
+<li><code>ik_max_word</code>会将<code>清华大学</code>分为<code>清华大学</code>，<code>清华</code>和<code>大学</code>，按需选其中之一就可以了。</li>
+</ul>
+<h2 id="能否在查询时指定分词器">能否在查询时指定分词器?</h2>
+<p>阿里云目前不能实现.</p>
+<p>不能对已经生成的数据, 重新设置分词</p>
+<p>PUT /school_index
+{
+&ldquo;settings&rdquo; : {
+&ldquo;index&rdquo; : {
+&ldquo;analysis.analyzer.default.type&rdquo;: &ldquo;ik_max_word&rdquo;
+}
+}
+}</p>
+<h2 id="fielddat问题">Fielddat问题</h2>
+<pre><code>Fielddat is disabled on text fields by default. Set fielddata=true on [title] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead
+</code></pre>
+<p>解决方法: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html</a></p>
+<h2 id="es既想包含查询又想精确查询">es既想包含查询,又想精确查询</h2>
+<p>如果es既想包含查询（即类似数据库like）又想精确查询（完全相等，类似于数据库＝)，则只要建立mapping中如下设置即可。查包含时直接字段名，＝查询时加.raw</p>
+<p>{
+&ldquo;properties&rdquo;: {
+&ldquo;user&rdquo;: {
+&ldquo;properties&rdquo;: {
+&ldquo;name&rdquo;: {
+&ldquo;type&rdquo;: &ldquo;string&rdquo;,
+&ldquo;fields&rdquo;: {
+&ldquo;raw&rdquo;: {
+&ldquo;type&rdquo;:  &ldquo;string&rdquo;,
+&ldquo;index&rdquo;: &ldquo;not_analyzed&rdquo;
+}
+}
+}
+}
+}
+}
+}</p>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li><a href="https://n3xtchen.github.io/n3xtchen/elasticsearch/2017/07/05/elasticsearch-23-useful-query-example">19 个很有用的 ElasticSearch 查询语句</a></li>
+</ol>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/es/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#es</a>
+    
+    <a href="https://www.haohongfan.com/tags/elasticsearch/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#elasticsearch</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/" class="block">MongoDB 数据重复的处理方法</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/" class="block">Graphql最大复杂度和最大深度设置</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

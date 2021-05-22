@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>golang | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Eureka is a elegant and powerful theme for Hugo.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Tags",
+      "item":"https://www.haohongfan.com/tags/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"golang",
+      "item":"https://www.haohongfan.com/tags/golang/"}]
+}
+</script>
+
+
+
+
+<script type="application/ld+json">
+{
+    "@context":"https://schema.org",
+    "@type":"ItemList",
+    "itemListElement":[{
+            "@type":"ListItem",
+            "position":  1 ,
+            "name": "限流器系列(1) -- Leaky Bucket 漏斗桶",
+            "description": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check",
+            "url": "https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
+            "name": "Bilibili Kratos 框架源码分析(4) -- Kratos Log",
+            "description": "用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = \u0026quot;xxx-service\u0026quot; dir = \u0026quot;/data/log/xxx-service/\u0026quot; stdout = true v = 3 filter = [\u0026quot;fileld1\u0026quot;, \u0026quot;field2\u0026quot;] [log.module] \u0026quot;dao_user\u0026quot; = 2 \u0026quot;servic*\u0026quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var",
+            "url": "https://www.haohongfan.com/posts/2020-06-09-kratos-log/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
+            "name": "Bilibili Kratos 框架源码分析(3) -- fanout异步",
+            "description": "在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = \u0026amp;dao{ ... cache: fanout.New(\u0026quot;cache\u0026quot;), ... } cf = d.Close return }",
+            "url": "https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
+            "description": "本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\u0026quot;/kratos-demo\u0026quot;) { g.GET(\u0026quot;/start\u0026quot;, howToStart) g.GET(\u0026quot;/sayHi\u0026quot;, sayHi) g.GET(\u0026quot;/sayHello\u0026quot;, func(context *bm.Context) { svc.SayHello(context, \u0026amp;pb.HelloReq{ Name: \u0026quot;test\u0026quot;, }) context.JSON(\u0026quot;success\u0026quot;, nil) }) } v2Group := e.Group(\u0026quot;/kratos-demo/v2\u0026quot;) { v2Group.GET(\u0026quot;/sayHi\u0026quot;, sayHi) }",
+            "url": "https://www.haohongfan.com/posts/2020-05-16-kratos-demo/"
+        },{
+            "@type":"ListItem",
+            "position":  5 ,
+            "name": "Bilibili Kratos 框架源码分析(1) -- 启动流程",
+            "description": "这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on \u0026amp;\u0026amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,",
+            "url": "https://www.haohongfan.com/posts/2020-05-08-kratos-flow/"
+        }
+    ]
+}
+</script><meta property="og:title" content="golang | HHFCodeRv" />
+<meta property="og:type" content="website" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/tags/golang/" />
+
+
+
+
+
+<meta property="og:description" content="Eureka is a elegant and powerful theme for Hugo." />
+
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="og:updated_time" content="2021-05-22T00:00:00&#43;00:00" />
+
+
+
+<meta property="article:section" content="tags" />
+
+
+<link rel="alternate" type="application/rss+xml" href="https://www.haohongfan.com/tags/golang/index.xml" title="HHFCodeRv" />
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+<article class="mx-6 my-8">
+    <h1 class="font-bold text-3xl text-primary-text">golang</h1>
+    
+</article>
+<div class="bg-secondary-bg rounded px-6">
+    <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
+</div>
+<div class="content">
+  限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
+</div>
+<div class="content">
+  用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &amp;quot;xxx-service&amp;quot; dir = &amp;quot;/data/log/xxx-service/&amp;quot; stdout = true v = 3 filter = [&amp;quot;fileld1&amp;quot;, &amp;quot;field2&amp;quot;] [log.module] &amp;quot;dao_user&amp;quot; = 2 &amp;quot;servic*&amp;quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-09</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+</div>
+<div class="content">
+  在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = &amp;amp;dao{ ... cache: fanout.New(&amp;quot;cache&amp;quot;), ... } cf = d.Close return }
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-05-22</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+</div>
+<div class="content">
+  本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&amp;quot;/kratos-demo&amp;quot;) { g.GET(&amp;quot;/start&amp;quot;, howToStart) g.GET(&amp;quot;/sayHi&amp;quot;, sayHi) g.GET(&amp;quot;/sayHello&amp;quot;, func(context *bm.Context) { svc.SayHello(context, &amp;amp;pb.HelloReq{ Name: &amp;quot;test&amp;quot;, }) context.JSON(&amp;quot;success&amp;quot;, nil) }) } v2Group := e.Group(&amp;quot;/kratos-demo/v2&amp;quot;) { v2Group.GET(&amp;quot;/sayHi&amp;quot;, sayHi) }
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-05-16</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+</div>
+<div class="content">
+  这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;amp;&amp;amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-05-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+</div>
+
+
+</div>
+
+<ul class="pagination">
+  <li class="page-item">
+    <a href="/tags/golang/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/tags/golang/page/2/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/tags/golang/">1</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/tags/golang/page/2/">2</a>
+  </li>
+  <li class="page-item active">
+    <a class="page-link" href="/tags/golang/page/3/">3</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/tags/golang/page/4/">4</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/tags/golang/page/5/">5</a>
+  </li>
+  <li class="page-item">
+    <a href="/tags/golang/page/4/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/tags/golang/page/5/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+  </li>
+</ul>
+
+
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Mutex | Go 源码分析与实战 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Docs",
+      "item":"https://www.haohongfan.com/docs/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Go 源码分析与实战",
+      "item":"https://www.haohongfan.com/docs/gohandbook/"},{
+      "@type": "ListItem",
+      "position": 3 ,
+      "name":"并发原语",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
+      "@type": "ListItem",
+      "position": 4 ,
+      "name":"Mutex",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/"
+    },
+    "headline": "Mutex | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "dateModified": "2021-04-01T09:57:16+08:00",
+    "wordCount":  3250 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math\/rand》，我们知道 math\/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争"
+}
+</script><meta property="og:title" content="Mutex | Go 源码分析与实战 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" />
+
+
+
+
+<meta property="og:description" content="Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="docs" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="lg:pt-12">
+    <div class="flex flex-col md:flex-row bg-secondary-bg rounded">
+        <div class="md:w-1/4 lg:w-1/5 border-r">
+            <div class="sticky top-16 pt-6">
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="sidebar-title" class="md:hidden mx-4 px-2 pt-4 pb-2 md:border-b text-tertiary-text md:text-primary-text">
+    <span class="font-semibold">目录</span>
+    <i class="fas fa-caret-right ml-1"></i>
+</div>
+
+<div id="sidebar-toc"
+    class="hidden md:block overflow-y-auto mx-6 md:mx-0 pr-6 pt-2 md:max-h-doc-sidebar bg-primary-bg md:bg-transparent">
+    <div class="flex flex-wrap ml-4 -mr-2 p-2 bg-secondary-bg md:bg-primary-bg rounded">
+        <a class=" hover:text-eureka"
+            href="https://www.haohongfan.com/docs/gohandbook/">Go 源码分析与实战</a>
+        
+        
+        
+
+
+    </div>
+    
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class=" pb-2 ">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/">并发原语</a>
+        </div>
+        
+        
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" text-eureka  hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">Mutex</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">Cond</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">WaitGroup</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">sync.Pool</a>
+        </div>
+        
+    </li>
+    
+    
+</ul>
+
+        
+    </li>
+    
+    
+</ul>
+
+</div>
+
+
+
+
+
+
+
+            </div>
+
+        </div>
+        <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
+            <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
+                <h1 class="font-bold text-3xl text-primary-text">Mutex</h1>
+                <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>7分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+            </div>
+            <div class="flex">
+                <div class="w-full lg:w-3/4 px-6">
+                    
+                    
+                    <div class="content">
+                        <p>Hi，大家好，我是 haohongfan。</p>
+<p>上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争 ？</p>
+<p>到底加锁的代码会不会产生线上问题？ 到底该不该使用锁来实现这个功能？线上的问题是不是由于使用了锁造成的？针对这些问题，本文就从源码角度剖析 Go Mutex, 揭开 Mutex 的迷雾。</p>
+<h2 id="源码分析">源码分析</h2>
+<p>Go mutex 源码只有短短的 228 行，但是却包含了很多的状态转变在里面，很不容易看懂，具体可以参见下面的流程图。Mutex 的实现主要借助了 CAS 指令 + 自旋 + 信号量来实现，具体代码我就不再每一行做分析了，有兴趣的可以根据下面流程图配合源码阅读一番。</p>
+<h3 id="lock">Lock</h3>
+<p><img src="https://images.haohongfan.com/mutex_lock.png" alt=""></p>
+<h3 id="unlock">Unlock</h3>
+<p><img src="https://images.haohongfan.com/mutex_unlock.png" alt="Unlock"></p>
+<h2 id="一些例子">一些例子</h2>
+<ol>
+<li>一个 goroutine 加锁解锁过程
+<img src="https://images.haohongfan.com/goroutine_one.png" alt="加锁加锁"></li>
+<li>没有加锁，直接解锁问题
+<img src="https://images.haohongfan.com/groutine_two.png" alt="没有加锁直接解锁"></li>
+<li>两个 Goroutine，互相加锁解锁
+<img src="https://images.haohongfan.com/goroutine_unlock.png" alt="互相加锁解锁"></li>
+<li>三个 Goroutine 等待加锁过程
+<img src="https://images.haohongfan.com/goroutine_three.png" alt="三个 goroutine 等待加锁"></li>
+</ol>
+<p>整篇源码其实涉及比较难以理解的就是 Mutex 状态（mutexLocked，mutexWoken，mutexStarving，mutexWaiterShift） 与 Goroutine 之间的状态（starving，awoke）改变， 我们下面将逐一说明。</p>
+<h3 id="什么是-goroutine-排队">什么是 Goroutine 排队?</h3>
+<p><img src="https://images.haohongfan.com/paidui2.png" alt="排队"></p>
+<p>如果 Mutex 已经被一个 Goroutine 获取了锁, 其它等待中的 Goroutine 们只能一直等待。那么等这个锁释放后，等待中的 Goroutine 中哪一个会优先获取 Mutex 呢?</p>
+<p>正常情况下, 当一个 Goroutine 获取到锁后, 其他的 Goroutine 开始进入自旋转(为了持有CPU) 或者进入沉睡阻塞状态(等待信号量唤醒). 但是这里存在一个问题, 新请求的 Goroutine 进入自旋时是仍然拥有 CPU 的, 所以比等待信号量唤醒的 Goroutine 更容易获取锁. 用官方话说就是，新请求锁的 Goroutine具有优势，它正在CPU上执行，而且可能有好几个，所以刚刚唤醒的 Goroutine 有很大可能在锁竞争中失败.</p>
+<p>于是如果一个 Goroutine 被唤醒过后, 仍然没有拿到锁, 那么该 Goroutine 会放在等待队列的最前面. 并且那些等待超过 1 ms 的 Goroutine 还没有获取到锁，该 Goroutine 就会进入饥饿状态。该 Goroutine 是饥饿状态并且 Mutex 是 Locked 状态时，才有可能给 Mutex 设置成饥饿状态.</p>
+<p>获取到锁的 Goroutine Unlock, 将 Mutex 的 Locked 状态解除, 发出来解锁信号, 等待的 Goroutine 开始竞争该信号. 如果发现当前 Mutex 是饥饿状态, 直接将唤醒信号发给第一个等待的 Goroutine</p>
+<p>这就是所谓的 Goroutine 排队</p>
+<h3 id="排队功能是如何实现的">排队功能是如何实现的</h3>
+<p>我们知道在正常状态下，所有等待锁的 Goroutine 按照 FIFO 顺序等待，在 Mutex 饥饿状态下，会直接把释放锁信号发给等待队列中的第一个Goroutine。排队功能主要是通过 runtime_SemacquireMutex, runtime_Semrelease 来实现的.</p>
+<p><strong>一、runtime_SemacquireMutex &ndash; 入队</strong></p>
+<p>当 Mutex 被其他 Goroutine 持有时，新来的 Goroutine 将会被 runtime_SemacquireMutex 阻塞。阻塞会分为2种情况:</p>
+<p><strong>Goroutine 第一次被阻塞：</strong></p>
+<p>当 Goroutine 第一次尝试获取锁时，由于当前锁可能不能被锁定，于是有可能进入下面逻辑</p>
+<pre><code class="language-go">queueLifo := waitStartTime != 0
+if waitStartTime == 0 {
+    waitStartTime = runtime_nanotime()
+}
+runtime_SemacquireMutex(&amp;m.sema, queueLifo, 1)
+</code></pre>
+<p>由于 waitStartTime 等于 0，runtime_SemacquireMutex 的 queueLifo 等于 false, 于是该 Goroutine 放入到队列的尾部。</p>
+<p><strong>Goroutine 被唤醒过，但是没加锁成功，再次被阻塞</strong></p>
+<p>由于 Goroutine 被唤醒过，waitStartTime 不等于 0，runtime_SemacquireMutex 的 queueLifo 等于 true, 于是该 Goroutine 放入到队列的头部。</p>
+<p><strong>二、runtime_Semrelease &ndash; 出队</strong></p>
+<p>当某个 Goroutine 释放锁时，调用 Unlock，这里同样存在两种情况：</p>
+<p><strong>当前 mutex 不是饥饿状态</strong></p>
+<pre><code class="language-go">if new&amp;mutexStarving == 0 {
+    old := new
+    for {
+        if old&gt;&gt;mutexWaiterShift == 0 || old&amp;(mutexLocked|mutexWoken|mutexStarving) != 0 {
+            return
+        }
+        // Grab the right to wake someone.
+        new = (old - 1&lt;&lt;mutexWaiterShift) | mutexWoken
+        if atomic.CompareAndSwapInt32(&amp;m.state, old, new) {
+            runtime_Semrelease(&amp;m.sema, false, 1)
+            return
+        }
+        old = m.state
+    }
+}
+</code></pre>
+<p>Unlock 时 Mutex 的 Locked 状态被去掉。当发现当前 Mutex 不是饥饿状态，设置 runtime_Semrelease 的 handoff 参数是 false, 于是唤醒其中一个 Goroutine。</p>
+<p><strong>当前 mutex 已经是饥饿状态</strong></p>
+<pre><code class="language-go">} else {
+    // Starving mode: handoff mutex ownership to the next waiter, and yield
+    // our time slice so that the next waiter can start to run immediately.
+    // Note: mutexLocked is not set, the waiter will set it after wakeup.
+    // But mutex is still considered locked if mutexStarving is set,
+    // so new coming goroutines won't acquire it.
+    runtime_Semrelease(&amp;m.sema, true, 1)
+}
+</code></pre>
+<p>同样 Unlock 时 Mutex 的 Locked 状态被去掉。由于当前 Mutex 是饥饿状态，于是设置 runtime_Semrelease 的 handoff 参数是 true, 于是让等待队列头部的第一个 Goroutine 获得锁。</p>
+<h3 id="goroutine-的排队-与-mutex-中记录的-waiters-之间的关系">Goroutine 的排队 与 mutex 中记录的 Waiters 之间的关系?</h3>
+<p>通过上面的分析，我们知道 Goroutine 的排队是通过 runtime_SemacquireMutex 来实现的。Mutex.state 记录了目前通过 runtime_SemacquireMutex 排队的 Goroutine 的数量</p>
+<h3 id="goroutine-的饥饿与-mutex-饥饿之间的关系">Goroutine 的饥饿与 Mutex 饥饿之间的关系？</h3>
+<p>Goroutine 的状态跟 Mutex 的是息息相关的。只有在 Goroutine 是饥饿状态下，才有可能给 Mutex 设置成饥饿状态。在 Mutex 是饥饿状态时，才有可能让饥饿的 Goroutine 优先获取到锁。不过需要注意的是，触发 Mutex 饥饿的 Goroutine 并不一定获取锁，有可能被其他的饥饿的 Goroutine 截胡。</p>
+<h3 id="goroutine-能够加锁成功的情况">Goroutine 能够加锁成功的情况</h3>
+<p>Mutex 没有被 Goroutine 占用 Mutex.state = 0, 这种情况下一定能获取到锁. 例如: 第一个 Goroutine 获取到锁
+还有一种情况 Goroutine有可能加锁成功:</p>
+<ol>
+<li>当前 Mutex 不是饥饿状态, 也不是 Locked 状态, 尝试 CAS 加锁时, Mutex 的值还没有被其他 Goroutine 改变, 当前 Goroutine 才能加锁成功.</li>
+<li>某个 Goroutine 刚好被唤醒后, 重新获取 Mutex, 这个时候 Mutex 处于饥饿状态. 因为这个时候只唤醒了饥饿的 Goroutine, 其他的 Goroutine 都在排队中, 没有其他 Goroutine 来竞争 Mutex, 所以能直接加锁成功</li>
+</ol>
+<h2 id="mutex-锁竞争的相关问题">Mutex 锁竞争的相关问题</h2>
+<h3 id="探测锁竞争">探测锁竞争</h3>
+<p>日常开发中锁竞争的问题还是能经常遇到的，我们如何去发现锁竞争呢？其实还是需要靠 pprof 来人肉来分析。</p>
+<p>《一次错误使用 go-cache 导致出现的线上问题》就是我真是遇到的一次线上问题，表象就是接口大量超时，打开pprof 发现大量 Goroutine 都集中 Lock 上。这个真实场景的具体的分析过程，有兴趣的可以阅读一下。
+<img src="https://images.haohongfan.com/go-cache.png" alt="mutex 竞争">
+简单总结一下：
+压测或者流量高的时候发现系统不正常，打开 pprof 发现 goroutine 指标在飙升，并且大量 Goroutine 都阻塞在 Mutex  的 Lock 上，这个基本就可以确定是锁竞争。</p>
+<p>pprof 里面是有个 pprof/mutex 指标，不过该指标默认是关闭的，而且并没有太多资料有介绍这个指标如何来分析 Mutex。有知道这个指标怎么用的大佬，欢迎留言。</p>
+<h3 id="mutex-锁的瓶颈">mutex 锁的瓶颈</h3>
+<p>现在模拟业务开发中的某接口，平均耗时 10 ms, 在 32C 物理机上压测。CentOS Linux release 7.3.1611 (Core),  go1.15.8 
+压测代码如下：</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;log&quot;
+	&quot;net/http&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
+
+	_ &quot;net/http/pprof&quot;
+)
+
+var mux sync.Mutex
+
+func testMutex(w http.ResponseWriter, r *http.Request) {
+	mux.Lock()
+	time.Sleep(10 * time.Millisecond)
+	mux.Unlock()
+}
+
+func main() {
+	go func() {
+		log.Println(http.ListenAndServe(&quot;:6060&quot;, nil))
+	}()
+
+	http.HandleFunc(&quot;/test/mutex&quot;, testMutex)
+	if err := http.ListenAndServe(&quot;:8000&quot;, nil); err != nil {
+		fmt.Println(&quot;start http server fail:&quot;, err)
+	}
+}
+</code></pre>
+<p><img src="https://images.haohongfan.com/yaceresult.png" alt="moni_mutex.png"></p>
+<p><img src="https://images.haohongfan.com/moni_mutex.png" alt="yaceresult.png"></p>
+<p>这个例子写的比较极端了，全局共享一个 Mutex。经过压测发现在 100 qps 时，Mutex 没啥竞争，在 150 QPS 时竞争就开始变的激烈了。</p>
+<p>当然我们写业务代码并不会这么写，但是可以通过这个例子发现 Mutex 在 QPS 很低的时候，锁竞争就会很激烈。需要说明的一点：这个压测数值没啥具体的意义，不同的机器上表现肯定还会不一样。</p>
+<p>这个例子告诉我们几点：</p>
+<ol>
+<li>写业务时不能全局使用同一个 Mutex</li>
+<li>尽量避免使用 Mutex，如果非使用不可，尽量多声明一些 Mutex，采用取模分片的方式去使用其中一个 Mutex</li>
+</ol>
+<h2 id="日常使用注意点">日常使用注意点</h2>
+<h3 id="1-lockunlock-成对出现">1. Lock/Unlock 成对出现</h3>
+<p>我们日常开发中使用 Mutex 一定要记得：先 Lock 再 Unlock。</p>
+<p>特别要注意的是：没有 Lock 就去 Unlock。当然这个 case 一般情况下我们都不会这么写。不过有些变种的写法我们要尤其注意，例如</p>
+<pre><code class="language-go">var mu sync.Mutex
+
+func release() {
+	mu.Lock()
+    fmt.Println(&quot;lock1 success&quot;)
+	time.Sleep(10 * time.Second)
+
+	mu.Lock()
+	fmt.Println(&quot;lock2 success&quot;)
+}
+
+func main() {
+	go release()
+
+	time.Sleep(time.Second)
+	mu.Unlock()
+	fmt.Println(&quot;unlock success&quot;)
+	for {}
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-go">release lock1 success
+main unlock success
+release lock2 success
+</code></pre>
+<p>我们看到 release goroutine 的锁竟然被 main goroutine 给释放了，同时 release goroutine 又能重新获取到锁。</p>
+<p>这段代码可能你想不到有啥问题，其实这个问题蛮严重的，想象一下你的代码中，本来是要加锁给用户加积分的，但是竟然被别的 goroutine 给解锁了，导致积分没有增加成功，同时解锁的时候还别的 Goroutine 的锁给 Unlock 了，互相加锁解锁，导致莫名其妙的问题。</p>
+<p>所以一般情况下，要在本 Goroutine 中完成 Mutex 的 Lock&amp;Unlock，千万不要将要加锁和解锁分到两个 Goroutine 中进行。如果你确实需要这么做，请抽支烟冷静一下，你真的是否需要这么做。</p>
+<h3 id="2-mutex-千万不能被复制">2. Mutex 千万不能被复制</h3>
+<p>我之前发过的《当 Go struct 遇上 Mutex》里面详细分析了不能被复制的原因，以及如何 Mutex 的最佳使用方式，建议没看过的同学去看一遍。我们还是举个例子说下为啥不能被复制，以及如何用源码进行分析</p>
+<pre><code class="language-go">type Person struct {
+	mux sync.Mutex
+}
+
+func Reduce(p1 Person) {
+	fmt.Println(&quot;step...&quot;, )
+	p1.mux.Lock()
+	fmt.Println(p1)
+	defer p1.mux.Unlock()
+	fmt.Println(&quot;over...&quot;)
+}
+
+func main() {
+	var p Person
+	p.mux.Lock()
+	go Reduce(p)
+	p.mux.Unlock()
+	fmt.Println(111)
+	for {}
+}
+</code></pre>
+<p>问题分析：</p>
+<ol>
+<li>main Goroutine 已经给 p.mux 加了锁 , 这个时候 p.mux  的 state 的值是 mutexLocked。</li>
+<li>然后将 p.mux 复制给了 Reduce Goroutine。这个时候被复制的 p1.mux 的 state 的值也是 mutexLocked。</li>
+<li>main Goroutine 虽然已经解锁了, 但是 Reduce Goroutine 跟 main Goroutine 的 mutex 已经不是同一个 mutex 了, 所以 Reduce Goroutine 就会加锁失败, 产生死锁，关键是编译器还发现不了这个 Deadlock.</li>
+</ol>
+<p>关于为什么编译器不能发现这个死锁，可以看我的博客《一次 Golang Deadlock 的讨论》</p>
+<p>至此 Go Mutex 的源码剖析全部完毕了，有什么想跟我交流的可以再评论区留言。</p>
+<p><img src="https://images.haohongfan.com/hhf11.png" alt="gzh"></p>
+
+                    </div>
+                    
+                    <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+                    
+                    
+                    <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/hhf11.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+                    
+
+                    
+
+
+
+                    
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="block">Cond</a>
+        
+    </div>
+</div>
+
+                    
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+                </div>
+                
+                <div class="hidden lg:block lg:w-1/4">
+                    
+                    <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-secondary-bg pt-16 -mt-16 ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6  pt-10 -mt-10 border-l ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#源码分析">源码分析</a>
+      <ul>
+        <li><a href="#lock">Lock</a></li>
+        <li><a href="#unlock">Unlock</a></li>
+      </ul>
+    </li>
+    <li><a href="#一些例子">一些例子</a>
+      <ul>
+        <li><a href="#什么是-goroutine-排队">什么是 Goroutine 排队?</a></li>
+        <li><a href="#排队功能是如何实现的">排队功能是如何实现的</a></li>
+        <li><a href="#goroutine-的排队-与-mutex-中记录的-waiters-之间的关系">Goroutine 的排队 与 mutex 中记录的 Waiters 之间的关系?</a></li>
+        <li><a href="#goroutine-的饥饿与-mutex-饥饿之间的关系">Goroutine 的饥饿与 Mutex 饥饿之间的关系？</a></li>
+        <li><a href="#goroutine-能够加锁成功的情况">Goroutine 能够加锁成功的情况</a></li>
+      </ul>
+    </li>
+    <li><a href="#mutex-锁竞争的相关问题">Mutex 锁竞争的相关问题</a>
+      <ul>
+        <li><a href="#探测锁竞争">探测锁竞争</a></li>
+        <li><a href="#mutex-锁的瓶颈">mutex 锁的瓶颈</a></li>
+      </ul>
+    </li>
+    <li><a href="#日常使用注意点">日常使用注意点</a>
+      <ul>
+        <li><a href="#1-lockunlock-成对出现">1. Lock/Unlock 成对出现</a></li>
+        <li><a href="#2-mutex-千万不能被复制">2. Mutex 千万不能被复制</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+                    
+                </div>
+                
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        hljs.initHighlightingOnLoad();
+        changeSidebarHeight();
+        switchDocToc();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

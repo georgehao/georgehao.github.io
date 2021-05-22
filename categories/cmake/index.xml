@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cmake on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/categories/cmake/</link>
+    <description>Recent content in cmake on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Fri, 25 Aug 2017 11:56:24 +0000</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/cmake/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LD_LIBRARY_PATH与-L的关系以及延伸</title>
+      <link>https://www.haohongfan.com/posts/2017-08-25-ld_library_path/</link>
+      <pubDate>Fri, 25 Aug 2017 11:56:24 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2017-08-25-ld_library_path/</guid>
+      <description>最近跟同学讨论c++在编译时g++ -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。 我遇到的问题： g++ multiple.cpp -L/usr/local/lib -lboost_program_options编译完后，ldd ./a.out发现libboost_program_options.</description>
+    </item>
+    
+    <item>
+      <title>有关LD_LIBRARY_PATH与ld.so.conf</title>
+      <link>https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/</link>
+      <pubDate>Fri, 25 Aug 2017 11:55:53 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/</guid>
+      <description>我之前写过一篇关于LD_LIBRARY_PATH与gcc/g++ -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了&amp;mdash;ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时</description>
+    </item>
+    
+  </channel>
+</rss>

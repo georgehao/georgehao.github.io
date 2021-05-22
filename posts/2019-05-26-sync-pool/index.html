@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>我所理解的Sync Pool | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="看gin源码时发现了sync.Pool的使用 // gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"我所理解的Sync Pool",
+      "item":"https://www.haohongfan.com/posts/2019-05-26-sync-pool/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-05-26-sync-pool/"
+    },
+    "headline": "我所理解的Sync Pool | HHFCodeRv","datePublished": "2019-06-08T22:22:15+08:00",
+    "dateModified": "2019-06-08T22:22:15+08:00",
+    "wordCount":  1677 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "看gin源码时发现了sync.Pool的使用 \/\/ gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } \/\/ gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度"
+}
+</script><meta property="og:title" content="我所理解的Sync Pool | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+
+
+
+<meta property="og:description" content="看gin源码时发现了sync.Pool的使用 // gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-06-08T22:22:15&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-06-08T22:22:15&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-03-04-gin-04/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-01-21-gin-03/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-02-18-gin-02/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-02-17-gin-01/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">我所理解的Sync Pool</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-06-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>看gin源码时发现了<code>sync.Pool</code>的使用</p>
+<pre><code class="language-go">// gin.go:L144
+func New() *Engine {
+	...
+
+	engine.pool.New = func() interface{} {
+		return engine.allocateContext()
+	}
+	return engine
+}
+
+// gin.go: L346
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	c := engine.pool.Get().(*Context)
+	c.writermem.reset(w)
+	c.Request = req
+	c.reset()
+
+	engine.handleHTTPRequest(c)
+
+	engine.pool.Put(c)
+}
+</code></pre>
+<p>那个时候其实不太明白这个<code>Pool</code>是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下<code>sync.Pool</code>具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了</p>
+<p>因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度相关的知识. 要是不明白Golang是如何调度的, 基本是看不懂Pool的源码的(虽说它只有短短的259行代码, 文件路径: SDK/src/sync/pool.go). 这里推荐Go调度器系列<a href="http://lessisbetter.site/2019/03/10/golang-scheduler-1-history/">系列文章</a></p>
+<p><strong>后面我就去看看别人是怎么理解和使用Pool的</strong>, 我就搜到了这么一篇文章 <a href="https://blog.csdn.net/yongjian_lian/article/details/42058893">go语言的官方包sync.Pool的实现原理和适用场景</a>里面有这么一个例子</p>
+<pre><code class="language-go">package main
+
+import(
+    &quot;fmt&quot;
+    &quot;sync&quot;
+)
+
+func main() {
+    p := &amp;sync.Pool{
+        New: func() interface{} {
+            return 0
+        },
+    }
+
+    a := p.Get().(int)
+    p.Put(1)
+    b := p.Get().(int)
+    fmt.Println(a, b)
+}
+</code></pre>
+<p>以及Golang中国论坛上一个人的<a href="https://golangtc.com/t/57e50b93b09ecc163500022d">提问</a>, 我不禁陷入了深深的疑问, 这个Golang的Pool到底是用来做什么的?</p>
+<p>我疑问的地方:</p>
+<ol>
+<li>sync.Pool的运用场景是什么, 哪些地方能用到Pool, 哪些地方不能用?</li>
+<li>为啥CSDN上先Put后Get, 就能拿到1; 而Golang中国上那个提问, 为啥得到的顺序就不确定了?</li>
+</ol>
+<p>我后面想了很久, 以及再回头去看<code>gin</code>, <code>logrus</code>的源码, 我才想明白: 这两个例子都是&quot;坑货&quot;. 这两个例子都是sync.Pool使用的反面例子, 都是不正确的用法. 其实这些在源码的注释中, 都是由明确说明的, 只是当时没能理解. <code>Callers should not assume any relation between values passed to Put and the values returned by Get</code>. 简单来说: 就是<code>Get</code>和<code>Put</code>没有任何关系, 我们用Pool的时候, 要时刻记得这个.</p>
+<p>因此, 我的<code>疑问2</code>就迎刃而解了, 其实就是这个一直困惑着我</p>
+<p>关于<code>疑问1</code>就更简单了</p>
+<pre><code>// Pool's purpose is to cache allocated but unused items for later reuse,
+// relieving pressure on the garbage collector. That is, it makes it easy to
+// build efficient, thread-safe free lists. However, it is not suitable for all
+// free lists.
+</code></pre>
+<p>简单来说, Pool就是为了减少GC压力的, 重复利用内存. 千万不能把他当成内存池使用</p>
+<p>其实Pool的用法很简单, 就是先<code>Get</code>, 用完之后<code>Put</code>, 如<code>gin</code>的使用.</p>
+<p>再比如<code>logrus</code>的用法</p>
+<pre><code class="language-go">func (logger *Logger) Println(args ...interface{}) {
+	entry := logger.newEntry()
+	entry.Println(args...)
+	logger.releaseEntry(entry)
+}
+
+func (logger *Logger) newEntry() *Entry {
+	entry, ok := logger.entryPool.Get().(*Entry)
+	if ok {
+		return entry
+	}
+	return NewEntry(logger)
+}
+
+func (logger *Logger) releaseEntry(entry *Entry) {
+	entry.Data = map[string]interface{}{}
+	logger.entryPool.Put(entry)
+}
+</code></pre>
+<p>所以别被别的池子带跑了, golang里的sync.Pool就是GC优化的, 用法很简单</p>
+<p>在<a href="https://gocn.vip/question/3415">gocn</a>有这么一个问题: <code>想在pool的基础上做一个限制池中对象数量的功能, 发现还是多次执行pool.New. 期望是只执行一次NewBuffer，也就是只打印一次alloc。 实际上每次执行，会打印多次alloc</code></p>
+<pre><code class="language-go">const MaxFrameSize = 5000
+
+func main() {
+    for i := 0; i &lt; 10; i++ {
+        // 多个协程想从pool中拿到对象
+        go func() {
+            c := getBuf()
+            putBuf(c)
+            log.Println(&quot;put done&quot;)
+        }()
+    }
+
+    time.Sleep(3 * time.Second)
+}
+
+var bufPool = sync.Pool{
+    New: func() interface{} {
+        log.Println(&quot;alloc&quot;)
+        return bytes.NewBuffer(make([]byte, 0, MaxFrameSize))
+    },
+}
+
+var bufPoolChan = make(chan bool, 1)
+
+func getBuf() *bytes.Buffer {
+    bufPoolChan &lt;- true
+    b := bufPool.Get().(*bytes.Buffer)
+    b.Reset()
+    return b
+}
+
+func putBuf(b *bytes.Buffer) {
+    bufPool.Put(b)
+    &lt;-bufPoolChan
+}
+</code></pre>
+<p>大神解答:</p>
+<blockquote>
+<p>sync.Pool的源代码里说了，pool里的对象随时都有可能被自动移除，并且没有任何通知。sync.Pool的数量是不可控制的。</p>
+</blockquote>
+<blockquote>
+<p>Pool调用New与线程调度有关，Pool内部有一个localPool的数组，每个P对应其中一个localPool，在当前P执行goroutine的时候，优先从当前的localPool的private变量取，娶不到在从shared列表里面取，再取不到就尝试从别的P的localPool的shared里面偷一个。最后实在取不到就New一个。</p>
+</blockquote>
+<blockquote>
+<p>由于你的bufPoolChan限制基本上10个goroutine就在两个P后面排队轮流执行，所以alloc就会出现两次，后面的基本就是从这两个localPool的private取出来的。</p>
+</blockquote>
+<blockquote>
+<p>如果取消这个限制，10个goroutine很快就被分配到10个P上去了，对应就有10个localPool，10次每次取private都取不到，取shared列表也取不到，别的localPool也没得偷，就会New10次，alloc就会出现10次。</p>
+</blockquote>
+<p>其他高级用法, 后面再补充</p>
+<p>参考文章</p>
+<p><a href="https://segmentfault.com/a/1190000004046212">[译] CockroachDB GC优化总结</a>
+<a href="https://blog.cyeam.com/golang/2017/02/08/go-optimize-slice-pool">Golang 优化之路——临时对象池</a>
+<a href="https://blog.yuantops.com/tech/sync-pool-benchmark/">用Benchmark验证sync.Pool对GC latency的优化效果</a>
+<a href="https://www.flysnow.org/2017/05/01/go-in-action-go-pool.html">Go语言实战笔记（十六）| Go 并发示例-Pool</a>
+<a href="https://godoc.org/sync#Pool">Pool</a></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" class="block">一次golang deadlock的讨论</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" class="block">[每日一译]golang range与iteration之间的关系</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/">gin源码阅读之四 -- gin的路由算法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-01-21-gin-03/">gin源码阅读之三 -- gin牛逼的context</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-02-18-gin-02/">gin源码阅读之二 -- 揭开gin的神秘面纱</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-02-17-gin-01/">gin源码阅读之一 -- net/http的大概流程</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/">[每日一译] Tags in Golang</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

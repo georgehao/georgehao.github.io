@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mongodb on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/mongodb/</link>
+    <description>Recent content in mongodb on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Sun, 30 Sep 2018 20:47:53 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/mongodb/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MongoDB 数据重复的处理方法</title>
+      <link>https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/</link>
+      <pubDate>Sun, 30 Sep 2018 20:47:53 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/</guid>
+      <description>背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B</description>
+    </item>
+    
+    <item>
+      <title>Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</title>
+      <link>https://www.haohongfan.com/posts/2018-06-13-compose-transporter/</link>
+      <pubDate>Wed, 13 Jun 2018 21:59:26 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2018-06-13-compose-transporter/</guid>
+      <description>工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans</description>
+    </item>
+    
+    <item>
+      <title>mongodb联表查询</title>
+      <link>https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/</link>
+      <pubDate>Sat, 17 Jun 2017 14:36:31 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/</guid>
+      <description>picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的</description>
+    </item>
+    
+  </channel>
+</rss>

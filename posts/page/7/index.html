@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Eureka is a elegant and powerful theme for Hugo.">
+
+
+
+
+<script type="application/ld+json">
+{
+    "@context":"https://schema.org",
+    "@type":"ItemList",
+    "itemListElement":[{
+            "@type":"ListItem",
+            "position":  1 ,
+            "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+            "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans",
+            "url": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
+            "name": "go 跨平台编译",
+            "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
+            "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
+            "name": "Golang interface入门",
+            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
+            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "Golang指针vs值",
+            "description": "Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(\u0026quot;%p\\n\u0026quot;, \u0026amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(\u0026quot;%p\u0026quot;, \u0026amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解",
+            "url": "https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"
+        },{
+            "@type":"ListItem",
+            "position":  5 ,
+            "name": "Golang命名规范",
+            "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https://studygolang.com/articles/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包",
+            "url": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
+        }
+    ]
+}
+</script><meta property="og:title" content="HHFCodeRv" />
+<meta property="og:type" content="website" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/" />
+
+
+
+
+
+<meta property="og:description" content="Eureka is a elegant and powerful theme for Hugo." />
+
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="og:updated_time" content="2021-01-23T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<link rel="alternate" type="application/rss+xml" href="https://www.haohongfan.com/posts/index.xml" title="HHFCodeRv" />
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+<article class="mx-6 my-8">
+    <h1 class="font-bold text-3xl text-primary-text">Posts</h1>
+    
+</article>
+<div class="bg-secondary-bg rounded px-6">
+    <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" class="font-bold text-xl hover:text-eureka">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</a>
+</div>
+<div class="content">
+  工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-06-13</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
+</div>
+<div class="content">
+  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &amp;gt;= 1.5 ppc64, ppc64le version &amp;gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &amp;gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &amp;gt;= 1.6 s390x (IBM System z) version &amp;gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-05-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
+</div>
+<div class="content">
+  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&amp;quot;hello&amp;quot;} i.M() } Interface本质 inter
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-04-15</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
+</div>
+<div class="content">
+  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&amp;quot;%p\n&amp;quot;, &amp;amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&amp;quot;%p&amp;quot;, &amp;amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-03-24</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
+</div>
+<div class="content">
+  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&amp;lt;a href=&amp;quot;https://studygolang.com/articles/8542&amp;quot;&amp;gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-01-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+</div>
+
+
+</div>
+
+<ul class="pagination">
+  <li class="page-item">
+    <a href="/posts/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/posts/page/6/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/">1</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/2/">2</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/3/">3</a>
+  </li>
+  <li class="page-item disabled">
+    <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/6/">6</a>
+  </li>
+  <li class="page-item active">
+    <a class="page-link" href="/posts/page/7/">7</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/8/">8</a>
+  </li>
+  <li class="page-item disabled">
+    <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/10/">10</a>
+  </li>
+  <li class="page-item">
+    <a href="/posts/page/8/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/posts/page/10/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+  </li>
+</ul>
+
+
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

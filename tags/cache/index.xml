@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cache on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/cache/</link>
+    <description>Recent content in cache on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Wed, 11 Mar 2020 16:30:35 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/cache/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一次错误使用 go-cache 导致出现的线上问题</title>
+      <link>https://www.haohongfan.com/posts/2020-03-11-go-cache/</link>
+      <pubDate>Wed, 11 Mar 2020 16:30:35 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-03-11-go-cache/</guid>
+      <description>话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说</description>
+    </item>
+    
+  </channel>
+</rss>

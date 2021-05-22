@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/golang/</link>
+    <description>Recent content in golang on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Sat, 22 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mutex</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/</guid>
+      <description>Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争</description>
+    </item>
+    
+    <item>
+      <title>Cond</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/</guid>
+      <description>hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &amp;quot;fmt&amp;quot; &amp;quot;time&amp;quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &amp;lt;- 1 }() fmt.Println(&amp;quot;waiting&amp;quot;) &amp;lt;-done fmt.Println(&amp;quot;done&amp;quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &amp;quot;fmt&amp;quot; &amp;quot;sync&amp;quot; &amp;quot;time&amp;quot; ) func main() { cond := sync.NewCond(&amp;amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag</description>
+    </item>
+    
+    <item>
+      <title>WaitGroup</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/</guid>
+      <description>hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为</description>
+    </item>
+    
+    <item>
+      <title>sync.Map</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/</guid>
+      <description>hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完</description>
+    </item>
+    
+    <item>
+      <title>sync.Pool</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/</guid>
+      <description>hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个</description>
+    </item>
+    
+    <item>
+      <title>Go 源码分析与实战</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/</link>
+      <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/</guid>
+      <description>Go 源码分析，项目实战系列教程，这个系列教程还在更新中，可以关注公众号：HHFCodeRv 第一时间阅读最新章节（公众号二维码在文末）。 当前内容基于 Go 源码 1.16.2 这个系列文章的目标 Go 业务开发中你是否遇到过这些问题？ 程序出现问题时，定位到某个关键字，才恍然大悟：哦，原来是这么用的！ 看别人代码，看到某段代码时，顿时愣住：这么写是为啥？ 同事间讨论问题，说到某个知识</description>
+    </item>
+    
+    <item>
+      <title>并发原语</title>
+      <link>https://www.haohongfan.com/docs/gohandbook/sync-chapter/</link>
+      <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/docs/gohandbook/sync-chapter/</guid>
+      <description>本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool</description>
+    </item>
+    
+    <item>
+      <title>你真的懂 golang reslice 吗</title>
+      <link>https://www.haohongfan.com/posts/2020-10-20-golang-slice/</link>
+      <pubDate>Tue, 20 Oct 2020 10:17:05 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-10-20-golang-slice/</guid>
+      <description>package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(&amp;quot;a[1:]&amp;quot;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体</description>
+    </item>
+    
+    <item>
+      <title>限流器系列(3)--自适应限流</title>
+      <link>https://www.haohongfan.com/posts/2020-07-05-bbr/</link>
+      <pubDate>Sun, 23 Aug 2020 11:59:45 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-07-05-bbr/</guid>
+      <description>漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找</description>
+    </item>
+    
+    <item>
+      <title>限流器系列(2) -- Token Bucket 令牌桶</title>
+      <link>https://www.haohongfan.com/posts/2020-06-30-token-bucket/</link>
+      <pubDate>Tue, 30 Jun 2020 18:38:23 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-06-30-token-bucket/</guid>
+      <description>上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket &amp;ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器</description>
+    </item>
+    
+    <item>
+      <title>限流器系列(1) -- Leaky Bucket 漏斗桶</title>
+      <link>https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/</link>
+      <pubDate>Sat, 27 Jun 2020 10:14:07 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/</guid>
+      <description>限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check</description>
+    </item>
+    
+    <item>
+      <title>Bilibili Kratos 框架源码分析(4) -- Kratos Log</title>
+      <link>https://www.haohongfan.com/posts/2020-06-09-kratos-log/</link>
+      <pubDate>Tue, 09 Jun 2020 10:14:07 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-06-09-kratos-log/</guid>
+      <description>用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &amp;quot;xxx-service&amp;quot; dir = &amp;quot;/data/log/xxx-service/&amp;quot; stdout = true v = 3 filter = [&amp;quot;fileld1&amp;quot;, &amp;quot;field2&amp;quot;] [log.module] &amp;quot;dao_user&amp;quot; = 2 &amp;quot;servic*&amp;quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var</description>
+    </item>
+    
+    <item>
+      <title>Bilibili Kratos 框架源码分析(3) -- fanout异步</title>
+      <link>https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/</link>
+      <pubDate>Fri, 22 May 2020 10:14:07 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/</guid>
+      <description>在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = &amp;amp;dao{ ... cache: fanout.New(&amp;quot;cache&amp;quot;), ... } cf = d.Close return }</description>
+    </item>
+    
+    <item>
+      <title>Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</title>
+      <link>https://www.haohongfan.com/posts/2020-05-16-kratos-demo/</link>
+      <pubDate>Sat, 16 May 2020 10:14:07 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-05-16-kratos-demo/</guid>
+      <description>本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&amp;quot;/kratos-demo&amp;quot;) { g.GET(&amp;quot;/start&amp;quot;, howToStart) g.GET(&amp;quot;/sayHi&amp;quot;, sayHi) g.GET(&amp;quot;/sayHello&amp;quot;, func(context *bm.Context) { svc.SayHello(context, &amp;amp;pb.HelloReq{ Name: &amp;quot;test&amp;quot;, }) context.JSON(&amp;quot;success&amp;quot;, nil) }) } v2Group := e.Group(&amp;quot;/kratos-demo/v2&amp;quot;) { v2Group.GET(&amp;quot;/sayHi&amp;quot;, sayHi) }</description>
+    </item>
+    
+    <item>
+      <title>Bilibili Kratos 框架源码分析(1) -- 启动流程</title>
+      <link>https://www.haohongfan.com/posts/2020-05-08-kratos-flow/</link>
+      <pubDate>Fri, 08 May 2020 14:42:38 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-05-08-kratos-flow/</guid>
+      <description>这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;amp;&amp;amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,</description>
+    </item>
+    
+    <item>
+      <title>一次错误使用 go-cache 导致出现的线上问题</title>
+      <link>https://www.haohongfan.com/posts/2020-03-11-go-cache/</link>
+      <pubDate>Wed, 11 Mar 2020 16:30:35 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2020-03-11-go-cache/</guid>
+      <description>话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说</description>
+    </item>
+    
+    <item>
+      <title>打造 Zap 开箱即用日志组件</title>
+      <link>https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/</link>
+      <pubDate>Sun, 15 Dec 2019 22:49:01 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/</guid>
+      <description>logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap</description>
+    </item>
+    
+    <item>
+      <title>Logrus源码阅读(2)--logrus生命周期</title>
+      <link>https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/</link>
+      <pubDate>Sat, 05 Oct 2019 11:21:24 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Golang是否真的没有指针运算?</title>
+      <link>https://www.haohongfan.com/posts/2019-07-22-golang-pointer/</link>
+      <pubDate>Mon, 22 Jul 2019 11:48:24 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-07-22-golang-pointer/</guid>
+      <description>答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := &amp;amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&amp;quot;p1: &amp;quot;, *p1) // 1 fmt.Printf(&amp;quot;p1 address:%p\n&amp;quot;, p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题) #include&amp;lt;stdio.h&amp;gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;amp;a+1); printf(&amp;quot;%d,%d&amp;quot;,*(a+1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量</description>
+    </item>
+    
+    <item>
+      <title>Logrus源码阅读(1)--基本用法</title>
+      <link>https://www.haohongfan.com/posts/2019-06-11-logurs-1/</link>
+      <pubDate>Tue, 16 Jul 2019 20:06:27 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-06-11-logurs-1/</guid>
+      <description>选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&amp;ldquo;hello logrus&amp;rdquo;) logrus.WithField(logruns.Fields{&amp;ldquo;key1&amp;rdquo;:&amp;ldquo;v1&amp;rdquo;}).Info(&amp;ldquo;hello logrus&amp;rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p</description>
+    </item>
+    
+    <item>
+      <title>一次golang deadlock的讨论</title>
+      <link>https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/</link>
+      <pubDate>Thu, 11 Jul 2019 10:44:07 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/</guid>
+      <description>背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果 // 程序1 func main() { fmt.Println(&amp;quot;running, not deadlock&amp;quot;) server, err := net.Listen(&amp;quot;tcp&amp;quot;, &amp;quot;127.0.0.1:9001&amp;quot;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(&amp;quot;server&amp;quot;) } fmt.Printf(&amp;quot;Received connection from %s.\n&amp;quot;, connection.RemoteAddr()) waitQueue &amp;lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue &amp;lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误 如下面这个例子 // 程序</description>
+    </item>
+    
+    <item>
+      <title>我所理解的Sync Pool</title>
+      <link>https://www.haohongfan.com/posts/2019-05-26-sync-pool/</link>
+      <pubDate>Sat, 08 Jun 2019 22:22:15 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-05-26-sync-pool/</guid>
+      <description>看gin源码时发现了sync.Pool的使用 // gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度</description>
+    </item>
+    
+    <item>
+      <title>[每日一译]golang range与iteration之间的关系</title>
+      <link>https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/</link>
+      <pubDate>Tue, 04 Jun 2019 11:11:54 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/</guid>
+      <description>原文地址 package main import ( &amp;quot;fmt&amp;quot; ) type T struct { id int } func main() { t1 := T{id: 1} t2 := T{id: 2} ts1 := []T{t1, t2} ts2 := []*T{} for _, t := range ts1 { ts2 = append(ts2, &amp;amp;t) } for _, t := range ts2 { fmt.Println((*t).id) } } 先不要看结果, 自己想想输出是什么? 对于很多人(包括我自己), 结果可能会让人感到惊讶 2 2 我个人期待的结果, 但是这是一个错误结果 1 2 迭代变量t使用短变量声明的方式声明, 它的声明周期就是for代码块. 这个变量在第一次循环时是第一个元素的值, 在</description>
+    </item>
+    
+    <item>
+      <title>[每日一译] Tags in Golang</title>
+      <link>https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/</link>
+      <pubDate>Mon, 03 Jun 2019 22:22:15 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/</guid>
+      <description>原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require</description>
+    </item>
+    
+  </channel>
+</rss>

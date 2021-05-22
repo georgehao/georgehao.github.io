@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>sync.Pool | Go 源码分析与实战 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Docs",
+      "item":"https://www.haohongfan.com/docs/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Go 源码分析与实战",
+      "item":"https://www.haohongfan.com/docs/gohandbook/"},{
+      "@type": "ListItem",
+      "position": 3 ,
+      "name":"并发原语",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
+      "@type": "ListItem",
+      "position": 4 ,
+      "name":"sync.Pool",
+      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/"
+    },
+    "headline": "sync.Pool | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "dateModified": "2021-04-01T09:57:16+08:00",
+    "wordCount":  2137 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个"
+}
+</script><meta property="og:title" content="sync.Pool | Go 源码分析与实战 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" />
+
+
+
+
+<meta property="og:description" content="hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="docs" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="lg:pt-12">
+    <div class="flex flex-col md:flex-row bg-secondary-bg rounded">
+        <div class="md:w-1/4 lg:w-1/5 border-r">
+            <div class="sticky top-16 pt-6">
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="sidebar-title" class="md:hidden mx-4 px-2 pt-4 pb-2 md:border-b text-tertiary-text md:text-primary-text">
+    <span class="font-semibold">目录</span>
+    <i class="fas fa-caret-right ml-1"></i>
+</div>
+
+<div id="sidebar-toc"
+    class="hidden md:block overflow-y-auto mx-6 md:mx-0 pr-6 pt-2 md:max-h-doc-sidebar bg-primary-bg md:bg-transparent">
+    <div class="flex flex-wrap ml-4 -mr-2 p-2 bg-secondary-bg md:bg-primary-bg rounded">
+        <a class=" hover:text-eureka"
+            href="https://www.haohongfan.com/docs/gohandbook/">Go 源码分析与实战</a>
+        
+        
+        
+
+
+    </div>
+    
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class=" pb-2 ">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/">并发原语</a>
+        </div>
+        
+        
+<ul class="pl-6">
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">Mutex</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">Cond</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">WaitGroup</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
+        </div>
+        
+    </li>
+    
+    
+    
+    
+    <li class="py-2">
+        <div class="">
+            <a class=" text-eureka  hover:text-eureka"
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">sync.Pool</a>
+        </div>
+        
+    </li>
+    
+    
+</ul>
+
+        
+    </li>
+    
+    
+</ul>
+
+</div>
+
+
+
+
+
+
+
+            </div>
+
+        </div>
+        <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
+            <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
+                <h1 class="font-bold text-3xl text-primary-text">sync.Pool</h1>
+                <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+            </div>
+            <div class="flex">
+                <div class="w-full lg:w-3/4 px-6">
+                    
+                    
+                    <div class="content">
+                        <p>hi, 大家好，我是 haohongfan。</p>
+<p>sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。</p>
+<p>尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个清晰的认知。</p>
+<h2 id="使用方式">使用方式</h2>
+<p>sync.Pool 使用很简单，但是想用对却很麻烦，因为你有可能看到网上一堆错误的示例，各位同学在搜索 sync.Pool 的使用例子时，要特别注意。</p>
+<p>sync.Pool 是一个内存池。通常内存池是用来防止内存泄露的（例如C/C++)。sync.Pool 这个内存池却不是干这个的，带 GC 功能的语言都存在垃圾回收 STW 问题，需要回收的内存块越多，STW 持续时间就越长。如果能让 new 出来的变量，一直不被回收，得到重复利用，是不是就减轻了 GC 的压力。</p>
+<p>正确的使用示例（下面的demo选自gin）</p>
+<pre><code class="language-go">func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	c := engine.pool.Get().(*Context)
+	c.writermem.reset(w)
+	c.Request = req
+	c.reset()
+	engine.handleHTTPRequest(c)
+	engine.pool.Put(c)
+}
+</code></pre>
+<p>一定要注意的是：是先 Get 获取内存空间，基于这个内存做相关的处理，然后再将这个内存还回（Put）到 sync.Pool。</p>
+<h3 id="pool-结构">Pool 结构</h3>
+<p><img src="https://images.haohongfan.com/sync_pool_all1.png" alt="sync.Pool 全景图"></p>
+<h2 id="源码图解">源码图解</h2>
+<p><img src="https://images.haohongfan.com/sync_pool_get1.png" alt="sync_pool_get1.png"></p>
+<p><img src="https://images.haohongfan.com/sync_pool_put1.png" alt="sync_pool_put1.png"></p>
+<p>简单点可以总结成下面的流程：</p>
+<p><img src="https://images.haohongfan.com/sync_pool_get_flow2.png" alt="sync_pool_get_flow2.png"></p>
+<p><img src="https://images.haohongfan.com/sync_pool_put_flow.png" alt="sync_pool_put_flow2.png"></p>
+<p><img src="https://images.haohongfan.com/sync_pool_gc2.png" alt="sync_pool_gc1.png"></p>
+<h2 id="syncpool-梳理">Sync.Pool 梳理</h2>
+<h3 id="pool-的内容会清理清理会造成数据丢失吗">Pool 的内容会清理？清理会造成数据丢失吗？</h3>
+<p>Go 会在每个 GC 周期内定期清理 sync.Pool 内的数据。</p>
+<p>要分几个方面来说这个问题。</p>
+<ol>
+<li>已经从 sync.Pool Get 的值，在 poolClean 时虽说将 pool.local 置成了nil，Get 到的值依然是有效的，是被 GC 标记为黑色的，不会被 GC回收，当 Put 后又重新加入到 sync.Pool 中</li>
+<li>在第一个 GC 周期内 Put 到 sync.Pool 的数值，在第二个 GC 周期没有被 Get 使用，就会被放在 local.victim 中。如果在 第三个 GC 周期仍然没有被使用就会被 GC 回收。</li>
+</ol>
+<h3 id="runtimegomaxprocs-与-pool-之间的关系">runtime.GOMAXPROCS 与 pool 之间的关系？</h3>
+<pre><code class="language-go">s := p.localSize
+l := p.local
+if uintptr(pid) &lt; s {
+    return indexLocal(l, pid), pid
+}
+
+if p.local == nil {
+    allPools = append(allPools, p)
+}
+// If GOMAXPROCS changes between GCs, we re-allocate the array and lose the old one.
+size := runtime.GOMAXPROCS(0)
+local := make([]poolLocal, size)
+atomic.StorePointer(&amp;p.local, unsafe.Pointer(&amp;local[0])) // store-release
+runtime_StoreReluintptr(&amp;p.localSize, uintptr(size))     // store-release
+</code></pre>
+<p>runtime.GOMAXPROCS(0) 是获取当前最大的 p 的数量。sync.Pool 的 poolLocal 数量受 p 的数量影响，会开辟 runtime.GOMAXPROCS(0) 个 poolLocal。某些场景下我们会使用 runtime.GOMAXPROCS（N) 来改变 p 的数量，会使 sync.Pool 的 pool.poolLocal 释放重新开辟新的空间。</p>
+<p>为什么要开辟 runtime.GOMAXPROCS 个 local？</p>
+<p>pool.local 是个 poolLocal 结构，这个结构体是 private + shared链表组成，在多 goroutine 的 Get/Put 下是有数据竞争的，如果只有一个 local 就需要加锁来操作。每个 p 的 local 就能减少加锁造成的数据竞争问题。</p>
+<h3 id="new-的作用假如没有-new-会出现什么情况">New() 的作用？假如没有 New 会出现什么情况？</h3>
+<p>从上面的 pool.Get 流程图可以看出来，从 sync.Pool 获取一个内存会尝试从当前 private，shared，其他的 p 的 shared 获取或者 victim 获取，如果实在获取不到时，才会调用 New 函数来获取。也就是 New() 函数才是真正开辟内存空间的。New() 开辟出来的的内存空间使用完毕后，调用 pool.Put 函数放入到 sync.Pool 中被重复利用。</p>
+<p>如果 New 函数没有被初始化会怎样呢？很明显，sync.Pool 就废掉了，因为没有了初始化内存的地方了。</p>
+<h3 id="先-put再-get-会出现什么情况">先 Put，再 Get 会出现什么情况？</h3>
+<p><strong>一定要注意，下面这个例子的用法是错误的</strong></p>
+<pre><code class="language-go">func main(){
+    pool:= sync.Pool{
+        New: func() interface{} {
+            return item{}
+        },
+    }
+    pool.Put(item{value:1})
+    data := pool.Get()
+    fmt.Println(data)
+}
+</code></pre>
+<p>如果你直接跑这个例子，能得到你想像的结果，但是在某些情况下就不是这个结果了。</p>
+<p>在 Pool.Get 注释里面有这么一句话：“Callers should not assume any relation between values passed to Put and the values returned by Get.”，告诉我们不能把值 Pool.Put 到 sync.Pool 中，再使用 Pool.Get 取出来，因为 sync.Pool 不是 map 或者 slice，放入的值是有可能拿不到的，sync.Pool 的数据结构就不支持做这个事情。</p>
+<p>前面说使用 sync.Pool 容易被错误示例误导，就是上面这个写法。为什么 Put 的值 再 Get 会出现问题？</p>
+<ul>
+<li>情况1：sync.Pool 的 poolCleanup 函数在系统 GC 时会被调用，Put 到 sync.Pool 的值，由于有可能一直得不到利用，被在某个 GC 周期内就有可能被释放掉了。</li>
+<li>情况2：不同的 goroutine 绑定的 p 有可能是不一样的，当前 p 对应的 goroutine 放入到 sync.Pool 的值有可能被其他的 p 对应的 goroutine 取到，导致当前 goroutine 再也取不到这个值。</li>
+<li>情况3：使用 runtime.GOMAXPROCS（N) 来改变 p 的数量，会使 sync.Pool 的 pool.poolLocal 释放重新开辟新的空间，导致 sync.Pool 被释放掉。</li>
+<li>情况4：还有很多情况</li>
+</ul>
+<h3 id="只-get-不-put-会内存泄露吗">只 Get 不 Put 会内存泄露吗？</h3>
+<p>使用其他的池，如连接池，如果取连接使用后不放回连接池，就会出现连接池泄露，<strong>是不是 sync.Pool 也有这个问题呢？</strong></p>
+<p>通过上面的流程图，可以看出来 Pool.Get 的时候会尝试从当前 private，shared，其他的 p 的 shared 获取或者 victim 获取，如果实在获取不到时，才会调用 New 函数来获取，New 出来的内容本身还是受系统 GC 来控制的。所以如果我们提供的 New 实现不存在内存泄露的话，那么 sync.Pool 是不会内存泄露的。当 New 出来的变量如果不再被使用，就会被系统 GC 给回收掉。</p>
+<p>如果不 Put 回 sync.Pool，会造成 Get 的时候每次都调用的 New 来从堆栈申请空间，达不到减轻 GC 压力。</p>
+<h2 id="使用场景">使用场景</h2>
+<p>上面说到 sync.Pool 业务开发中不是一个常用结构，我们业务开发中没必要假想某块代码会有强烈的性能问题，一上来就用 sync.Pool 硬怼。 sync.Pool 主要是为了解决 Go GC 压力过大问题的，所以一般情况下，当线上高并发业务出现 GC 问题需要被优化时，才需要用 sync.Pool 出场。</p>
+<h2 id="使用注意点">使用注意点</h2>
+<ol>
+<li>sync.Pool 同样不能被复制。</li>
+<li>好的使用习惯，从 pool.Get 出来的值进行数据的清空（reset），防止垃圾数据污染。</li>
+</ol>
+<blockquote>
+<p>本文基于的 Go 源码版本：1.16.2</p>
+</blockquote>
+<h2 id="参考链接">参考链接</h2>
+<ol>
+<li>深度解密 Go 语言之 sync.Pool <a href="https://www.cnblogs.com/qcrao-2018/p/12736031.html">https://www.cnblogs.com/qcrao-2018/p/12736031.html</a></li>
+<li>请问sync.Pool有什么缺点？<a href="https://mp.weixin.qq.com/s/2ZC1BWTylIZMmuQ3HwrnUg">https://mp.weixin.qq.com/s/2ZC1BWTylIZMmuQ3HwrnUg</a></li>
+<li>Go 1.13中 sync.Pool 是如何优化的? <a href="https://colobu.com/2019/10/08/how-is-sync-Pool-improved-in-Go-1-13/">https://colobu.com/2019/10/08/how-is-sync-Pool-improved-in-Go-1-13/</a></li>
+</ol>
+<p>sync.Pool 的剖析到这里基本就写完了，想跟我交流的可以在评论区留言。</p>
+<p><img src="https://images.haohongfan.com/hhf11.png" alt="gzh"></p>
+
+                    </div>
+                    
+                    <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+                    
+                    
+                    <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/hhf11.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+                    
+
+                    
+
+
+
+                    
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" class="block">sync.Map</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+    </div>
+</div>
+
+                    
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+                </div>
+                
+                <div class="hidden lg:block lg:w-1/4">
+                    
+                    <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-secondary-bg pt-16 -mt-16 ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6  pt-10 -mt-10 border-l ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#使用方式">使用方式</a>
+      <ul>
+        <li><a href="#pool-结构">Pool 结构</a></li>
+      </ul>
+    </li>
+    <li><a href="#源码图解">源码图解</a></li>
+    <li><a href="#syncpool-梳理">Sync.Pool 梳理</a>
+      <ul>
+        <li><a href="#pool-的内容会清理清理会造成数据丢失吗">Pool 的内容会清理？清理会造成数据丢失吗？</a></li>
+        <li><a href="#runtimegomaxprocs-与-pool-之间的关系">runtime.GOMAXPROCS 与 pool 之间的关系？</a></li>
+        <li><a href="#new-的作用假如没有-new-会出现什么情况">New() 的作用？假如没有 New 会出现什么情况？</a></li>
+        <li><a href="#先-put再-get-会出现什么情况">先 Put，再 Get 会出现什么情况？</a></li>
+        <li><a href="#只-get-不-put-会内存泄露吗">只 Get 不 Put 会内存泄露吗？</a></li>
+      </ul>
+    </li>
+    <li><a href="#使用场景">使用场景</a></li>
+    <li><a href="#使用注意点">使用注意点</a></li>
+    <li><a href="#参考链接">参考链接</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+                    
+                </div>
+                
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        hljs.initHighlightingOnLoad();
+        changeSidebarHeight();
+        switchDocToc();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

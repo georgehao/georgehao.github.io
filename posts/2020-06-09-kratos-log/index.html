@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Bilibili Kratos 框架源码分析(4) -- Kratos Log | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &quot;xxx-service&quot; dir = &quot;/data/log/xxx-service/&quot; stdout = true v = 3 filter = [&quot;fileld1&quot;, &quot;field2&quot;] [log.module] &quot;dao_user&quot; = 2 &quot;servic*&quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Bilibili Kratos 框架源码分析(4) -- Kratos Log",
+      "item":"https://www.haohongfan.com/posts/2020-06-09-kratos-log/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-06-09-kratos-log/"
+    },
+    "headline": "Bilibili Kratos 框架源码分析(4) -- Kratos Log | HHFCodeRv","datePublished": "2020-06-09T10:14:07+08:00",
+    "dateModified": "2020-06-09T10:14:07+08:00",
+    "wordCount":  2136 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = \u0026quot;xxx-service\u0026quot; dir = \u0026quot;\/data\/log\/xxx-service\/\u0026quot; stdout = true v = 3 filter = [\u0026quot;fileld1\u0026quot;, \u0026quot;field2\u0026quot;] [log.module] \u0026quot;dao_user\u0026quot; = 2 \u0026quot;servic*\u0026quot; = 1 对应的加载方法 \/\/ cmd\/main.go func main() { paladin.Init() var"
+}
+</script><meta property="og:title" content="Bilibili Kratos 框架源码分析(4) -- Kratos Log | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" />
+
+
+
+
+<meta property="og:description" content="用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &quot;xxx-service&quot; dir = &quot;/data/log/xxx-service/&quot; stdout = true v = 3 filter = [&quot;fileld1&quot;, &quot;field2&quot;] [log.module] &quot;dao_user&quot; = 2 &quot;servic*&quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-06-09T10:14:07&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-06-09T10:14:07&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="kratos" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-03-11-go-cache/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Bilibili Kratos 框架源码分析(4) -- Kratos Log</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-09</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="用法">用法</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">flag</th>
+<th style="text-align:left">env</th>
+<th style="text-align:left">type</th>
+<th style="text-align:left">remark</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">log.v</td>
+<td style="text-align:left">LOG_V</td>
+<td style="text-align:left">int</td>
+<td style="text-align:left">日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4</td>
+</tr>
+<tr>
+<td style="text-align:left">log.stdout</td>
+<td style="text-align:left">LOG_STDOUT</td>
+<td style="text-align:left">bool</td>
+<td style="text-align:left">是否标准输出：true、false</td>
+</tr>
+<tr>
+<td style="text-align:left">log.dir</td>
+<td style="text-align:left">LOG_DIR</td>
+<td style="text-align:left">string</td>
+<td style="text-align:left">日志文件目录，如果配置会输出日志到文件，否则不输出日志文件</td>
+</tr>
+<tr>
+<td style="text-align:left">log.module</td>
+<td style="text-align:left">LOG_MODULE</td>
+<td style="text-align:left">string</td>
+<td style="text-align:left">可单独配置每个文件的verbose级别：file=1,file2=2</td>
+</tr>
+<tr>
+<td style="text-align:left">log.filter</td>
+<td style="text-align:left">LOG_FILTER</td>
+<td style="text-align:left">string</td>
+<td style="text-align:left">过虑敏感信息 format: field1,field2.</td>
+</tr>
+</tbody>
+</table>
+<p>被阉割的功能: log.agent</p>
+<h2 id="配置文件">配置文件</h2>
+<pre><code class="language-toml">[log]
+	family = &quot;xxx-service&quot;
+	dir = &quot;/data/log/xxx-service/&quot;
+	stdout = true
+	v = 3
+	filter = [&quot;fileld1&quot;, &quot;field2&quot;]
+[log.module]
+	&quot;dao_user&quot; = 2
+	&quot;servic*&quot; = 1
+</code></pre>
+<p>对应的加载方法</p>
+<pre><code class="language-go">// cmd/main.go
+func main() {
+	paladin.Init()
+	var cfg struct {
+		Log *log.Config
+	}
+	if err := paladin.Get(&quot;application.toml&quot;).UnmarshalTOML(&amp;cfg); err != nil {
+		return
+	}
+	// init log
+	log.Init(cfg.Log) // debug flag: log.dir={path}
+	defer log.Close()
+}
+</code></pre>
+<h3 id="最简单用法">最简单用法</h3>
+<p>Kratos Log 有 4 种级别的打印方式: log.Info(), log.Warn(), log.Error(), 以及一个log.V(4).Info(). 如果开启文件打印后, 会分别对应info.log, warn.log, error.log</p>
+<pre><code class="language-go">func main() {
+  flag.Parse()
+  log.Init(nil)
+  log.Info(&quot;hi:%s&quot;, &quot;kratos&quot;)
+  log.Infoc(Context.TODO(), &quot;hi:%s&quot;, &quot;kratos&quot;)
+  log.Infov(Context.TODO(), log.KVInt(&quot;key1&quot;, 100), log.KVString(&quot;key2&quot;, &quot;test value&quot;)
+  // Warn, Error 这里就不写了, 跟 Info() 一样
+  log.V(5).Info(&quot;xxxx&quot;)
+}
+</code></pre>
+<h3 id="logv">log.v</h3>
+<p>kratos log 日志级别(level)跟其他我们熟知的日志框架(logrus, zap)不太一样.</p>
+<p>以 logrus 为例:</p>
+<pre><code class="language-go">package main
+import (
+  log &quot;github.com/sirupsen/logrus&quot;
+)
+
+func main() {
+	log.SetLevel(log.WarnLevel)
+  	log.WithFields(log.Fields{
+    	&quot;animal&quot;: &quot;walrus&quot;,
+    	&quot;size&quot;:   10,
+	}).Info(&quot;A group of walrus emerges from the ocean&quot;)
+}
+</code></pre>
+<p>当 <code>SetLevel</code> 后只会打印这个 Level 高的日志. 但是 Kraots 使用 log.Info(), log.Warn(), log.Error() 却没有这个功能. 也就是说只要程序里面使用就会输出.</p>
+<p>当然 Kratos 也提供了类似 logrus 的这种对应用法, 但是感觉有点另类. 需要配置文件设置<code>log.v</code> 配合 log.V(4).Info()使用. 如:</p>
+<pre><code class="language-go">log.V(5).Info(&quot;xxx&quot;)
+</code></pre>
+<p>如果 <code>log.v</code> 设置是 5, 那么能打印<code>xxx</code>. 如果 <code>log.v</code> 小于 5, 则不能打印. 也就是说 log.V 只能打印比 log.v 小的日志</p>
+<h4 id="logmodule">log.module</h4>
+<p>这个功能我觉得没啥用处. 具体的功能就是:</p>
+<p>配置文件 <code>log.v</code> 设置是 3. 按照上面说的, log.V(5).Info(&ldquo;xx&rdquo;) 是肯定打印不出来的. 但是可以通过 <code>log.module</code> 来另外定义某些文件特殊打印级别</p>
+<pre><code>[log]
+	v = 3
+[log.module]
+	&quot;dao_user&quot; = 5
+	&quot;servic*&quot; = 1
+</code></pre>
+<p>在 dao_user.go 里面, log.V(5).Info(&ldquo;dao_user&rdquo;), 日志照样会打印 &ldquo;dao_user&rdquo;. <code>dao_user</code>, <code>servic*</code>是对应的文件的名字</p>
+<h2 id="logstdout">log.stdout</h2>
+<p>这个简单, 就是控制日志是否打印在命令行里面. 生产环境需要关闭改选项(默认关闭), 在开发时打开这个是很有用的</p>
+<h2 id="logdir">log.dir</h2>
+<p>设置写日志文件的路径</p>
+<h2 id="logfilter">log.filter</h2>
+<p>这个还是蛮有意思的功能. 比如打印日志的时候, <code>密码</code>等敏感信息一般是不能打印在日志文件里. 该功能就能将这些信息隐藏掉</p>
+<pre><code class="language-toml">[log]
+filter = [&quot;password&quot;]
+</code></pre>
+<pre><code class="language-go">log.Infov(context.Background(), log.KV(&quot;password&quot;, &quot;123456&quot;))
+</code></pre>
+<p>打印出来就会变成<code>[2020/06/08 23:19:55.490] [INFO] [/demo1/cmd/main.go:21] password=***</code></p>
+<p>整体上 kratos log 就提供了这么多功能, 下面进入源码分析</p>
+<h2 id="源码分析">源码分析</h2>
+<h3 id="加载-init">加载 Init</h3>
+<p>其实加载没啥说的, 主要就是调用Init()函数</p>
+<pre><code class="language-go">func Init(conf *Config) {
+	var isNil bool
+	if conf == nil {
+		isNil = true
+		conf = &amp;Config{
+			Stdout: _stdout,
+			Dir:    _dir,
+			V:      int32(_v),
+			Module: _module,
+			Filter: _filter,
+		}
+	}
+	if len(env.AppID) != 0 {
+		conf.Family = env.AppID // for caster
+	}
+	conf.Host = env.Hostname
+	if len(conf.Host) == 0 {
+		host, _ := os.Hostname()
+		conf.Host = host
+	}
+	var hs []Handler
+	// when env is dev
+	if conf.Stdout || (isNil &amp;&amp; (env.DeployEnv == &quot;&quot; || env.DeployEnv == env.DeployEnvDev)) || _noagent {
+		hs = append(hs, NewStdout())
+	}
+	if conf.Dir != &quot;&quot; {
+		hs = append(hs, NewFile(conf.Dir, conf.FileBufferSize, conf.RotateSize, conf.MaxLogFile))
+	}
+	h = newHandlers(conf.Filter, hs...)
+	c = conf
+}
+</code></pre>
+<p>作用:</p>
+<ol>
+<li>初始化文章一开头提到那五个功能: log.v, log.stdout, log.dir, log.module, log.filter</li>
+<li>初始化 stdout, file handler</li>
+</ol>
+<h3 id="field">Field</h3>
+<blockquote>
+<p>基于zap的field方式实现的高性能log库，提供Info、Warn、Error日志级别；
+并提供了context支持，方便打印环境信息以及日志的链路追踪，在框架中都通过field方式实现，避免format日志带来的性能消耗</p>
+</blockquote>
+<p>上面这段摘自官方wiki, 但是看完源码之后, 发现跟 zap 毛线关系没有, 就用了 zap 的一个结构体</p>
+<pre><code class="language-go">type Field struct {
+	Key       string
+	Value     interface{}
+	Type      FieldType
+	StringVal string
+	Int64Val  int64
+}
+</code></pre>
+<p>其实想不太明白, 就用了一个结构体(也没有用任何 zap 为该结构体提供的函数), 为何将 zap 那么多代码复制了过来, 差评</p>
+<p>Kartos log 没有采用类似 logrus 或者 Zap json 或者 text 序列化的方案, 就以上面的 Field 为基础扩展一个 KVString, KVInt, &hellip;. KVDuration 结构. 在写日志时候, 我们就可以像下面这样打印多个kv</p>
+<pre><code>log.Infov(Context.TODO(), log.KVInt(&quot;key1&quot;, 100), log.KVString(&quot;key2&quot;, &quot;test value&quot;)
+</code></pre>
+<h3 id="handler">Handler</h3>
+<p>上面的log.InfoV(xxx) 将会调用下面的 Log() 函数</p>
+<pre><code class="language-go">func (hs Handlers) Log(ctx context.Context, lv Level, d ...D) {
+	hasSource := false
+	for i := range d {
+		if _, ok := hs.filters[d[i].Key]; ok {
+			d[i].Value = &quot;***&quot; // 实现log.filter
+		}
+		if d[i].Key == _source {
+			hasSource = true
+		}
+	}
+	if !hasSource {
+		fn := funcName(3)
+		errIncr(lv, fn)
+		d = append(d, KVString(_source, fn))
+	}
+	d = append(d, KV(_time, time.Now()), KVInt64(_levelValue, int64(lv)), KVString(_level, lv.String()))
+	for _, h := range hs.handlers {
+		h.Log(ctx, lv, d...)
+	}
+}
+</code></pre>
+<p>Kratos log 提供的所有Info(), Warn(), Error() 系列函数最终都会调用到这个函数上面来.</p>
+<p>这个函数的主要作用就是:</p>
+<ol>
+<li>实现 log.filter 功能</li>
+<li>增加一些额外的字段, 如: time, level, source Field</li>
+<li>根据初始化 log 的时候是否启动 stdout 或者 file handler, 来调用对应的handler 的 Log 函数做最终处理</li>
+</ol>
+<h3 id="handlers-stdout-file">handlers (stdout, file)</h3>
+<p>上面的Handler Log() 里面有这么句代码. 就是具体调用 stdout或者file handlers</p>
+<pre><code class="language-go">for _, h := range hs.handlers {
+	h.Log(ctx, lv, d...)
+}
+</code></pre>
+<p>不过在调用具体的 handler 来打印的时候, 需要对相关的 Field 来做处理, 分别会调用下面 toMap, addExtraField 函数, 将处理结果都放在一个 map[string]interface{}里</p>
+<h4 id="tomap">toMap</h4>
+<pre><code class="language-go">func toMap(args ...D) map[string]interface{} {
+	d := make(map[string]interface{}, 10+len(args))
+	for _, arg := range args {
+		switch arg.Type {
+		case core.UintType, core.Uint64Type, core.IntTpye, core.Int64Type:
+			d[arg.Key] = arg.Int64Val
+		case core.StringType:
+			d[arg.Key] = arg.StringVal
+		case core.Float32Type:
+			d[arg.Key] = math.Float32frombits(uint32(arg.Int64Val))
+		case core.Float64Type:
+			d[arg.Key] = math.Float64frombits(uint64(arg.Int64Val))
+		case core.DurationType:
+			d[arg.Key] = time.Duration(arg.Int64Val)
+		default:
+			d[arg.Key] = arg.Value
+		}
+	}
+	return d
+}
+</code></pre>
+<p>其实这段代码没啥意思, 就是将 KVInt(), KVString()系列函数对应的Val从对应的字段上取出来</p>
+<h4 id="addextrafield">addExtraField</h4>
+<pre><code class="language-go">func addExtraField(ctx context.Context, fields map[string]interface{}) {
+	if t, ok := trace.FromContext(ctx); ok {
+		fields[_tid] = t.TraceID()
+	}
+	if caller := metadata.String(ctx, metadata.Caller); caller != &quot;&quot; {
+		fields[_caller] = caller
+	}
+	if color := metadata.String(ctx, metadata.Color); color != &quot;&quot; {
+		fields[_color] = color
+	}
+	if env.Color != &quot;&quot; {
+		fields[_envColor] = env.Color
+	}
+	if cluster := metadata.String(ctx, metadata.Cluster); cluster != &quot;&quot; {
+		fields[_cluster] = cluster
+	}
+	fields[_deplyEnv] = env.DeployEnv
+	fields[_zone] = env.Zone
+	fields[_appID] = c.Family
+	fields[_instanceID] = c.Host
+	if metadata.String(ctx, metadata.Mirror) != &quot;&quot; {
+		fields[_mirror] = true
+	}
+}
+</code></pre>
+<p>这段代码就是另外再加几个字段, 如果 env, zone, appid, instance_id, caller, tid</p>
+<h3 id="pattern">Pattern</h3>
+<p>经过上面的操作基本上操作, map[string]interface{} 里面大概有这些内容</p>
+<pre><code>test1 -&gt; test1
+source -&gt; /learn_kratos/demo1/cmd/main.go:21
+time -&gt; 2020-06-09T19:07:36.3063
+level_value -&gt; 1
+level -&gt; INFO
+app_id -&gt; xxx-service
+instance_id -&gt; localhost
+env -&gt; dev
+zone -&gt; zone01
+</code></pre>
+<p>接着要做的就是将他们写成字符串(对, kratos 只提供了TextFormater方式)</p>
+<pre><code class="language-go">var patternMap = map[string]func(map[string]interface{}) string{
+	&quot;T&quot;: longTime,
+	&quot;t&quot;: shortTime,
+	&quot;D&quot;: longDate,
+	&quot;d&quot;: shortDate,
+	&quot;L&quot;: keyFactory(_level),
+	&quot;f&quot;: keyFactory(_source),
+	&quot;i&quot;: keyFactory(_instanceID),
+	&quot;e&quot;: keyFactory(_deplyEnv),
+	&quot;z&quot;: keyFactory(_zone),
+	&quot;S&quot;: longSource,
+	&quot;s&quot;: shortSource,
+	&quot;M&quot;: message,
+}
+
+....
+
+for _, f := range p.funcs {
+	builder.WriteString(f(d))
+}
+</code></pre>
+<p>这里的实现方式还是蛮巧妙的, 可以看看</p>
+<h3 id="stdout-filewriter">stdout, filewriter</h3>
+<p>经过上面的处理, 就进入了最后的输出阶段了, 分别对应 stdout, filewirter</p>
+<p>鉴于篇幅有限, filewriter 本篇就不再介绍, 另外再出一篇吧</p>
+<h2 id="总结">总结</h2>
+<p>优点: kratos log整体采用 Kv 结构来处理, 结构比较清晰, 功能简单, 没有序列化的压力, 追踪日志需要的字段全都有.</p>
+<p>缺点: 只支持TextFormater, 日志级别控制跟当前主流 Log 框架使用习惯不太一样</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/kratos/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#kratos</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" class="block">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" class="block">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/">一次错误使用 go-cache 导致出现的线上问题</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/">打造 Zap 开箱即用日志组件</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/">Golang是否真的没有指针运算?</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Logrus源码阅读(1)--基本用法 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&ldquo;hello logrus&rdquo;) logrus.WithField(logruns.Fields{&ldquo;key1&rdquo;:&ldquo;v1&rdquo;}).Info(&ldquo;hello logrus&rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Logrus源码阅读(1)--基本用法",
+      "item":"https://www.haohongfan.com/posts/2019-06-11-logurs-1/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-06-11-logurs-1/"
+    },
+    "headline": "Logrus源码阅读(1)--基本用法 | HHFCodeRv","datePublished": "2019-07-16T20:06:27+08:00",
+    "dateModified": "2019-06-11T20:06:27+08:00",
+    "wordCount":  2000 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(\u0026ldquo;hello logrus\u0026rdquo;) logrus.WithField(logruns.Fields{\u0026ldquo;key1\u0026rdquo;:\u0026ldquo;v1\u0026rdquo;}).Info(\u0026ldquo;hello logrus\u0026rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p"
+}
+</script><meta property="og:title" content="Logrus源码阅读(1)--基本用法 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+
+
+
+<meta property="og:description" content="选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&ldquo;hello logrus&rdquo;) logrus.WithField(logruns.Fields{&ldquo;key1&rdquo;:&ldquo;v1&rdquo;}).Info(&ldquo;hello logrus&rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-07-16T20:06:27&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-06-11T20:06:27&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="logrus" />
+
+<meta property="article:tag" content="源码阅读" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-03-04-gin-04/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-01-21-gin-03/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-02-18-gin-02/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Logrus源码阅读(1)--基本用法</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-07-16</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>选择golang日志库时, 使用<a href="https://github.com/sirupsen/logrus">logrus</a>的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下</p>
+<p>整体结构图</p>
+<p><img src="http://images.haohongfan.com/logrus.png" alt="logrus"></p>
+<p>整体来看总共提供两种方式调用:</p>
+<ol>
+<li>logrus.Info(&ldquo;hello logrus&rdquo;)</li>
+<li>logrus.WithField(logruns.Fields{&ldquo;key1&rdquo;:&ldquo;v1&rdquo;}).Info(&ldquo;hello logrus&rdquo;)</li>
+</ol>
+<p>这些函数都在<code>exported.go</code>文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的<code>print</code>函数, 如: <code>Infof</code>, <code>Error</code>, <code>Errorf</code>, <code>Panic</code>等等</p>
+<p>在直接使用logrus等情况下<code>exported.go</code>是唯一入口, 但是我们可以简单封装一下, 跟项目框架更加贴合, 这个留在后面用具体例子来解释这么做的原因和好处</p>
+<h2 id="简单介绍使用方法">简单介绍使用方法</h2>
+<h3 id="普通用法">普通用法</h3>
+<pre><code class="language-golang">package main
+
+import (
+  log &quot;github.com/sirupsen/logrus&quot;
+)
+
+func main() {
+  log.Info(&quot;A walrus appears&quot;)
+}
+</code></pre>
+<pre><code class="language-text">time=&quot;2019-07-16T22:51:31+08:00&quot; level=info msg=&quot;hello logrus&quot;
+</code></pre>
+<p>注意<code>log &quot;github.com/sirupsen/logrus&quot;</code>这里将logrus的别名设置为log, 然后就直接调用了log.Info. 假如你的项目现在使用的标准库log, 则可以无缝迁移到logrus上, 因为标准库实现的print函数较少, logrus全部已经实现, 只需要简单引入这个别名即可</p>
+<h3 id="withfields">WithFields</h3>
+<p>由于logrus不建议下面的用法:</p>
+<pre><code class="language-golang">log.Fatalf(&quot;Failed to send event %s to topic %s with key %d&quot;)
+</code></pre>
+<p>因为logrus鼓励结构化的日志输出, 上面的用法就非常的不人性化, 不美观. 应该改成下面的方式:</p>
+<pre><code class="language-golang">log.WithFields(log.Fields{
+  &quot;event&quot;: event,
+  &quot;topic&quot;: topic,
+  &quot;key&quot;: key,
+}).Fatal(&quot;Failed to send event&quot;)
+</code></pre>
+<p>但是根据实际使用过程中发现, 一般要使用WithFields输出日志字段时, 那些字段一般都是公共字段, 比如: request_id, token等等, 程序里到处打印WithFields也不是个优美的办法(后续会解释怎么做)</p>
+<p>所以尽管<code>logrus</code>不建议我们使用<code>Printf</code>, 但是程序该需要用到<code>Printf</code>的地方还是需要的</p>
+<h3 id="设置打印格式">设置打印格式</h3>
+<p>logrus自带两种方式的输出格式: 纯文本和JSON格式的.</p>
+<h4 id="jsonformatter">JSONFormatter</h4>
+<pre><code class="language-golang">func main() {
+	log.SetFormatter(&amp;log.JSONFormatter{})
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<pre><code>{&quot;level&quot;:&quot;info&quot;,&quot;msg&quot;:&quot;hello logrus&quot;,&quot;time&quot;:&quot;2019-07-17T22:47:14+08:00&quot;}
+</code></pre>
+<h4 id="textformatter">TextFormatter</h4>
+<p>默认情况下就是<code>TextFormatter</code>, 默认情况下是带颜色输出的. 当然也不是任何时候都输出带颜色的结果, 取决于在终端输出并且不是运行在windows系统, 或者是否设置过<code>ForceColors=true</code>, 如果设置了就会按照有颜色的方式输出.</p>
+<p>程序会在启动的时候检测是否是终端运行, 具体的实现就是<code>terminal_check_(OS).go</code>, 具体实现后续关于TextFormatter的具体实现再看</p>
+<pre><code class="language-golangspec">func main() {
+	log.SetFormatter(&amp;log.TextFormatter{})
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<pre><code>INFO[0000] hello logrus
+</code></pre>
+<p>也可以禁用</p>
+<pre><code class="language-golang">func main() {
+	log.SetFormatter(&amp;log.TextFormatter{
+		DisableColors: true,
+	})
+	log.Info(&quot;hello logrus&quot;)
+}
+
+</code></pre>
+<pre><code>time=&quot;2019-07-17T23:44:42+08:00&quot; level=info msg=&quot;hello logrus&quot;
+</code></pre>
+<p>同时, 你可以根据自己的实际需求, 去定制自己的<code>Formater</code>, 只需要实现<code>Format</code>方法即可</p>
+<h3 id="设置调用log的位置">设置调用log的位置</h3>
+<pre><code class="language-golang">func main() {
+	log.SetFormatter(&amp;log.TextFormatter{
+		DisableColors: true,
+	})
+	log.SetReportCaller(true)
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<pre><code>time=&quot;2019-07-18T10:40:21+08:00&quot; level=info msg=&quot;hello logrus&quot; func=main.main file=&quot;/Users/haohongfan/goproject/test/logrus_test/main.go:33&quot;
+</code></pre>
+<p>但是请注意:</p>
+<pre><code>Note that this does add measurable overhead - the cost will depend on the version of Go,
+but is between 20 and 40% in recent tests with 1.6 and 1.7.You can validate this in your environment
+via benchmarks: go test -bench=.*CallerTracing
+</code></pre>
+<p>也就设置这个是有性能问题的, 生产环境是一定不能启动用, 其实也没有必要, 我们并不关心是哪一行打印的(如果你的日志确实需要靠这个来确定的话, 那你的日志是需要优化一下的)</p>
+<h3 id="设置日志级别">设置日志级别</h3>
+<p>logrus日志一共7级别, 从高到低: panic, fatal, error, warn, info, debug, trace.</p>
+<p>在生产环境时选择打印Info以上级别的日志, 就可以log.SetLevel(log.InfoLevel), 那么Debug, Trace就不会打印出来. 源码实现这个功能很简单, 就是判断Print函数的级别是否大于SetLevel的值</p>
+<p>log.SetLevel(log.ErrorLevel)这个函数要求传入的参数是<code>Level</code>类型的值(其实也就是uint32, type Level uint32), 我们在封装我们代码时, 肯定要定义panic等这些级别. logrus本身提供将<code>panic</code>转换成<code>PanicLevel</code>的函数和获取<code>xxLevel</code>对应的字符串. 这些都封装在<code>logrus.go</code>里面</p>
+<pre><code class="language-golang">func main() {
+	// log.SetLevel(log.ErrorLevel)
+	level, _ := log.ParseLevel(&quot;info&quot;)
+	log.SetLevel(level)
+	log.Info(&quot;hello logrus&quot;)
+	fmt.Println(log.ErrorLevel)
+}
+</code></pre>
+<pre><code>error
+time=&quot;2019-07-18T11:41:02+08:00&quot; level=info msg=&quot;hello logrus&quot;
+</code></pre>
+<h3 id="hook">Hook</h3>
+<p><code>Hook</code>是一大特色, 也给logrus留下各种各样的扩展机会. 比如: <code>lfshook</code>, <code>dingrus</code>等</p>
+<p>你可以根据自己的特殊需求扩展自己的Hook, 只需要简单实现<code>Levels() []Level</code>, <code>Fire(*Entry) error</code>即可. logrus提供一个<code>syslog</code>, <code>test</code>的插件, 同时github上可以找到很多</p>
+<p>后面说源码的时候, 我会选择<a href="github.com/rifflock/lfshook">lfshook</a>作为例子进行分析其实现细节, 同时我们也会选择一个功能实现一个</p>
+<h3 id="日志的文件输出-切分-删过期文件">日志的文件输出, 切分, 删过期文件</h3>
+<p>logrus本身不提供这样的功能, 需要借助第三方插件<a href="github.com/rifflock/lfshook">lfshook</a>进行</p>
+<h3 id="相对高级的用法">相对高级的用法</h3>
+<p>前面说到程序里到处log.WithFields{log.Field{xxx}}是一种比较不好的用法, 故我们开发的框架在集成logrus的时候要简单封装一下. logrus <a href="https://github.com/sirupsen/logrus#default-fields">README</a>也有提到</p>
+<pre><code class="language-golang">requestLogger := log.WithFields(log.Fields{&quot;request_id&quot;: request_id, &quot;user_ip&quot;: user_ip})
+requestLogger.Info(&quot;something happened on that request&quot;) # will log request_id and user_ip
+requestLogger.Warn(&quot;something not great happened&quot;)
+</code></pre>
+<p>下面说具体如何操作, 可以参考bilibili <a href="https://github.com/bilibili/sniper/blob/master/util/log/log.go#L61">sniper</a></p>
+<p>比如跟<code>gin</code>的结合使用, 这是我的项目的一段实际的代码. 在log目录下创建log.go</p>
+<pre><code class="language-golang">// Entry ling-nest log Entry
+func Entry(ctx *gin.Context) *logrus.Entry {
+	return logrus.WithFields(logrus.Fields{
+		&quot;device_type&quot;: ctx.Value(&quot;device_type&quot;),
+		&quot;channel&quot;:     ctx.Value(&quot;channel&quot;),
+		&quot;license&quot;:     ctx.Value(&quot;license&quot;),
+		&quot;v4&quot;:          ctx.Value(&quot;V4&quot;),
+	})
+}
+</code></pre>
+<p>实际使用时: <code>log.Entry(context).Info(&quot;xxxxxx&quot;)</code></p>
+<h2 id="总结">总结</h2>
+<p>第一篇关于logrus源码阅读主要是为了介绍相关的用法. 从下面开始将正式进入源码阶段. 下一篇主要根据源码介绍logrus的整个生命周期</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/logrus/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#logrus</a>
+    
+    <a href="https://www.haohongfan.com/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#源码阅读</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" class="block">Golang是否真的没有指针运算?</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" class="block">一次golang deadlock的讨论</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/">gin源码阅读之四 -- gin的路由算法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-01-21-gin-03/">gin源码阅读之三 -- gin牛逼的context</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-02-18-gin-02/">gin源码阅读之二 -- 揭开gin的神秘面纱</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

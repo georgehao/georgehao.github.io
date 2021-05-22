@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>mongodb联表查询 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"mongodb联表查询",
+      "item":"https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/"
+    },
+    "headline": "mongodb联表查询 | HHFCodeRv","datePublished": "2017-06-17T14:36:31+00:00",
+    "dateModified": "2017-06-17T14:36:31+00:00",
+    "wordCount":  2364 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的"
+}
+</script><meta property="og:title" content="mongodb联表查询 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/" />
+
+
+
+
+<meta property="og:description" content="picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2017-06-17T14:36:31&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2017-06-17T14:36:31&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="aggregation" />
+
+<meta property="article:tag" content="mongodb" />
+
+<meta property="article:tag" content="php" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">mongodb联表查询</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-06-17</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h4 id="picture_books表">picture_books表</h4>
+<p><img src="http://images.haohongfan.com/bookshelf.png" alt="picture_book"></p>
+<h4 id="bookshelfs表">bookshelfs表</h4>
+<p><img src="http://images.haohongfan.com/bookshelf1.png" alt="bookshelf"></p>
+<p>现在下面的需求:</p>
+<ol>
+<li>bookshelf表的绘本列表展示(分页)</li>
+<li>picture_book的<strong>status</strong>为1的需要为一组, 且按照时间排序</li>
+<li>picture_book的<strong>status</strong>不为1需要分为一组, 且按照时间排序</li>
+</ol>
+<p><strong>Note:</strong>
+数据库: mongodb
+关系: bookshelf通过<strong>bookshelfabld_id</strong>和picture_book的<strong>id</strong>关联</p>
+<h3 id="先分析一下这里面的难点">先分析一下这里面的难点:</h3>
+<h4 id="mongodb的表之间无关系的-无法关联查询">mongodb的表之间无关系的, 无法关联查询</h4>
+<p>参照这两个表来说, 要分组的话, 需要知道bookshelfable_id对应的picture_book的status, 然后根据这个值进行分组. 但是因为是NOSQL,无法关联查询. 一般能想到的就是遍历<strong>bookshelf</strong>, 通过bookshelfable_id查询picture_book.
+这样就会造成: 本来在mysql中<strong>一次</strong>能查询搞定的事情, 在mongodb中, 需要查询<strong>N次</strong>才能完成. 这个效率不可谓不低.</p>
+<h4 id="如何解决这个问题">如何解决这个问题?</h4>
+<p>其实说难也难, 说简单也简单. 这就需要我们学会去查看<a href="https://docs.mongodb.com/v3.0/">官方文档</a>.</p>
+<p>能解决这个问题的优雅方法只有: <a href="https://docs.mongodb.com/v3.0/core/aggregation-introduction/">Aggregation</a>了</p>
+<h3 id="解决问题">解决问题</h3>
+<p>解决这个问题的过程中, 我遇到下面几个难题, 都已经基本解决.</p>
+<h5 id="1-如何联表查询">1. 如何联表查询</h5>
+<p>其实这个挺简单的, 只要使<code>$match</code>,<code>$lookup</code>就可以了.</p>
+<pre><code>db.bookshelves.aggregate([ 
+	{ 
+		$match: {
+			&quot;child_id&quot;:223 
+		}
+	}, 
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;,
+			foreignField: &quot;_id&quot;,
+			as: &quot;picture_books&quot;
+		}
+	}
+])
+</code></pre>
+<p><strong>是不是很简单?</strong>, 如果要是这么想你就错了.</p>
+<pre><code>localField: &quot;bookshelfable_id&quot;,
+foreignField: &quot;_id&quot;,
+</code></pre>
+<p><code>bookshelfable_id</code>是string类型, 而<code>_id</code>是ObjectId类型. 所以直接这样比较是没有办法直接进行匹配. <code>所以这样写是错误的</code>
+其实这个问题我没有解决, 从stackoverflow看的用<code>ObjectId()</code>是无法起作用的. 有解决的同学请给我留言.</p>
+<p><strong>想了一个折中的办法:</strong>
+就是在<code>picture_books</code>表后再增加一个字段<code>book_id</code>,也就是<code>_id</code>的<code>String</code>格式.</p>
+<p>picture_books表就变成下面的样子:
+<img src="http://images.haohongfan.com/picture_book_book_id-1.png" alt="11">
+于是, 查询的语句也变成下面的样子:</p>
+<pre><code>db.bookshelves.aggregate([ 
+	{ 
+		$match: {
+			&quot;child_id&quot;:223 
+		}
+	}, 
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;,
+			foreignField: &quot;book_id&quot;,
+			as: &quot;picture_books&quot;
+		}
+	}
+])
+</code></pre>
+<p>其返回数据:
+<img src="http://images.haohongfan.com/%E4%B9%A6%E6%9E%B6%E8%BF%94%E5%9B%9E1.png" alt="22"></p>
+<h5 id="2-如何过滤想要的字段">2. 如何过滤想要的字段</h5>
+<p>过滤想要的字段只有使用<code>$project</code>就可以了. 但是这里有个坑(因为当时没有注意到, 导致调试了很久)</p>
+<pre><code>db.bookshelves.aggregate([ 
+	{ 
+		$match: {
+			&quot;child_id&quot;:223 
+		}
+	}, 
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;,
+			foreignField: &quot;book_id&quot;,
+			as: &quot;picture_books&quot;
+		}
+	}, 
+	{
+		$project: {
+			picture_books: {
+				name: 1,
+				status: 1
+			}, 
+			cmp: {
+				$eq: [&quot;$picture_books.status&quot;, 1]
+			}
+		}
+	}
+])
+</code></pre>
+<p>过滤主要是利用<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/project/">$project</a>. 使用<code>$project</code>很简单. 要显示的字段<code>置1</code>即可. 看我上面贴出的代码有什么问题 ? ?.</p>
+<p>上面代码的执行结果是:</p>
+<pre><code>{ &quot;_id&quot; : ObjectId(&quot;594107284bcd1c0ac87bde82&quot;), &quot;picture_books&quot; : [ { &quot;name&quot; : &quot;14只老鼠吃早餐&quot;, &quot;status&quot; : 1 } ], &quot;cmp&quot; : false }
+{ &quot;_id&quot; : ObjectId(&quot;5941073b4bcd1c0ad666a3c2&quot;), &quot;picture_books&quot; : [ { &quot;name&quot; : &quot;14只老鼠过冬天&quot;, &quot;status&quot; : 1 } ], &quot;cmp&quot; : false }
+.....
+</code></pre>
+<p>不管怎么执行, <code>cmp</code>始终是<code>false</code>. 要是这么写, 要是这么写基本上就入坑了.</p>
+<p><img src="http://images.haohongfan.com/%E4%B9%A6%E6%9E%B6%E8%BF%94%E5%9B%9E1.png" alt=""></p>
+<p>注意看图片上标红色<code>下划线</code>的地方, 返回的<code>picture_books</code>是个数组. 这就是这个问题造成的关键点. 对<code>$eq: [&quot;$picture_books.status&quot;, 1]</code>操作的时候, 只能是对具体对象进行比较, 不能对整个数组操作.</p>
+<p>找到问题了, 贴出正确的代码:</p>
+<pre><code>db.bookshelves.aggregate([
+	{
+		$match: {&quot;child_id&quot;:257}
+	},
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;, 
+			foreignField: &quot;book_id&quot;, 
+			as: &quot;picture_books&quot;
+		}
+	},
+	{
+		$unwind: &quot;$picture_books&quot;
+	},
+	{
+		$project: {
+			picture_books: {
+				name: 1,
+				status: 1
+			}, 
+			cmp: {
+				$eq: [&quot;$picture_books.status&quot;, 1]
+			}
+		}
+	}])
+</code></pre>
+<p>上面代码的返回值:</p>
+<pre><code>{ &quot;_id&quot; : ObjectId(&quot;5949e6474bcd1c4bc71d5083&quot;), &quot;picture_books&quot; : { &quot;name&quot; : &quot;托马斯不要泪汪汪&quot;, &quot;status&quot; : 1 }, &quot;cmp&quot; : true }
+{ &quot;_id&quot; : ObjectId(&quot;5949e6594bcd1c4c2201c063&quot;), &quot;picture_books&quot; : { &quot;name&quot; : &quot;托马斯不怕黑洞洞&quot;, &quot;status&quot; : 1 }, &quot;cmp&quot; : true }
+Type &quot;it&quot; for more
+{ &quot;_id&quot; : ObjectId(&quot;5949e6914bcd1c4c4d6c7eb3&quot;), &quot;picture_books&quot; : { &quot;name&quot; : &quot;拇指姑娘&quot;, &quot;status&quot; : 0 }, &quot;cmp&quot; : false }
+</code></pre>
+<h5 id="3-如何分组">3. 如何分组</h5>
+<p>看到这个问题, 理论上应该使用<code>$group</code>. 但是<a href="https://docs.mongodb.com/v3.0/reference/operator/aggregation/group/#pipe._S_group">$group</a>其实不合适.  这里我们直接使用<code>$sort</code>代替分组.</p>
+<blockquote>
+<p>现在下面的需求:</p>
+<ol>
+<li>bookshelf表的绘本列表展示(分页)</li>
+<li>picture_book的<strong>status</strong>为1的需要为一组, 且按照时间排序</li>
+<li>picture_book的<strong>status</strong>不为1需要分为一组, 且按照时间排序</li>
+</ol>
+</blockquote>
+<p>根据这个需求, 这里的思路是:</p>
+<ol>
+<li>先按照<code>cmp</code>倒序排序, 把<code>status=1</code>和 <code>status != 1</code>的分为两组</li>
+<li>然后再分别利用<code>order_column</code>排序</li>
+</ol>
+<p>具体<code>$sort</code>如何使用, 请查看<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/sort/">$sort</a></p>
+<h5 id="4-如何排序">4. 如何排序</h5>
+<p>上面已经解释了, 直接贴代码</p>
+<pre><code>db.bookshelves.aggregate([
+	{
+		$match: {&quot;child_id&quot;:257}
+	},
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;, 
+			foreignField: &quot;book_id&quot;, 
+			as: &quot;picture_books&quot;
+		}
+	},
+	{
+		$unwind: &quot;$picture_books&quot;
+	},
+	{
+		$project: {
+			order_column:1,
+			picture_books: {
+				name: 1,
+				status: 1
+			}, 
+			cmp: {
+				$eq: [&quot;$picture_books.status&quot;, 1]
+			}
+		}
+	},
+	{
+		$sort: {
+			cmp: -1,
+			order_column: -1 
+		}
+	}])
+</code></pre>
+<p>结果:</p>
+<pre><code>{ &quot;_id&quot; : ObjectId(&quot;594206184bcd1c0dae330b59&quot;), &quot;order_column&quot; : 50, &quot;picture_books&quot; : { &quot;alg_book_id&quot; : 23, &quot;name&quot; : &quot;杰琪的自行车旅行&quot;, &quot;status&quot; : 1 }, &quot;cmp&quot; : true }
+{ &quot;_id&quot; : ObjectId(&quot;594210da4bcd1c134e4a6823&quot;), &quot;order_column&quot; : 52, &quot;picture_books&quot; : { &quot;alg_book_id&quot; : 169, &quot;name&quot; : &quot;我去找回太阳&quot;, &quot;status&quot; : 1 }, &quot;cmp&quot; : true }
+{ &quot;_id&quot; : ObjectId(&quot;594210e44bcd1c134e4a6825&quot;), &quot;order_column&quot; : 53, &quot;picture_books&quot; : { &quot;alg_book_id&quot; : 167, &quot;name&quot; : &quot;我想有颗星星&quot;, &quot;status&quot; : 1 }, &quot;cmp&quot; : true }
+</code></pre>
+<p><strong>NOTE:重点看order_column的值</strong></p>
+<p>这里其实还有一个坑, 如果上面的代码变成这样, 结果会怎么样呢?</p>
+<pre><code>db.bookshelves.aggregate([
+	{
+		$match: {&quot;child_id&quot;:257}
+	},
+	{
+		$lookup: {
+			from: &quot;picture_books&quot;,
+			localField: &quot;bookshelfable_id&quot;, 
+			foreignField: &quot;book_id&quot;, 
+			as: &quot;picture_books&quot;
+		}
+	},
+	{
+		$unwind: &quot;$picture_books&quot;
+	},
+	{
+		$project: {
+			picture_books: {
+				name: 1,
+				status: 1
+			}, 
+			cmp: {
+				$eq: [&quot;$picture_books.status&quot;, 1]
+			}
+		}
+	},
+	{
+		$sort: {
+			cmp: -1,
+			order_column: -1 
+		}
+	}])
+</code></pre>
+<p>和上面正确的代码相比, 这段代码缺少第18行: <code>order_column:1,</code>. 其实这样是无法按照<code>order_column</code>进行排序. 所以要使用<code>$sort</code>的话, 一定需要在<code>project</code>中设置出来.</p>
+<h5 id="5-如何分页">5. 如何分页</h5>
+<p>关于如何分页就使用<code>$limit</code>, <code>$skip</code>, 就可以了, 很简单.</p>
+<p>但是, 需要注意的是:</p>
+<blockquote>
+<p>When a $sort immediately precedes a $limit in the pipeline, the $sort operation only maintains the top n results as it progresses, where n is the specified limit, and MongoDB only needs to store n items in memory. This optimization still applies when allowDiskUse is true and the n items exceed the aggregation memory limit.</p>
+</blockquote>
+<p>想了很久, 结合实际的操作, 这句话的意思是: sort排序是对整体排序, 但是排序结果, mongodb在内存中只会保持<code>$limit</code>指定的n个数.</p>
+<h3 id="局限性">局限性</h3>
+<p>OK, 经过上面的啰嗦, 下面要说点最重要的事情.</p>
+<p>mongodb的官方文档说</p>
+<blockquote>
+<p>$lookup:
+Performs a left outer join to an unsharded collection in the same database to filter in documents from the “joined” collection for processing. The $lookup stage does an equality match between a field from the input documents with a field from the documents of the “joined” collection.</p>
+</blockquote>
+<p>简单点说就是: <code>$lookup</code>只能在同一个数据库中, 且这个<code>collection</code>不能有分片. 如果你的表设计不在一个库中, 且设置了分片的话, 那上面的全都是废话.</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/aggregation/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#aggregation</a>
+    
+    <a href="https://www.haohongfan.com/tags/mongodb/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#mongodb</a>
+    
+    <a href="https://www.haohongfan.com/tags/php/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#php</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2017-07-19-wordpress_error/" class="block">nginx代理wordpress无法访问的问题</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

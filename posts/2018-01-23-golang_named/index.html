@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Golang命名规范 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&quot;https://studygolang.com/articles/8542&quot;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Golang命名规范",
+      "item":"https://www.haohongfan.com/posts/2018-01-23-golang_named/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
+    },
+    "headline": "Golang命名规范 | HHFCodeRv","datePublished": "2018-01-23T15:34:24+00:00",
+    "dateModified": "2018-01-23T15:34:24+00:00",
+    "wordCount":  1111 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https:\/\/studygolang.com\/articles\/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包"
+}
+</script><meta property="og:title" content="Golang命名规范 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2018-01-23-golang_named/" />
+
+
+
+
+<meta property="og:description" content="文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&quot;https://studygolang.com/articles/8542&quot;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-01-23T15:34:24&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2018-01-23T15:34:24&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Golang命名规范</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-01-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="文件名">文件名</h2>
+<ol>
+<li>没有明确的规定</li>
+<li>根据<code>test</code>文件的命名规范推测, 还是使用<code>下划线</code>比较统一.</li>
+<li>测试文件: path_test.go</li>
+<li>版本区分: trap_windows_1.4.go</li>
+<li>平台区分: file_windows.go</li>
+<li>CPU区分: vdso_linux_amd64.go</li>
+</ol>
+<p>由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&quot;https://studygolang.com/articles/8542&quot;&gt;这篇文档</a>归档的挺不错. 以后发现有别的规定再补充.</p>
+<h2 id="包名">包名</h2>
+<p>尽量短, 尽量简洁, 容易记(short, concise, evocative). 因为别人会用你的package.</p>
+<p>包名都是小写(lower case)</p>
+<p>一个单词(single-word), 不能是下划线或者驼峰式(mixedCaps)的命名方式. 看源码发现有人是把两个单词合成一个在用, 如: <code>screen shot</code>会写成<code>screenshot</code></p>
+<p>在工程中<code>包名</code>并不一定需要唯一. 因为包名只是默认导入的名字. 当报名冲突的时候, 可以在引入的地方重新起一个别名</p>
+<p>包名只是目录的<code>base name</code>. 例如: <code>src/encoding/base64</code>的引入方式是<code>import encoding/base64</code>,但包名为<code>base64</code></p>
+<p>由于我们使用包内的元素会带上这个包名, 因此对<code>struct</code>, <code>function</code>等命名的时候, 我们可以使用非常简洁的方式. 例如: <code>bufio</code>的<code>buffered reader type</code> 命名为<code>Reader</code>, 而不是<code>BufReader</code>; 还比如, 在<code>ring</code>包内, 有一个类<code>Ring</code>, 我们为这个<code>Ring</code>声明一个构造函数时, 可以直接把这个函数起名为<code>New</code>, 而不是<code>NewRing</code></p>
+<h2 id="函数名变量名">函数名/变量名</h2>
+<p>函数名遵循<code>Golang</code>包导出的原则, 首字符大写的是包外可见的; 否则包外不可见.</p>
+<p>命名要遵循<code>MixedCaps</code>和<code>mixedCaps</code>的方式. 不能使用<code>下划线</code>的方式.</p>
+<p>函数命名要避免使用一些特殊的名字, 如: Read, Write, Close, Flush, String等一些有特殊意义的名字. 防止和库函数混淆.</p>
+<p>同样, 变量名也一样.</p>
+<h2 id="getters">Getters</h2>
+<p><code>Go</code>不会自动提供<code>getters</code> 和 <code>setters</code>, 这两个方法通常需要自己提供.</p>
+<p>通常不建议将<code>Get</code>放在方法名中. 如: 在获取字段<code>owner</code>的时候, 尽量使用<code>Owner()</code>, 而不是<code>GetOwner()</code></p>
+<p><code>Set</code>方法的函数名是需要带上<code>Set</code>的. 如: <code>SetOwner()</code></p>
+<pre><code>owner := obj.Owner()
+if owner != user {
+    obj.SetOwner(user)
+}
+</code></pre>
+<h2 id="接口">接口</h2>
+<p>如果接口只有一个方法, 那个这个接口的命名就是这个方法的名字 + 后缀(er)构成.</p>
+<h2 id="mixedcaps">MixedCaps</h2>
+<p><code>Golang</code> 是推荐使用<code>MixedCaps</code>或者<code>mixedCaps</code>. 强烈不建议使用<code>下划线</code>方式.</p>
+<h2 id="receiver-name">Receiver Name</h2>
+<p><code>Receiver Name</code>是<code>Receiver Type</code>的一个反映, 通常是这个类型的一个或者两个字符的缩写, 如: 对于<code>Client</code>, <code>c</code>或者<code>cl</code>就足够了, 要足够简洁.</p>
+<p><code>Receiver Name</code> 不要使用<code>me</code>, <code>this</code>, <code>self</code>这些OOP语言通用的名字.</p>
+<p>同一个Type的Name, 要保持一致. 如果有一个Receiver叫<code>c</code>, 那么另外一个就不要叫<code>cl</code>了.</p>
+<p>参考:</p>
+<ol>
+<li>
+<p><a href="https://golang.org/doc/effective_go.html">Effictive Go</a></p>
+</li>
+<li>
+<p><a href="https://studygolang.com/articles/8542%22">文件名规范</a></p>
+</li>
+<li>
+<p><a href="https://github.com/golang/go/wiki/CodeReviewComments#receiver-names">receiver-names</a></p>
+</li>
+</ol>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="block">Golang指针vs值</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/" class="block">使用阿里云OSS &#43; CDN遇到的问题及解决方式</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

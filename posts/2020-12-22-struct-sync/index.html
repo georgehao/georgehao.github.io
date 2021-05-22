@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>当 Go struct 遇上 sync | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="struct 是我们写 Go 必然会用到的关键字, 不过当 struct 遇上一些比较特殊类型的时候, 你注意过你的程序是否正常吗 ? 一段代码 type URL struct { Ip string Port string mux sync.RWMutex params url.Values } func (c *URL) Clone() URL { newUrl := URL{} newUrl.Ip = c.Ip newUrl.params = url.Values{} return newUrl } 这段代码你能看出来问题所在吗 ? A: 程序正常 B: 编译失败 C: panic D: 有可能发生 data race E: 有可能发生死锁 如果你看出来问题在哪里的话, 那我再悄悄告诉你, 这段代码是 github 某 3k star Go 框架的底层核心代码, 那你是不是就">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"当 Go struct 遇上 sync",
+      "item":"https://www.haohongfan.com/posts/2020-12-22-struct-sync/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-12-22-struct-sync/"
+    },
+    "headline": "当 Go struct 遇上 sync | HHFCodeRv","datePublished": "2020-12-22T00:21:52+08:00",
+    "dateModified": "2020-12-22T00:21:52+08:00",
+    "wordCount":  2221 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "struct 是我们写 Go 必然会用到的关键字, 不过当 struct 遇上一些比较特殊类型的时候, 你注意过你的程序是否正常吗 ? 一段代码 type URL struct { Ip string Port string mux sync.RWMutex params url.Values } func (c *URL) Clone() URL { newUrl := URL{} newUrl.Ip = c.Ip newUrl.params = url.Values{} return newUrl } 这段代码你能看出来问题所在吗 ? A: 程序正常 B: 编译失败 C: panic D: 有可能发生 data race E: 有可能发生死锁 如果你看出来问题在哪里的话, 那我再悄悄告诉你, 这段代码是 github 某 3k star Go 框架的底层核心代码, 那你是不是就"
+}
+</script><meta property="og:title" content="当 Go struct 遇上 sync | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-12-22-struct-sync/" />
+
+
+
+
+<meta property="og:description" content="struct 是我们写 Go 必然会用到的关键字, 不过当 struct 遇上一些比较特殊类型的时候, 你注意过你的程序是否正常吗 ? 一段代码 type URL struct { Ip string Port string mux sync.RWMutex params url.Values } func (c *URL) Clone() URL { newUrl := URL{} newUrl.Ip = c.Ip newUrl.params = url.Values{} return newUrl } 这段代码你能看出来问题所在吗 ? A: 程序正常 B: 编译失败 C: panic D: 有可能发生 data race E: 有可能发生死锁 如果你看出来问题在哪里的话, 那我再悄悄告诉你, 这段代码是 github 某 3k star Go 框架的底层核心代码, 那你是不是就" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-12-22T00:21:52&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-12-22T00:21:52&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">当 Go struct 遇上 sync</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-12-22</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>struct 是我们写 Go 必然会用到的关键字, 不过当 struct 遇上一些比较特殊类型的时候, 你注意过你的程序是否正常吗 ?</p>
+<h3 id="一段代码">一段代码</h3>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	Port     string
+	mux   	 sync.RWMutex
+	params    url.Values
+}
+
+func (c *URL) Clone() URL {
+	newUrl := URL{}
+	newUrl.Ip = c.Ip
+	newUrl.params = url.Values{}
+	return newUrl
+}
+</code></pre>
+<p>这段代码你能看出来问题所在吗 ?</p>
+<pre><code>A: 程序正常
+B: 编译失败
+C: panic
+D: 有可能发生 data race
+E: 有可能发生死锁
+</code></pre>
+<p>如果你看出来问题在哪里的话, 那我再悄悄告诉你, 这段代码是 github 某 3k star Go 框架的底层核心代码, 那你是不是就觉得这个话题开始有意思了 ?</p>
+<h2 id="先说结论">先说结论</h2>
+<p>上面那段代码的问题是 <code>sync.RWMutex</code> 引起的. 如果你看过有关 sync 相关类型的介绍或者相关源码时, 在 <code>sync</code> 包里面的所有类型都有句这样的注释: <code>must not be copied after first use</code>, 可能很多人却并不知道这句话有什么作用, 顶多看到相关介绍时还记得 <code>sync</code> 相关类型的变量不能复制, 可能真正使用 Mutex, WaitGroup, Cond时, 早把这个注释忘的一干二净.</p>
+<p>究其原因, 我觉得有下面两点原因:</p>
+<ol>
+<li>不明白什么叫 sync 类型变量复制</li>
+<li>sync 类型的变量复制了会出现怎样的结果</li>
+</ol>
+<p>下面的例子都以 Mutex 来举例</p>
+<ol>
+<li>最容易看出来的情形</li>
+</ol>
+<pre><code class="language-go">func main() {
+	var amux sync.Mutex
+	b := amux
+	b.Lock()
+	b.Unlock()
+}
+</code></pre>
+<p>其实这种情况一般情况下, 没人这么用. 问题不大, 略过</p>
+<ol start="2">
+<li>嵌套在 struct 里面, struct 变量间的互相赋值</li>
+</ol>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	Port     string
+	mux   	 sync.RWMutex
+	params    url.Values
+}
+
+func main() {
+	var url1 URL
+	url2 := url1
+}
+</code></pre>
+<p>当 struct 嵌套 <strong>不可复制</strong> 类型时, 就需要开始小心了. 当 struct 嵌套层次过深或者 struct 变量随着值传递对外扩散时, 这个时候就会变得不可控了, 就需要特别小心了.</p>
+<ol start="3">
+<li>struct 类型变量的值传递作为返回值</li>
+</ol>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	mux   	 sync.RWMutex
+}
+
+func (c *URL) Clone() URL {
+	newUrl := URL{}
+	newUrl.Ip = c.Ip
+	return newUrl
+}
+</code></pre>
+<ol start="4">
+<li>struct 类型变量的值传递作为 receiver</li>
+</ol>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	mux   	 sync.RWMutex
+}
+
+func (c URL) String() string {
+	c.paramsLock.Lock()
+	defer c.paramsLock.Unlock()
+	buf.WriteString(c.params.Encode())
+	return buf.String()
+}
+</code></pre>
+<h3 id="复制后出现的结果">复制后出现的结果</h3>
+<p>例子1:</p>
+<pre><code class="language-go">import (
+	&quot;fmt&quot;
+	&quot;sync&quot;
+)
+
+var wg sync.WaitGroup
+var age int
+
+type Person struct {
+	mux sync.Mutex
+}
+
+func (p Person) AddAge() {
+	defer wg.Done()
+	p.mux.Lock()
+	age++
+	defer p.mux.Unlock()
+
+}
+
+func main() {
+	p1 := Person{
+		mux: sync.Mutex{},
+	}
+	wg.Add(100)
+	for i := 0; i &lt; 100; i++ {
+		go p1.AddAge()
+	}
+	wg.Wait()
+	fmt.Println(age)
+}
+
+</code></pre>
+<p>结果: 结果有可能是 100, 也有可能是99&hellip;.</p>
+<p>例子2:</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;sync&quot;
+)
+
+type Person struct {
+	mux sync.Mutex
+}
+
+func Reduce(p Person) {
+	fmt.Println(&quot;step...&quot;, )
+	p.mux.Lock()
+	fmt.Println(p)
+	defer p.mux.Unlock()
+	fmt.Println(&quot;over...&quot;)
+}
+
+func main() {
+	var p Person
+	p.mux.Lock()
+	go Reduce(p)
+	p.mux.Unlock()
+	fmt.Println(111)
+	for {
+	}
+}
+</code></pre>
+<p>结果: Reduce 协程会死锁.</p>
+<p>看到这里我们就能发现, 当 struct 嵌套了 Mutex, 如果以值传递的方式使用时, 有可能造成程序死锁, 有可能需要互斥的变量并不能达到互斥.</p>
+<p>所以不管是单独使用 <strong>不能复制</strong> 类型的变量, 还是嵌套在 struct 里面都不能值传递的方式使用.</p>
+<h3 id="不能复制原因">不能复制原因</h3>
+<p>以 Mutex 为例,</p>
+<pre><code class="language-go">type Mutex struct {
+	state int32
+	sema  uint32
+}
+</code></pre>
+<p>我们使用 Mutex 是为了不同 goroutine 之间共享某个变量, 所以需要让这个变量做到能够互斥, 不然该变量就会被互相被覆盖. Mutex 底层是由 <code>state</code> <code>sema</code> 控制的, 当 Mutex 变量被复制时, Mutex 的 state, sema 当时的状态也被复制走了, 但是由于不同 goroutine 之间的 Mutex 已经不是同一个变量了, 这样就会造成要么某个 goroutine 死锁或者不同 goroutine 共享的变量达不到互斥</p>
+<h2 id="struct-如何与-不可复制-的类型一块使用-">struct 如何与 不可复制 的类型一块使用 ?</h2>
+<p>由上面可以看到不只是 sync 相关类型变量自身不能被复制，而且 sturct 嵌套 <strong>不可复制</strong> 类型变量时, 同样也不能被复制. 但是如果我将嵌套的不可复制变量改成指针类型变量呢, 是不是就解决了不能复制的问题 ?</p>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	mux   	 *sync.RWMutex
+}
+</code></pre>
+<p>这样确实解决了上述的不能复制问题. 但也引出了另外一个问题. 众所周知 Go 没有构造函数, 这就导致我们使用 URL 的时候都需要先去初始化 RWMutex, 不然就会造成同样很严重的空指针问题, 这个问题同样很棘手，也许哪个位置就忘了初始化这个 RWMutex.</p>
+<p>根据 google groups 的讨论 <a href="https://groups.google.com/g/golang-nuts/c/imxjBLNJ9OY">How to copy a struct which contains a mutex?</a>, 以及我查看了<a href="https://github.com/kubernetes/kubernetes/blob/d20e3246bade17564860655e7fa57ead922d7307/pkg/controller/endpointslicemirroring/metrics/cache.go#L28">Kubernets 的相关源码(这里只是一个例子, 里面还有很多)</a>, 发现大家的观点基本上都是一致的, 都不会去选用 struct 去嵌套指针类型的变量, 由此不建议 struct 去嵌套 <strong>不可复制的</strong> 的指针类型变量. 最重要的原因: 没有一个工具能去准确的检测空指针.</p>
+<p>所以一般情况下, 当 struct 嵌套了 <strong>不可复制</strong> 类型的变量时, 都需要传递的是 struct 类型变量的指针. 如:</p>
+<pre><code class="language-go">type URL struct {
+	Ip       string
+	mux   	 sync.RWMutex
+}
+
+func (c *URL) Clone() *URL {
+	newUrl := &amp;URL{}
+	newUrl.Ip = c.Ip
+	return newUrl
+} 
+</code></pre>
+<h2 id="如何防止复制了不该复制的变量呢">如何防止复制了不该复制的变量呢?</h2>
+<p>由于 Go 并不提供<code>重载</code>的功能, 所以并不能做到去重载 struct 的相关的被复制的方法. 但是 Go 的槽点就来了, Go 本身还不提供不能被复制的相关的编译强约束. 这样就有可能导致出现<strong>不能被复制的类型</strong>被复制过后蒙混过关. 那我们需要怎么做呢 ?</p>
+<p>Go 提供了另外一个工具 <code>go vet</code> 来做补充, 用这个工具是能检测出来不可复制的类型是否被复制过.</p>
+<pre><code class="language-go">func main() {
+	var amux sync.Mutex
+	b := amux
+	b.Lock()
+	b.Unlock()
+}
+</code></pre>
+<pre><code>$ go vet main.go
+# command-line-arguments
+./main.go:7:7: assignment copies lock value to b: sync.Mutex
+</code></pre>
+<p>我们怎么把 go vet 与 日常开发结合起来呢?</p>
+<ol>
+<li>目前的 Goland, Vscode 都会集成 go vet 的相关功能, 如果你强迫症比较严重的话, 你就能发现有相关提示.</li>
+<li>把 go vet 与 CI 流程结合起来, 其实更推荐使用 <code>golangci-lint</code> 这个 lint 工具来做 CI</li>
+</ol>
+<p>Go 还提供一段 noCopy 的代码, 当你的 struct 有不能被复制的需求的时候, 可以加入这段代码</p>
+<pre><code class="language-go">type noCopy struct{}
+
+// Lock is a no-op used by -copylocks checker from `go vet`.
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}
+</code></pre>
+<p>这段代码依然是给 go vet 来使用的.</p>
+<p>说到这里, 禁止复制不能被复制的变量, 这个明明能在 <strong>编译期</strong> 就杜绝的事情, 为啥非要搞出来工具来做这个事情呢? 有点想不通.</p>
+<h2 id="不可复制的类型有哪些">不可复制的类型有哪些?</h2>
+<p>Go 提供的不可复制的类型基本上就是 sync 包内的所有类型: <code>atomic.Value</code>, <code>sync.Mutex</code>, <code>sync.Cond</code>, <code>sync.RWMutex</code>, <code>sync.Map</code>, <code>sync.Pool</code>, <code>sync.WaitGroup</code>.</p>
+<p>这些内置的不可被复制的类型当被复制时配合 go vet是能够发现的. 但是下面这种场景你是否遇见过?</p>
+<pre><code class="language-go">package main
+
+import &quot;fmt&quot;
+
+type Books struct {
+	someImportantData []int
+}
+
+func DoSomething(otherBook Books) Books {
+	newBook := otherBook
+	// do something
+	for k := range newBook.someImportantData {
+		newBook.someImportantData[k]++ // just like this
+	}
+	return otherBook
+}
+
+func main() {
+	oldBook := Books{
+		someImportantData: make([]int, 0, 100),
+	}
+
+	oldBook.someImportantData = append(oldBook.someImportantData, 1, 2, 3)
+	fmt.Println(&quot;before DoSomething, old book:&quot;, oldBook.someImportantData)
+	DoSomething(oldBook)
+	fmt.Println(&quot;after DoSomething, old book:&quot;, oldBook.someImportantData)
+	// 使用oldBook.someImportantData 继续做某些事情
+}
+
+</code></pre>
+<p>结果:</p>
+<pre><code>before DoSomething, old book: [1 2 3]
+after DoSomething, old book: [2 3 4]
+</code></pre>
+<p>这个场景其实我们可能不经意间就会遇到. newBook 是我们要操作的数据, 但是通过 DoSomething` 后, newBook.someImportantData 的值可能就被改掉了, 这可能并不是我们所期待的. 由于 DoSomething 是通过复制传递的, 可能我们并不能很敏感关注到这个点, 导致程序继续往下走逻辑可能就错了. 我们是不是可以设置 Books 为不可复制呢 ? 这样可以让 go vet 帮助我们发现这些问题</p>
+<h2 id="最后的最后">最后的最后</h2>
+<p>你是否这样初始化过 WaitGroup ?</p>
+<pre><code class="language-go">wg := sync.WaitGroup{}
+</code></pre>
+<p>这个算不算是被复制了呢, 欢迎留言讨论.</p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-01-23-rand/" class="block">一文完全掌握 Go math/rand</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-12-17-const-int/" class="block">疑惑: Go const 会导致程序结果错乱 ?</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

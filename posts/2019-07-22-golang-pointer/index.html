@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Golang是否真的没有指针运算? | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := &amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&quot;p1: &quot;, *p1) // 1 fmt.Printf(&quot;p1 address:%p\n&quot;, p1) // 0xc00009a000 p1 = p1 &#43; 1 } invalid operation: p1 &#43; 1 (mismatched types *int and int) C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题) #include&lt;stdio.h&gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;a&#43;1); printf(&quot;%d,%d&quot;,*(a&#43;1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Golang是否真的没有指针运算?",
+      "item":"https://www.haohongfan.com/posts/2019-07-22-golang-pointer/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-07-22-golang-pointer/"
+    },
+    "headline": "Golang是否真的没有指针运算? | HHFCodeRv","datePublished": "2019-07-22T11:48:24+08:00",
+    "dateModified": "2019-07-22T11:48:24+08:00",
+    "wordCount":  2841 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := \u0026amp;a1[0] fmt.Println(reflect.TypeOf(p1)) \/\/ *int fmt.Println(\u0026quot;p1: \u0026quot;, *p1) \/\/ 1 fmt.Printf(\u0026quot;p1 address:%p\\n\u0026quot;, p1) \/\/ 0xc00009a000 p1 = p1 \u002b 1 } invalid operation: p1 \u002b 1 (mismatched types *int and int) C或者C\u002b\u002b转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C\u002b\u002b的时候, 基本每家公司的笔试题上都会有这道题) #include\u0026lt;stdio.h\u0026gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026amp;a\u002b1); printf(\u0026quot;%d,%d\u0026quot;,*(a\u002b1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量"
+}
+</script><meta property="og:title" content="Golang是否真的没有指针运算? | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+
+
+
+<meta property="og:description" content="答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := &amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&quot;p1: &quot;, *p1) // 1 fmt.Printf(&quot;p1 address:%p\n&quot;, p1) // 0xc00009a000 p1 = p1 &#43; 1 } invalid operation: p1 &#43; 1 (mismatched types *int and int) C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题) #include&lt;stdio.h&gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;a&#43;1); printf(&quot;%d,%d&quot;,*(a&#43;1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-07-22T11:48:24&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-07-22T11:48:24&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-03-04-gin-04/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-01-21-gin-03/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Golang是否真的没有指针运算?</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-07-22</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>6分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)</p>
+<pre><code class="language-golang">func main()  {
+	a1 := []int{1, 2, 3}
+	p1 := &amp;a1[0]
+	fmt.Println(reflect.TypeOf(p1)) // *int
+	fmt.Println(&quot;p1: &quot;, *p1) // 1
+	fmt.Printf(&quot;p1 address:%p\n&quot;, p1) // 0xc00009a000
+	p1 = p1 + 1
+}
+</code></pre>
+<pre><code>invalid operation: p1 + 1 (mismatched types *int and int)
+</code></pre>
+<p>C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题)</p>
+<pre><code class="language-c">#include&lt;stdio.h&gt;
+void main()
+{
+　　int a[5]={1,2,3,4,5};  
+　　int *ptr=(int *)(&amp;a+1);  
+　　printf(&quot;%d,%d&quot;,*(a+1),*(ptr-1));  
+}
+</code></pre>
+<p>这题的结果是: 2和5</p>
+<p>可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了<code>unsafe</code>包, 能够实现同样的功能</p>
+<h2 id="unsafe">Unsafe</h2>
+<h3 id="pointer">Pointer</h3>
+<pre><code class="language-golang">type ArbitraryType int
+type Pointer *ArbitraryType
+</code></pre>
+<p><strong>这里特别要注意ArbitraryType在这里只起到文档作用, 不是代表是真正的int</strong>. 比如: <code>Sizeof</code>等相关的函数可以接受任意类型的变量, 假如按照int类型来解释, 基本就解释不通了. 官方文档特别提示这个</p>
+<pre><code>ArbitraryType is here for the purposes of documentation only and is not actually part of the unsafe package.
+It represents the type of an arbitrary Go expression.
+</code></pre>
+<pre><code class="language-golang">a1 := 3.6
+fmt.Println(unsafe.Pointer(&amp;a1)) // 0xc000014078
+
+a2 := 3
+fmt.Println(unsafe.Pointer(&amp;a2)) // 0xc00007a008
+</code></pre>
+<p>从这里可以看到Pointer可以指向任意类型的变量(跟C的void*类似)</p>
+<p>使用Pointer要注意下面4条准则</p>
+<ul>
+<li>任何类型的指针值都可以转换为Pointer // unsafe.Pointer(&amp;a1)</li>
+<li>Pointer可以转换为任何类型的指针值   // (*float32)(unsafe.Pointer(numPointer))</li>
+<li>uintptr可以转换为 Pointer        // unsafe.Pointer(uintptr(nPointer) + + unsafe.Sizeof(&amp;a) * 3)</li>
+<li>Pointer可以转换为 uintptr        // uintptr(unsafe.Pointer(numPointer))</li>
+</ul>
+<h3 id="uintptr">uintptr</h3>
+<pre><code class="language-golang">type uintptr uintptr
+</code></pre>
+<p>uintptr 是一个整数类型，它足够大，可以存储. 只有将Pointer转换成uintptr才能进行指针的相关操作</p>
+<p>但下面的代码要注意, 这种用法是错误的</p>
+<pre><code class="language-golang">tmp := uintptr(unsafe.Pointer(&amp;x)) + unsafe.Offsetof(x.b)
+pb := (*int16)(unsafe.Pointer(tmp))
+*pb = 42
+</code></pre>
+<p>uintptr是可以用于指针运算的，但是GC并不把uintptr当做指针，所以uintptr不能持有对象, 可能会被GC回收, 导致出现无法预知的错误. Pointer指向一个对象时, GC是不会回收这个内存的.</p>
+<h3 id="相关函数">相关函数</h3>
+<ul>
+<li>func Sizeof(x ArbitraryType) uintptr</li>
+<li>func Offsetof(x ArbitraryType) uintptr</li>
+<li>func Alignof(x ArbitraryType) uintptr</li>
+</ul>
+<h4 id="sizeof">Sizeof</h4>
+<p>返回类型x所占据的字节数, 但是却不包括x所引用的内存. 例如: 对于一个指针，函数返回的大小为8字节（64位机上），一个slice的大小则为slice header的大小</p>
+<pre><code class="language-golang">	var a int32 = 10
+	t := unsafe.Sizeof(a)
+	fmt.Println(t)
+
+	var b string = &quot;test&quot;
+	fmt.Println(unsafe.Sizeof(b))
+
+	type aa struct {
+		B bool
+		C uint64
+	}
+	c := aa{}
+	fmt.Println(unsafe.Sizeof(c))
+
+	type bb struct {
+		B *bool
+	}
+	c1 := bb{}
+	fmt.Println(unsafe.Sizeof(c1))
+</code></pre>
+<pre><code>4  // 这个没啥说的, int32在64位机器上占4个字节
+16 // Sizeof(string)占计算string header的大小, struct string { uint8 *str; int len;}
+16 // 这个涉及到内存对齐的问题(C, C++同学是不是又想到曾经虐我们千百遍的面试题了...). 内存对齐的问题下面再说
+8  // 指针占8个字节(64位机器)
+</code></pre>
+<h4 id="offsetof">Offsetof</h4>
+<p>返回结构体中某个字段的偏移量, 这个字段必须是structValue.field形式. 也就是返回结构体变量的开始位置到那个字段的开始位置之间字节数.</p>
+<pre><code class="language-golang">type aa struct {
+	B bool
+	C uint64
+}
+
+c := aa{}
+fmt.Println(unsafe.Offsetof(c.B), unsafe.Offsetof(c.C))
+</code></pre>
+<pre><code>B:0
+C:8
+</code></pre>
+<p>注意这里<code>C:8</code>是不是结果错了? 其实不然, 这是因为涉及到内存对齐的问题</p>
+<h4 id="alignof">Alignof</h4>
+<p>这个函数返回内存对齐时的对齐值, 这个跟内存对齐有关</p>
+<pre><code class="language-golang">type Part1 struct {
+	a bool
+	b int32
+	c int8
+	d int64
+		e byte
+	}
+
+part1 := Part1{}
+fmt.Printf(&quot;part1 size: %d, align: %d\n&quot;, unsafe.Sizeof(part1), unsafe.Alignof(part1))
+</code></pre>
+<pre><code>part1 size: 32, align: 8
+</code></pre>
+<h2 id="内存对齐">内存对齐</h2>
+<p>关于为什么要内存对齐, 就是为了加快内存的存取速度, 用空间换时间的做法. 我们不需要太过关注这个, 就大概知道golang有这么一个性质.</p>
+<p>不同平台类型T内存大小和对齐值都是不一样的. 具体使用的时候要按照自己的本机实际情况为准. 不过大部分面试题或者我们讨论的时候都是按照64位进行的</p>
+<pre><code class="language-goalng">fmt.Printf(&quot;bool: %d\n&quot;, unsafe.Alignof(bool(true)))
+fmt.Printf(&quot;int32: %d\n&quot;, unsafe.Alignof(int32(0)))
+fmt.Printf(&quot;int8: %d\n&quot;, unsafe.Alignof(int8(0)))
+fmt.Printf(&quot;int64: %d\n&quot;, unsafe.Alignof(int64(0)))
+fmt.Printf(&quot;byte: %d\n&quot;, unsafe.Alignof(byte(0)))
+fmt.Printf(&quot;string: %d\n&quot;, unsafe.Alignof(&quot;xxx&quot;))
+fmt.Printf(&quot;map: %d\n&quot;, unsafe.Alignof(map[string]string{}))
+</code></pre>
+<pre><code>bool: 1
+int32: 4
+int8: 1
+int64: 8
+byte: 1
+string: 8
+map: 8
+</code></pre>
+<p>不只是unsafe.Alignof可以计算内存对齐值, <code>reflect.TypeOf(bool(true)).Align())</code>同样可以</p>
+<p>关于普通变量的对齐没啥说的, 就是上面代码那个样子. 但是涉及结构体就变得比较复杂了</p>
+<pre><code class="language-golang">type Part1 struct {
+	a bool // 1
+	b int32 // 4
+	c int8  // 1
+	d int64 // 8
+	e byte // 1
+}
+j
+part1 := Part1{}
+fmt.Printf(&quot;part1 size: %d\n&quot;, unsafe.Sizeof(part1))
+</code></pre>
+<p>结果是多少呢? 是不是<code>1+4+1+8+1 = 15</code>, 结果并不是. 下面具体分析</p>
+<h3 id="对齐规则">对齐规则</h3>
+<ol>
+<li>结构体的成员变量，第一个成员变量的偏移量为 0。往后的每个成员变量的对齐值必须为编译器默认对齐长度（#pragma pack(n)）或当前成员变量类型的长度（unsafe.Sizeof），取最小值作为当前类型的对齐值。其偏移量必须为对齐值的整数倍</li>
+<li>结构体本身，对齐值必须为编译器默认对齐长度（#pragma pack(n)）或结构体的所有成员变量类型中的最大长度，取最大数的最小整数倍作为对齐值</li>
+<li>结合以上两点，可得知若编译器默认对齐长度（#pragma pack(n)）超过结构体内成员变量的类型最大长度时，默认对齐长度是没有任何意义的</li>
+</ol>
+<p>首先我们要知道struct, slice内存都是连续的</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">成员</th>
+<th style="text-align:center">类型</th>
+<th style="text-align:center">默认对齐值</th>
+<th style="text-align:center">当前偏移量</th>
+<th style="text-align:left">解析</th>
+<th style="text-align:left">内存布局</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">a</td>
+<td style="text-align:center">bool</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:left">第一个成员的偏移量是0, 占用1位</td>
+<td style="text-align:left">a</td>
+</tr>
+<tr>
+<td style="text-align:left">b</td>
+<td style="text-align:center">int32</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">根据规则1, 对齐值是当前成员类型的对齐值, 所以偏移量是4的整数倍, 所以需要先补3位(2-4), 再第5位开始填充</td>
+<td style="text-align:left">axxx|bbbb</td>
+</tr>
+<tr>
+<td style="text-align:left">c</td>
+<td style="text-align:center">int8</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">8</td>
+<td style="text-align:left">根据规则1, 偏移量是对齐值的整数倍, 8/1 = 8, 故不需要偏移, 从第9位开始填充1位</td>
+<td style="text-align:left">axxx|bbbb|c</td>
+</tr>
+<tr>
+<td style="text-align:left">d</td>
+<td style="text-align:center">int64</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">9</td>
+<td style="text-align:left">根据规则1, 偏移量是对齐值的整数倍, 故需要先补7位(9-16), 从17位开始填充8位</td>
+<td style="text-align:left">axxx|bbbb|cxxx|xxxx| dddd|dddd</td>
+</tr>
+<tr>
+<td style="text-align:left">e</td>
+<td style="text-align:center">byte</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">24</td>
+<td style="text-align:left">根据规则1, 24/1= 24, 不需要偏移, 从25位开始填充</td>
+<td style="text-align:left">axxx|bbbb|cxxx|xxxx| dddd|dddd|e</td>
+</tr>
+<tr>
+<td style="text-align:left">最终调整</td>
+<td style="text-align:center">struct</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">25</td>
+<td style="text-align:left">根据规则2, 结构体的的对齐值是8, 由于目前的偏移量是25, 不是8的整数倍, 故需要填充至8的最小整数倍, 同时比25大, 故是32</td>
+<td style="text-align:left">axxx|bbbb|cxxx|xxxx|dddd|dddd|exxx|xxxx</td>
+</tr>
+</tbody>
+</table>
+<p>有的时候我们调整机构体字段的顺序是可以节省内存的</p>
+<pre><code class="language-golang">type Part1 struct {
+    a bool
+    b int32
+    c int8
+    d int64
+    e byte
+}
+
+type Part2 struct {
+    e byte
+    c int8
+    a bool
+    b int32
+    d int64
+}
+
+func main() {
+    part1 := Part1{}
+    part2 := Part2{}
+
+    fmt.Printf(&quot;part1 size: %d, align: %d\n&quot;, unsafe.Sizeof(part1), unsafe.Alignof(part1))
+    fmt.Printf(&quot;part2 size: %d, align: %d\n&quot;, unsafe.Sizeof(part2), unsafe.Alignof(part2))
+}
+</code></pre>
+<pre><code>part1 size: 32, align: 8
+part2 size: 16, align: 8
+</code></pre>
+<p>看到这里, 基本就解释了<code>Sizeof</code>, <code>Offsetof</code>涉及到内存对齐的问题. 这里详细解释一下</p>
+<pre><code class="language-golang">type aa struct {
+	B bool
+	C uint64
+}
+c := aa{}
+fmt.Println(unsafe.Sizeof(c))
+fmt.Println(unsafe.Offsetof(c.B), unsafe.Offsetof(c.C))
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">成员</th>
+<th style="text-align:center">类型</th>
+<th style="text-align:center">默认对齐值</th>
+<th style="text-align:center">偏移量</th>
+<th style="text-align:left">解析</th>
+<th style="text-align:left">内存布局</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">B</td>
+<td style="text-align:center">bool</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:left">第一个成员的偏移量是0, 占用1位</td>
+<td style="text-align:left">B</td>
+</tr>
+<tr>
+<td style="text-align:left">C</td>
+<td style="text-align:center">uint64</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">由于偏移量必须是对齐值的整数倍, 所以需要补位(2-8), 从9位开始填充</td>
+<td style="text-align:left">Bxxx|xxxx|CCCC|CCCC</td>
+</tr>
+</tbody>
+</table>
+<p>所以结果是: <code>unsafe.Sizeof(c) = 16, unsafe.Offsetof(c.C) = 8</code></p>
+<p>关于更详细关于内存对齐, 请参考<a href="https://book.eddycjy.com/golang/talk/go-memory-align.html">煎鱼</a>博客</p>
+<h2 id="实际使用场景">实际使用场景</h2>
+<h3 id="转换类型">转换类型</h3>
+<pre><code class="language-golang">func Float64bits(f float64) uint64 {
+	return *(*uint64)(unsafe.Pointer(&amp;f))
+}
+</code></pre>
+<h3 id="计算偏移量">计算偏移量</h3>
+<pre><code class="language-golang">func main() {
+	type aa struct {
+		B bool
+		C uint64
+	}
+	c := aa{}
+
+	fmt.Println(c)
+	aac := (*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&amp;c)) + unsafe.Offsetof(c.C)))
+	*aac = 10
+	fmt.Println(c)
+}
+</code></pre>
+<pre><code>{false 0}
+{false 10}
+</code></pre>
+<h3 id="验证slice子切片和母切片共享底层数组">验证slice子切片和母切片共享底层数组</h3>
+<p>总看到slice子切片和母切片共享底层数组, 下面我们用实际的代码验证一下</p>
+<pre><code class="language-golang">func main() {
+	var s1 = []int{1, 2, 3, 4, 5, 6, 7}
+	var s2 = s1[2:5]
+
+	s1SliceArrayPointer := unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(&amp;s1)))
+	fmt.Println(&quot;s1[0]:&quot;, *(*int)(s1SliceArrayPointer))
+	fmt.Println(&quot;s1 address:&quot;, s1SliceArrayPointer)
+
+	s2SliceArrayPointer := unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(&amp;s2)))
+	fmt.Println(&quot;s2[0]:&quot;, *(*int)(s2SliceArrayPointer))
+	fmt.Println(&quot;s2 address:&quot;, s2SliceArrayPointer)
+
+	offset2Pointer := unsafe.Pointer(uintptr(s1SliceArrayPointer) + unsafe.Sizeof(&amp;s1[0])*2)
+	fmt.Println(&quot;offset s1[2]:&quot;, *(*int)(offset2Pointer))
+	fmt.Println(&quot;offset s1 address:&quot;, offset2Pointer)
+}
+</code></pre>
+<pre><code>s1[0]: 1
+s1 address: 0xc00001a040
+s2[0]: 3
+s2 address: 0xc00001a050
+offset s1[2]: 3
+offset s1 address: 0xc00001a050
+</code></pre>
+<p>前提是要先知道slice的结构体</p>
+<pre><code class="language-golang">// runtime/slice.go
+type slice struct {
+    array unsafe.Pointer // 元素指针
+    len   int // 长度 
+    cap   int // 容量
+}
+</code></pre>
+<p><img src="https://images.haohongfan.com/slice.png" alt="slice"></p>
+<ol>
+<li>unsafe.Pointer(&amp;s1) 取到s1的首地址的指针, 其实也就是s1 array位置的指针</li>
+<li>unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(&amp;s1))) 将s1 array存放的值取出来, 也就是底层数组的首元素的地址</li>
+<li>unsafe.Pointer(uintptr(s1SliceArrayPointer) + unsafe.Sizeof(&amp;s1[0])*2) 向后偏移2位, 也就是取到3的位置</li>
+</ol>
+<p>我们看到s2的首元素的地址和s1偏移2个位置的地址都是0xc00001a050, 所以也就证明确实是同一个底层数组</p>
+<h2 id="结论">结论</h2>
+<p>golang指针不能参与计算, 但是unsafe包可以</p>
+<p>unsafe包绕过了Go的类型系统，达到直接操作内存的目的，使用它有一定的风险性, 正常事情下, 不建议开发的代码中大量引入这个. 但是我们需要知道有这样的黑科技存在!</p>
+<h3 id="参考资料">参考资料</h3>
+<ol>
+<li><a href="https://golang.org/pkg/unsafe/">官方文档</a></li>
+<li><a href="https://mp.weixin.qq.com/s/OO-kwB4Fp_FnCaNXwGJoEw">码农桃花源-深度解密Go语言之unsafe</a></li>
+<li><a href="https://book.eddycjy.com/golang/pkg/unsafe.html">煎鱼-有点不安全却又一亮的 Go unsafe.Pointer</a></li>
+<li><a href="https://book.eddycjy.com/golang/talk/go-memory-align.html">煎鱼-在 Go 中恰到好处的内存对齐</a></li>
+</ol>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/" class="block">Logrus源码阅读(2)--logrus生命周期</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" class="block">Logrus源码阅读(1)--基本用法</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/">Logrus源码阅读(1)--基本用法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/">gin源码阅读之四 -- gin的路由算法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-01-21-gin-03/">gin源码阅读之三 -- gin牛逼的context</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

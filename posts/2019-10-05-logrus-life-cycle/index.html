@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Logrus源码阅读(2)--logrus生命周期 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Eureka is a elegant and powerful theme for Hugo.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Logrus源码阅读(2)--logrus生命周期",
+      "item":"https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"
+    },
+    "headline": "Logrus源码阅读(2)--logrus生命周期 | HHFCodeRv","datePublished": "2019-10-05T11:21:24+08:00",
+    "dateModified": "2019-10-05T11:21:24+08:00",
+    "wordCount":  5986 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "Eureka is a elegant and powerful theme for Hugo."
+}
+</script><meta property="og:title" content="Logrus源码阅读(2)--logrus生命周期 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/" />
+
+
+
+
+<meta property="og:description" content="" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2019-10-05T11:21:24&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2019-10-05T11:21:24&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="logrus" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Logrus源码阅读(2)--logrus生命周期</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-10-05</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>12分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p><a href="https://www.haohongfan.com/post/2019-06-11-logurs-1/">上一篇</a>介绍logrus的基本用法, 本篇文章介绍logrus的整个生命周期</p>
+<pre><code class="language-golang">func main() {
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<p>从上面这个简单的例子, 追踪logrus的整个生命周期</p>
+<h2 id="初始化">初始化</h2>
+<pre><code class="language-golang">// exported.go:L108
+func Info(args ...interface{}) {
+	std.Info(args...)
+}
+</code></pre>
+<p>Info函数的参数是一个可变参数, 接收任意类型的参数</p>
+<pre><code class="language-golang">// exported.go:L11
+var (
+	// std is the name of the standard logger in stdlib `log`
+	std = New()
+)
+
+func StandardLogger() *Logger {
+	return std
+}
+</code></pre>
+<p>std是一个全局变量, 是一个<code>logrus.Logger</code>类型. 由于std是包外面无法访问的, 所以还提供StandardLogger()函数获取到std</p>
+<p>logrus就是初始化一个全局变量<code>std</code>, 所有的使用方式都是围绕着这个std来的</p>
+<p>上一篇关于logrus的三种使用方式: <code>logrus.Info</code>, <code>logrus.WithField</code>, <code>Entry(ctx *gin.Context) *logrus.Entry</code>本质就是调用全局变量std</p>
+<p><strong>这里留个思考题, 您是否知道golang的初始化流程呢? std全局变量是什么时候被初始化完成的?</strong></p>
+<p>这里还要引申出另外一个问题: 由于我们维护一个全局变量, 但是我们程序是多goroutine的, 当程序多个地方打印日志或者写入文件时, 如何保证日志顺序的正确性, 也就是并发是如何实现的?</p>
+<h3 id="new">New</h3>
+<p>从<code>初始化</code>那里可以看到std是由<code>New</code>函数创建出来的</p>
+<pre><code class="language-go">func New() *Logger {
+	return &amp;Logger{
+		Out:          os.Stderr,
+		Formatter:    new(TextFormatter),
+		Hooks:        make(LevelHooks),
+		Level:        InfoLevel,
+		ExitFunc:     os.Exit,
+		ReportCaller: false,
+	}
+}
+</code></pre>
+<p>logrus由<code>Out</code>, <code>Formatter</code>, <code>Hooks</code>, <code>Level</code>, <code>ExitFunc</code>, <code>ReportCaller</code>组成. 关于组件的详细作用, 下面再具体介绍剖析</p>
+<p>其实还有两个重要的字段</p>
+<ul>
+<li>MutexWrap: 用来解决并发. // Used to sync writing to the log. Locking is enabled by Default</li>
+<li>entryPool: 用来解决Entry gc压力. // Reusable empty entry</li>
+</ul>
+<h2 id="调用流程">调用流程</h2>
+<p>回到<code>log.Info(&quot;hello logrus&quot;)</code>这个最简单的使用的例子, 追踪下具体的调用过程</p>
+<p><img src="https://images.haohongfan.com/logrus-liucheng2.png" alt=""></p>
+<pre><code class="language-go">// exported.go:L107
+// Info logs a message at level Info on the standard logger.
+func Info(args ...interface{}) {
+	std.Info(args...) // &lt;-- 看这里
+}
+
+// logger.go:L205
+func (logger *Logger) Info(args ...interface{}) {
+	logger.Log(InfoLevel, args...) // &lt;-- 看这里
+}
+
+// logger.go:L189
+func (logger *Logger) Log(level Level, args ...interface{}) {
+	if logger.IsLevelEnabled(level) {
+		entry := logger.newEntry()
+		entry.Log(level, args...) // &lt;-- 看这里
+		logger.releaseEntry(entry)
+	}
+}
+
+// entry.go:L266
+func (entry *Entry) Log(level Level, args ...interface{}) {
+	if entry.Logger.IsLevelEnabled(level) {
+		entry.log(level, fmt.Sprint(args...)) // &lt;-- 看这里
+	}
+}
+
+// entry.go:L206
+func (entry Entry) log(level Level, msg string) {
+	...
+
+	buffer = bufferPool.Get().(*bytes.Buffer)
+	buffer.Reset()
+	defer bufferPool.Put(buffer)
+	entry.Buffer = buffer
+
+	entry.write() // &lt;-- 看这里
+
+	....
+}
+
+// entry.go:L252
+func (entry *Entry) write() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	serialized, err := entry.Logger.Formatter.Format(entry)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, &quot;Failed to obtain reader, %v\n&quot;, err)
+	} else {
+		_, err = entry.Logger.Out.Write(serialized)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, &quot;Failed to write to log, %v\n&quot;, err)
+		}
+	}
+}
+</code></pre>
+<p>虽说初始化的时候, New出来的是<code>Logger</code>类型, 但logrus真正执行者却是<code>Entry</code>. <code>Logger</code>有两个比较重要的函数<code>newEntry</code>, <code>releaseEntry</code>, logrus所有的log函数, 比如: <code>Info</code>, <code>Error</code>&hellip;. 最终都会调用这两个函数</p>
+<h3 id="newentry--releaseentry">newEntry &amp;&amp; releaseEntry</h3>
+<pre><code class="language-go">// logger.go:L90-101
+func (logger *Logger) newEntry() *Entry {
+	entry, ok := logger.entryPool.Get().(*Entry)
+	if ok {
+		return entry
+	}
+	return NewEntry(logger)
+}
+
+func (logger *Logger) releaseEntry(entry *Entry) {
+	entry.Data = map[string]interface{}{}
+	logger.entryPool.Put(entry)
+}
+</code></pre>
+<p>Logger使用到了<code>sync.Pool</code>, 用来解决频繁创建/释放Entry对象造成的gc的压力. 具体位置就是<code>logger.go:L189</code></p>
+<p>当我们使用logrus log相关函数时, 必定会调用到<code>logger.Log()</code>函数, 该函数会调用<code>newEntry()</code>来申请Pool内存, 调用完成后会再调用<code>releaseEntry()</code>返还给Pool</p>
+<p>注意点:</p>
+<ol>
+<li>初始化Logger时, <code>New</code>函数没有初始化entryPool, 所以entryPool默认返回的是nil</li>
+<li>entry, ok := logger.entryPool.Get().(*Entry), 这段代码是先从Pool获取内存, 然后判断获取到的值是否是<code>*Entry</code>类型</li>
+<li>在第一次调用时由于获取到的值肯定是nil, 故调用了<code>NewEntry</code>函数获取了一块内存</li>
+<li>不过在调用releaseEntry函数时将这块内存Put到entryPool里, 后面所有调用都是从Pool里面获取</li>
+</ol>
+<p>newEntry, releaseEntry这是<code>Sync.Pool</code>的另外一种用法, 可以看这里一个具体的简单的<a href="https://play.golang.org/p/74gWnH37-zr">例子</a></p>
+<h2 id="entry">Entry</h2>
+<pre><code class="language-go">type Entry struct {
+	Logger *Logger // 其实就是std指针, 后面再说具体的作用
+	Data Fields    // 就是各种WithXXX所带的参数
+	Time time.Time // 提供给logrus.WithTime, logrus.WithContext使用
+	Level Level    // 日志级别
+	Caller *runtime.Frame  // 当设置SetReportCaller时使用, 具体后面再说
+	Message string // 真正打印的日志内容
+	Buffer *bytes.Buffer // 提供给各种Formatter使用, 其实就是真正要打印的日志的内存地址
+	Context context.Context // 提供给logrus.WithTime, logrus.WithContext使用
+	err string // 提供一个能够包含错误信息的字段
+}
+</code></pre>
+<pre><code class="language-go">// entry.go:L80-86
+func NewEntry(logger *Logger) *Entry {
+	return &amp;Entry{
+		Logger: logger,
+		// Default is three fields, plus one optional.  Give a little extra room.
+		Data: make(Fields, 6),
+	}
+}
+</code></pre>
+<p>注意到到Data其实就是<code>map[string]interface{}</code>, 其预先分配了6个空间(预先给make函数⼀一个合理元素数量参数，有助于提升性能。因为事先申请⼀一⼤大块内存， 可避免后续操作时频繁扩张 &ndash; Go 学习笔记 第四版. 引申: map是否能用cap函数计算其容量? 为什么?)</p>
+<h3 id="withxxx">WithXXX</h3>
+<p>几个比较重要的With函数</p>
+<ul>
+<li>WithContext</li>
+<li>WithField</li>
+<li>WithFields</li>
+<li>WithTime</li>
+<li>WithError</li>
+</ul>
+<p>考虑到篇幅过长, 这个几个函数具体实现, 下篇介绍logurs高级用法再说</p>
+<h3 id="log">log</h3>
+<p>不管程序是否调用WithXXX函数, 最终都会调用Entry.log函数. 这是logrus最重要的函数, Hook机制也就是在这里实现的</p>
+<pre><code class="language-go">func (entry Entry) log(level Level, msg string) {
+	var buffer *bytes.Buffer
+
+	// 判断时间是否为空, 如果是空的话, 就设置entry.Time为当前时间
+	if entry.Time.IsZero() {
+		entry.Time = time.Now()
+	}
+
+	entry.Level = level
+	entry.Message = msg
+	// 设置调用者
+	if entry.Logger.ReportCaller {
+		entry.Caller = getCaller()
+	}
+
+	// 调用Hook
+	entry.fireHooks()
+
+	buffer = bufferPool.Get().(*bytes.Buffer)
+	buffer.Reset()
+	defer bufferPool.Put(buffer)
+	entry.Buffer = buffer
+
+	entry.write()
+
+	entry.Buffer = nil
+
+	// 当日志级别是PanicLevel时, 让程序直接panic
+	if level &lt;= PanicLevel {
+		panic(&amp;entry)
+	}
+}
+</code></pre>
+<h2 id="hook">Hook</h2>
+<p>logrus提供了一个很方便的插件功能就是Hook, 其实现原理很简单. 流程调用的地方就是<code>entry.fireHooks()</code></p>
+<pre><code class="language-go">func (entry *Entry) fireHooks() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	err := entry.Logger.Hooks.Fire(entry.Level, entry)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, &quot;Failed to fire hook: %v\n&quot;, err)
+	}
+}
+</code></pre>
+<p>我们可以根据自己的需求自定义Hook, 但需要实现Hook的interface</p>
+<pre><code class="language-go">type Hook interface {
+	Levels() []Level // 用来确定哪些级别的日志, 去调用Hook
+	Fire(*Entry) error // 真正执行自定义Hook
+}
+</code></pre>
+<p><strong>Hook的使用方法</strong></p>
+<ol>
+<li>实现Levels, Fire函数</li>
+<li>调用全局AddHook, 将Hook注册, ok</li>
+</ol>
+<p>以<code>github.com/rifflock/lfshook</code>举例</p>
+<pre><code class="language-go">package main
+
+import (
+	rotatelogs &quot;github.com/lestrrat-go/file-rotatelogs&quot;
+	&quot;github.com/rifflock/lfshook&quot;
+)
+
+func newLfsHook(fileName string, maxRemainCnt uint) log.Hook {
+	writer, err := rotatelogs.New(
+		fileName+&quot;.%Y%m%d%H%M&quot;,
+		rotatelogs.WithLinkName(&quot;ling_nest_log&quot;),
+		rotatelogs.WithRotationTime(time.Hour*time.Duration(config.Config.GetInt(&quot;log.time&quot;))),
+		rotatelogs.WithRotationCount(maxRemainCnt),
+	)
+
+	if err != nil {
+		log.Errorf(&quot;config local file system for logger error: %v&quot;, err)
+	}
+
+	lfsHook := lfshook.NewHook(lfshook.WriterMap{
+		log.DebugLevel: writer,
+		log.InfoLevel:  writer,
+		log.WarnLevel:  writer,
+		log.ErrorLevel: writer,
+		log.FatalLevel: writer,
+		log.PanicLevel: writer,
+	}, &amp;log.JSONFormatter{})
+
+	return lfsHook
+}
+
+func main() {
+	fileName := &quot;log.txt&quot;
+	logrus.AddHook(newLfsHook(fileName, 100))
+	logrus.Info(&quot;xxxx&quot;)
+}
+</code></pre>
+<p>值得注意的是: <strong>由于logrus本身并不提供写文件, 并且按照日期自动分割, 删除过期日志文件的功能. 一般情况下大家都是使用<code>github.com/rifflock/lfshook</code>配合<code>github.com/lestrrat-go/file-rotatelogs</code>来实现相关的功能</strong></p>
+<p>原理:</p>
+<pre><code class="language-go">type Logger struct {
+	...
+
+	Hooks LevelHooks
+
+	...
+}
+</code></pre>
+<pre><code class="language-go">type LevelHooks map[Level][]Hook
+func (hooks LevelHooks) Add(hook Hook) {
+	for _, level := range hook.Levels() {
+		hooks[level] = append(hooks[level], hook)
+	}
+}
+
+func (hooks LevelHooks) Fire(level Level, entry *Entry) error {
+	for _, hook := range hooks[level] {
+		if err := hook.Fire(entry); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+</code></pre>
+<ol>
+<li>调用AddHook时, 将Hook加入到LevelHooks map中</li>
+<li>程序打印log, 会最终执行到<code>Entry.log()</code></li>
+<li>Entry.log()会调用<code>fireHooks()</code></li>
+<li>fireHooks又会调用LevelHooks Fire()函数, 该函数会遍历所有的Hook, 从而执行相应的Hook</li>
+</ol>
+<h2 id="reportcaller">ReportCaller</h2>
+<pre><code class="language-go">import (
+	log &quot;github.com/sirupsen/logrus&quot;
+)
+
+func main() {
+	log.SetReportCaller(true)
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<p>输出:</p>
+<p><code>INFO[0000]/Users/haohongfan/goproject/test/logrus_test/main.go:37 main.main() hello logrus</code></p>
+<p>对比不开启<code>ReportCaller</code>的日志, 多了下面字段:</p>
+<ol>
+<li>日志打印的文件名字</li>
+<li>日志打印的行号</li>
+<li>日志打印的函数名字</li>
+</ol>
+<p>关于如何实现的, 推荐先看鸟窝博客- &laquo;如何在Go的函数中得到调用者函数名?&raquo;</p>
+<p>其实ReportCaller主要是提供给Formatter使用的, 例如: JSONFormatter</p>
+<pre><code class="language-go">// json_formatter.go:L91-103
+if entry.HasCaller() {
+	funcVal := entry.Caller.Function
+	fileVal := fmt.Sprintf(&quot;%s:%d&quot;, entry.Caller.File, entry.Caller.Line)
+	if f.CallerPrettyfier != nil {
+		funcVal, fileVal = f.CallerPrettyfier(entry.Caller)
+	}
+	if funcVal != &quot;&quot; {
+		data[f.FieldMap.resolve(FieldKeyFunc)] = funcVal
+	}
+	if fileVal != &quot;&quot; {
+		data[f.FieldMap.resolve(FieldKeyFile)] = fileVal
+	}
+}
+</code></pre>
+<p>由于打算结合logrus的实现, 出一篇介绍golang如何获取调用者的文件名/函数名/行号等等, 及其实现的原理的文章, 就不在继续扩展了</p>
+<p>这里简单说下logrus的实现过程.</p>
+<p>规则:</p>
+<ol>
+<li>当设置SetReportCaller(true)时, 会最终在Entry.log()函数调用<code>entry.Caller = getCaller()</code></li>
+<li><code>getCaller()</code>函数有个<code>callerInitOnce</code> sync.Once变量, 在第一次被调用时会获取logrus的包名字是<code>github.com/sirupsen/logrus</code></li>
+<li>紧接着调用<code>runtime.CallersFrames</code>获取到所有函数调用栈</li>
+<li>然后比对函数栈的package名字, 与<code>github.com/sirupsen/logrus</code>相比, 如果不相等, 则是去掉logrus包的第一个调用者; 否则continue</li>
+</ol>
+<p>比如:</p>
+<pre><code class="language-go">func main() {
+	log.SetReportCaller(true)
+	log.Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<p>函数调用栈的顺序是:</p>
+<ol>
+<li>github.com/sirupsen/logrus.(*Logger).Log</li>
+<li>github.com/sirupsen/logrus.(*Logger).Info</li>
+<li>github.com/sirupsen/logrus.Info</li>
+<li>main.main</li>
+</ol>
+<p>按照上面的规则, 由于1,2,3获取到的package包名都是github.com/sirupsen/logrus, 故continue, 最终获取到的第一个函数是main.main的<code>*runtime.Frame</code>. Frame包含着文件名, 函数名, 行号等等</p>
+<p>我们回过头看logrus获取调用者的这个实现. 是靠着完全遍历匹配package名来获取调用者的. 先抛去runtime.Caller等相关的函数是否慢的问题, 单说这个完全匹配的过程已经浪费了大量时间处理这个事情. <strong>所以我们日志在release版本下还是尽量不要开启这个选项, logrus也不建议使用这开启这个选项</strong></p>
+<h2 id="write">write</h2>
+<p>logrus另外一个非常重要的函数</p>
+<pre><code class="language-go">// entry.go:L252-264
+func (entry *Entry) write() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	serialized, err := entry.Logger.Formatter.Format(entry)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, &quot;Failed to obtain reader, %v\n&quot;, err)
+	} else {
+		_, err = entry.Logger.Out.Write(serialized)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, &quot;Failed to write to log, %v\n&quot;, err)
+		}
+	}
+}
+</code></pre>
+<p>看着很简单, 其实包含的内容还是挺多的: <code>Formatter</code>, <code>Out</code></p>
+<h3 id="formatter">Formatter</h3>
+<pre><code class="language-go">type Formatter interface {
+	Format(*Entry) ([]byte, error)
+}
+</code></pre>
+<p>由于Formatter是个接口类型, 故可以根据自己的需求, 实现自己的Formatter, 只需要实现对应的Format函数即可</p>
+<p>继续查看Formatter的具体调用过程(暂且不管Mutex的问题)</p>
+<pre><code class="language-go">// 执行Formatter的地方
+func (entry *Entry) write() {
+	...
+
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	serialized, err := entry.Logger.Formatter.Format(entry)
+
+	...
+}
+</code></pre>
+<pre><code class="language-go">// 设置Formatter的地方
+// SetFormatter sets the standard logger formatter.
+func SetFormatter(formatter Formatter) {
+	std.SetFormatter(formatter)
+}
+</code></pre>
+<p>在调用logrus.SetFormatter()函数后, <code>Logger</code>的<code>Formatter</code>字段就被设置为你想使用的<code>XXXFormatter</code>了, 如果没有设置那么就是默认的<code>TextFormatter</code></p>
+<p>程序执行到<code>entry.Logger.Formatter.Format(entry)</code>时, 就会执行具体的XXXFormatter的Format函数, 从而执行具体的序列化过程</p>
+<p>这里由于篇幅限制只解析比较简单的<code>JSONFormatter</code>, 这个其实经常被用到的Formatter.</p>
+<h4 id="jsonformatter">JSONFormatter</h4>
+<pre><code class="language-go">// json_formatter.go:L24-54
+type JSONFormatter struct {
+	TimestampFormat string // 设置Formatter时间格式
+	DisableTimestamp bool  // 控制序列化时是否显示时间
+	DataKey string // 配合主要是配合WithFields使用
+	FieldMap FieldMap // 其实用处很小, 就是让用户自定义序列化字段的名字
+	CallerPrettyfier func(*runtime.Frame) (function string, file string) // 配合SetReportCaller, 不需要太关注
+	PrettyPrint bool // 让Json格式化输出
+}
+</code></pre>
+<p><strong>主要字段介绍</strong></p>
+<h5 id="1timestampformat">1.TimestampFormat</h5>
+<p>Time的时间格式, 设置JSONFormatter TimestampFormat字段时就可以选择下面这些常量. 默认值:time.RFC3339</p>
+<pre><code>ANSIC       = &quot;Mon Jan _2 15:04:05 2006&quot;
+UnixDate    = &quot;Mon Jan _2 15:04:05 MST 2006&quot;
+RubyDate    = &quot;Mon Jan 02 15:04:05 -0700 2006&quot;
+RFC822      = &quot;02 Jan 06 15:04 MST&quot;
+RFC822Z     = &quot;02 Jan 06 15:04 -0700&quot; // RFC822 with numeric zone
+RFC850      = &quot;Monday, 02-Jan-06 15:04:05 MST&quot;
+RFC1123     = &quot;Mon, 02 Jan 2006 15:04:05 MST&quot;
+RFC1123Z    = &quot;Mon, 02 Jan 2006 15:04:05 -0700&quot; // RFC1123 with numeric zone
+RFC3339     = &quot;2006-01-02T15:04:05Z07:00&quot;
+RFC3339Nano = &quot;2006-01-02T15:04:05.999999999Z07:00&quot;
+Kitchen     = &quot;3:04PM&quot;
+// Handy time stamps.
+Stamp      = &quot;Jan _2 15:04:05&quot;
+StampMilli = &quot;Jan _2 15:04:05.000&quot;
+StampMicro = &quot;Jan _2 15:04:05.000000&quot;
+StampNano  = &quot;Jan _2 15:04:05.000000000
+</code></pre>
+<h5 id="2datakey">2.DataKey</h5>
+<pre><code class="language-go">func main() {
+	log.SetFormatter(&amp;log.JSONFormatter{
+		DataKey: &quot;hhf&quot;,
+	})
+	log.WithFields(log.Fields{&quot;k1&quot;: &quot;v1&quot;}).Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<p>输出:</p>
+<p><code>{&quot;hhf&quot;:{&quot;k1&quot;:&quot;v1&quot;},&quot;level&quot;:&quot;info&quot;,&quot;msg&quot;:&quot;hello logrus&quot;,&quot;time&quot;:&quot;2019-10-09T13:31:05+08:00&quot;}</code></p>
+<p>当没有注释掉<code>DataKey: &quot;hhf&quot;</code>时, 输出就会变成下面</p>
+<p><code>{&quot;k1&quot;:&quot;v1&quot;,&quot;level&quot;:&quot;info&quot;,&quot;msg&quot;:&quot;hello logrus&quot;,&quot;time&quot;:&quot;2019-10-09T13:32:26+08:00&quot;}</code></p>
+<p>其实就是用<code>DataKey</code>来包装一下WithFields的k-v字段</p>
+<h5 id="3fieldmap">3.FieldMap</h5>
+<pre><code class="language-go">func main() {
+	log.SetFormatter(&amp;log.JSONFormatter{
+		FieldMap: log.FieldMap{
+			log.FieldKeyTime:  &quot;@timestamphhf&quot;,
+			log.FieldKeyLevel: &quot;@levelhhf&quot;,
+			log.FieldKeyMsg:   &quot;@messagehhf&quot;,
+			log.FieldKeyFunc:  &quot;@callerhhf&quot;,
+		},
+	})
+	log.WithFields(log.Fields{&quot;k1&quot;: &quot;v1&quot;}).Info(&quot;hello logrus&quot;
+}
+</code></pre>
+<p>输出:</p>
+<pre><code>{&quot;@levelhhf&quot;:&quot;info&quot;,&quot;@messagehhf&quot;:&quot;hello logrus&quot;,&quot;@timestamphhf&quot;:&quot;2019-10-09T13:42:09+08:00&quot;,&quot;k1&quot;:&quot;v1&quot;}
+</code></pre>
+<p>主要的key有下面这几种类型</p>
+<pre><code>FieldKeyMsg            = &quot;msg&quot;
+FieldKeyLevel          = &quot;level&quot;
+FieldKeyTime           = &quot;time&quot;
+FieldKeyLogrusError    = &quot;logrus_error&quot;
+FieldKeyFunc           = &quot;func&quot;
+FieldKeyFile           = &quot;file
+</code></pre>
+<h5 id="4prettyprint">4.PrettyPrint</h5>
+<pre><code class="language-go">func main() {
+	log.SetFormatter(&amp;log.JSONFormatter{PrettyPrint: true})
+	log.WithFields(log.Fields{&quot;k1&quot;: &quot;v1&quot;}).Info(&quot;hello logrus&quot;)
+}
+</code></pre>
+<p>输出结果:</p>
+<pre><code>{
+  &quot;k1&quot;: &quot;v1&quot;,
+  &quot;level&quot;: &quot;info&quot;,
+  &quot;msg&quot;: &quot;hello logrus&quot;,
+  &quot;time&quot;: &quot;2019-10-09T13:52:18+08:00&quot;
+}
+</code></pre>
+<h4 id="format">Format</h4>
+<pre><code class="language-go">// json_formatter.go:L57-121
+func (f *JSONFormatter) Format(entry *Entry) ([]byte, error) {
+	// 将Entry的WithFields的kv值遍历放入到map[string]interface{}类型的data中
+	data := make(Fields, len(entry.Data)+4)
+	for k, v := range entry.Data {
+		switch v := v.(type) {
+		case error:
+			// Otherwise errors are ignored by `encoding/json`
+			// https://github.com/sirupsen/logrus/issues/137
+			data[k] = v.Error()
+		default:
+			data[k] = v
+		}
+	}
+
+	// 判断是否存在DataKey, 如果是就用DataKey包装一下data
+	if f.DataKey != &quot;&quot; {
+		newData := make(Fields, 4)
+		newData[f.DataKey] = data
+		data = newData
+	}
+
+	// 该函数判断调用WithFields时, 当用户自定义的Key与logrus内置的key相同时, 
+	// 用户自定义的key会转换成fields.xx. 例如:logrus.WithField(&quot;level&quot;, 1).Info(&quot;hello&quot;), 
+	// 由于level跟内置的FieldKeyLevel冲突了, 那么输出就会变成
+	// {&quot;level&quot;: &quot;info&quot;, &quot;fields.level&quot;: 1, &quot;msg&quot;: &quot;hello&quot;, &quot;time&quot;: &quot;...&quot;}
+	prefixFieldClashes(data, f.FieldMap, entry.HasCaller())
+
+	// 设置时间的序列化方式
+	timestampFormat := f.TimestampFormat
+	if timestampFormat == &quot;&quot; {
+		timestampFormat = defaultTimestampFormat
+	}
+
+	// 判断entry的error是否有值, 进行相关的序列化
+	if entry.err != &quot;&quot; {
+		data[f.FieldMap.resolve(FieldKeyLogrusError)] = entry.err
+	}
+
+	// 判断是否禁用Timestamp, 如果不禁用, 就将时间戳按照相应的格式序列化. entry.Time在entry.log()函数里进行了初始化
+	// if entry.Time.IsZero() {
+	// 	entry.Time = time.Now()
+	// }
+	if !f.DisableTimestamp {
+		data[f.FieldMap.resolve(FieldKeyTime)] = entry.Time.Format(timestampFormat)
+	}
+
+	// 设置日志的具体内容
+	data[f.FieldMap.resolve(FieldKeyMsg)] = entry.Message
+	// 设置日志级别
+	data[f.FieldMap.resolve(FieldKeyLevel)] = entry.Level.String()
+	// 序列化调用位置
+	if entry.HasCaller() {
+		funcVal := entry.Caller.Function
+		fileVal := fmt.Sprintf(&quot;%s:%d&quot;, entry.Caller.File, entry.Caller.Line)
+		if f.CallerPrettyfier != nil {
+			funcVal, fileVal = f.CallerPrettyfier(entry.Caller)
+		}
+		if funcVal != &quot;&quot; {
+			data[f.FieldMap.resolve(FieldKeyFunc)] = funcVal
+		}
+		if fileVal != &quot;&quot; {
+			data[f.FieldMap.resolve(FieldKeyFile)] = fileVal
+		}
+	}
+
+	// entry.Buffer是在entry.log()函数里(entry.go:L226-229)从sync.Pool里获取到一块内容空间
+	// 目的是: 防止JSONFormatter每次调用都会去申请空间, 减小GC压力
+	var b *bytes.Buffer
+	if entry.Buffer != nil {
+		b = entry.Buffer
+	} else {
+		b = &amp;bytes.Buffer{}
+	}
+
+	// 将Buffer提供给json encoder使用
+	encoder := json.NewEncoder(b)
+	if f.PrettyPrint {
+		encoder.SetIndent(&quot;&quot;, &quot;  &quot;)
+	}
+	if err := encoder.Encode(data); err != nil {
+		return nil, fmt.Errorf(&quot;failed to marshal fields to JSON, %v&quot;, err)
+	}
+
+	// 序列化完成, 将序列化的内容返回
+	return b.Bytes(), nil
+}
+</code></pre>
+<h3 id="out">Out</h3>
+<p>Formatter介绍完了, 回到上面write()函数继续剖析Out相关</p>
+<pre><code class="language-go">// entry.go:L252-264
+func (entry *Entry) write() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	serialized, err := entry.Logger.Formatter.Format(entry)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, &quot;Failed to obtain reader, %v\n&quot;, err)
+	} else {
+		_, err = entry.Logger.Out.Write(serialized)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, &quot;Failed to write to log, %v\n&quot;, err)
+		}
+	}
+}
+</code></pre>
+<p>在没有调用SetOutput时, 默认的Out是<code>os.Stderr</code>, 所以默认情况下基本都打印到终端里, 没有存入文件</p>
+<p>即使logrus可以提供io.Writter, 但是还是不建议在这里将日志落盘, 还是使用<code>lfsHook</code>来做这个事情</p>
+<p>在这里也回答上面一个问题, <strong>为什么在<code>Entry</code>结构体里面会有<code>Logger</code>指针存在?</strong></p>
+<p>答: 以Out举例, 由于我们在调用logrus.SetOutput()函数时, Out是设置给Logger的, 但是真正的使用者却是<code>Entry</code>. 故需要将Logger传给Entry一份</p>
+<h2 id="logrus如何保证并发的正确性">logrus如何保证并发的正确性</h2>
+<p>logrus的并发控制的正确性是靠着Logger.Mutex来实现的. 程序中调用Logger.Mutex地方有几处:</p>
+<ol>
+<li>fireHooks() entry.go:L243</li>
+<li>write() entry.go:L252</li>
+<li>AddHook() logger.go:L313</li>
+<li>ReplaceHook() logger.go:L345</li>
+<li>SetFormatter() logger.go:L235</li>
+<li>SetNoLock() logger.go:L294</li>
+<li>SetOutput() logger.go:L332</li>
+<li>SetReportCaller() logger.go:338</li>
+</ol>
+<p>最重要的两处就是fireHooks(), write()</p>
+<pre><code class="language-go">func (entry *Entry) fireHooks() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	err := entry.Logger.Hooks.Fire(entry.Level, entry)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, &quot;Failed to fire hook: %v\n&quot;, err)
+	}
+}
+</code></pre>
+<pre><code class="language-go">func (entry *Entry) write() {
+	entry.Logger.mu.Lock()
+	defer entry.Logger.mu.Unlock()
+	serialized, err := entry.Logger.Formatter.Format(entry)
+	....
+}
+</code></pre>
+<p>可以观察到, 不管有多少goroutine在调用logrus, 都是靠着资源竞争来保证顺序的正确性</p>
+<p>查看整个logrus的源码, logrus只有一个goroutine顺序处理日志数据, 并且没有相关的buffer来保存日志信息, 这就造成logrus的整体效率是不高的</p>
+<p>后面一篇文章会专门对比<code>zap</code>之间的差别, 敬请期待</p>
+<h2 id="总结">总结</h2>
+<p>至此, logrus的主体源码已经解析完毕</p>
+<p>一句话总结其生命周期就是: logrus是在编译期就确定的一个全局变量, 伴随着我们程序的整个生命周期而存在. 最重要的组件是: Formatter, Hook. 良好的序列化机制, 方便的插件开发是我们选择logrus的原因</p>
+<h2 id="参考文档">参考文档</h2>
+<ol>
+<li>鸟窝博客 - 如何在Go的函数中得到调用者函数名? <a href="https://colobu.com/2018/11/03/get-function-name-in-go/">https://colobu.com/2018/11/03/get-function-name-in-go/</a></li>
+<li>logrus <a href="https://github.com/sirupsen/logrus">https://github.com/sirupsen/logrus</a></li>
+<li>file-rotatelogs <a href="https://github.com/lestrrat-go/file-rotatelogs">https://github.com/lestrrat-go/file-rotatelogs</a></li>
+<li>lfshook <a href="https://github.com/rifflock/lfshook">https://github.com/rifflock/lfshook</a></li>
+<li>dingrus <a href="https://github.com/dandans-dan/dingrus">https://github.com/dandans-dan/dingrus</a></li>
+</ol>
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/logrus/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#logrus</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" class="block">打造 Zap 开箱即用日志组件</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" class="block">Golang是否真的没有指针运算?</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/">Logrus源码阅读(1)--基本用法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/">Golang是否真的没有指针运算?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-04-golang-range-address-of-iterator/">[每日一译]golang range与iteration之间的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/">[每日一译] Tags in Golang</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

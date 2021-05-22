@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>源码阅读 on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+    <description>Recent content in 源码阅读 on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Tue, 16 Jul 2019 20:06:27 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Logrus源码阅读(1)--基本用法</title>
+      <link>https://www.haohongfan.com/posts/2019-06-11-logurs-1/</link>
+      <pubDate>Tue, 16 Jul 2019 20:06:27 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2019-06-11-logurs-1/</guid>
+      <description>选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&amp;ldquo;hello logrus&amp;rdquo;) logrus.WithField(logruns.Fields{&amp;ldquo;key1&amp;rdquo;:&amp;ldquo;v1&amp;rdquo;}).Info(&amp;ldquo;hello logrus&amp;rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>限流器系列(1) -- Leaky Bucket 漏斗桶 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"限流器系列(1) -- Leaky Bucket 漏斗桶",
+      "item":"https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/"
+    },
+    "headline": "限流器系列(1) -- Leaky Bucket 漏斗桶 | HHFCodeRv","datePublished": "2020-06-27T10:14:07+08:00",
+    "dateModified": "2020-06-27T10:14:07+08:00",
+    "wordCount":  2286 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check"
+}
+</script><meta property="og:title" content="限流器系列(1) -- Leaky Bucket 漏斗桶 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" />
+
+
+
+
+<meta property="og:description" content="限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-06-27T10:14:07&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-06-27T10:14:07&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="kratos" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-03-11-go-cache/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">限流器系列(1) -- Leaky Bucket 漏斗桶</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式</p>
+<ol>
+<li>计数器</li>
+<li>漏斗通 (Leaky Bucket)</li>
+<li>令牌桶 (Token Bucket)</li>
+<li>基于 BBR 算法的自适应限流</li>
+<li>基于 Nginx 的限流</li>
+<li>分布式限流</li>
+</ol>
+<p>这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶</p>
+<h2 id="什么是限流器">什么是限流器</h2>
+<blockquote>
+<p>Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.</p>
+<p>In case a client made too many requests within a given time frame, HTTP servers can respond with status code 429: Too Many Requests</p>
+</blockquote>
+<p>这段话是摘自<a href="https://en.wikipedia.org/wiki/Rate_limiting">维基百科</a>. 简单来说<code>限流器</code>是基于 KV 内存数据库的一个限速判断, 在给定的时间内, 客户端请求次数过多, 服务器就会返回状态码 429: Too Many Request</p>
+<h2 id="计数器">计数器</h2>
+<p>计数器是一种最简单的限流器.</p>
+<p>如果把 QPS 设置为100, 从第一个请求进来开始计时，在接下去的1s内，每来一个请求，就把计数加1，如果累加的数字达到了100，那么后续的请求就会被全部拒绝。等到1s结束后，把计数恢复成0，重新开始计数. 这种计数器一般称为<code>固定窗口计数器算法</code>.</p>
+<p>可以看到计数器虽说有一定的缓冲空间, 但是需要一定的恢复空窗期, 在这个恢复时间内请求全部拒绝. 计数器还存在着另外一个问题, 特殊情况下会让请求的通过量为限制的两倍.</p>
+<p>考虑如下情况：</p>
+<p>限制 1 秒内最多通过 5 个请求，在第一个窗口的最后半秒内通过了 5 个请求，第二个窗口的前半秒内又通过了 5 个请求。这样看来就是在 1 秒内通过了 10 个请求</p>
+<p>综合来看, 计数器方式的限流是比较简单粗暴的, 我们需要更加优雅的限流方式</p>
+<h2 id="漏斗桶">漏斗桶</h2>
+<p>相对于<code>计数器</code>的粗鲁方式, 漏斗桶会更加优雅一些, 如下图</p>
+<p><img src="https://images.haohongfan.com/leaky_bucket1.png?imageView2/2/w/500/h/500" alt="leaky_bucket"></p>
+<p>其实从字面就很好理解. 类似生活用到的漏斗, 当客户端请求进来时，相当于水倒入漏斗，然后从下端小口慢慢匀速的流出。不管上面流量多大，下面流出的速度始终保持不变.</p>
+<p>当水流入速度过大时, 漏斗就会溢出, 同样会造成服务拒绝. 相对于<code>计数器</code>的在恢复期内全部拒绝请求, 因为漏斗桶会以一定的速率消费请求, 这样就能够让后续的请求有机会进入到漏斗桶里面.</p>
+<h3 id="漏斗桶的弊端">漏斗桶的弊端</h3>
+<p>由于漏斗桶有点类似队列, 先进去才能被消费掉, 如果漏斗桶溢出了, 后续的请求都直接丢弃了, 也就是说漏斗桶是无法短时间应对突发流量的. 对于互联网行业来说, 面对突发流量, 不能一刀切将突发流量全部干掉, 这样会给产品带来口碑上影响. 因此漏斗桶也不是完美的方案.</p>
+<p>不过漏斗桶能够限制数据的平均传输速率, 能够满足大部分的使用场景的. 如: 我们可以使用漏斗桶限制论坛发帖频率</p>
+<h2 id="uber-ratelimit">Uber Ratelimit</h2>
+<p>Uber Ratelimit 是漏斗桶的一个具体实现. 下面主要结合 <a href="https://github.com/uber-go/ratelimit">Uber Ratelimit</a> 来介绍 Leaky Buckt(漏洞桶)</p>
+<h3 id="官方-demo">官方 demo</h3>
+<pre><code class="language-go">func main() {
+	rl := ratelimit.New(100) // per second
+    prev := time.Now()
+    for i := 0; i &lt; 10; i++ {
+        now := rl.Take()
+        fmt.Println(i, now.Sub(prev))
+        prev = now
+    }
+}
+</code></pre>
+<p>Output:</p>
+<pre><code> 0 0
+ 1 10ms
+ 2 10ms
+ 3 10ms
+ 4 10ms
+ 5 10ms
+ 6 10ms
+ 7 10ms
+ 8 10ms
+ 9 10ms
+</code></pre>
+<p>从这个例子的输出结果, 可以看出来有下面这些特点:</p>
+<ul>
+<li>初始化时需要设置 bucket 大小</li>
+<li>输出结果是间隔 10ms, 由此可以看出来 leaky bucket 一定是保证匀速率的从桶内取值</li>
+<li>通过 <code>Take()</code> 函数与 ratelimiter 来交互, 但是 Take() 的返回值却是上一次拿到的请求时间</li>
+</ul>
+<h3 id="gin-中间件">gin 中间件</h3>
+<pre><code class="language-go">import (
+	&quot;fmt&quot;
+	&quot;github.com/gin-gonic/gin&quot;
+	&quot;go.uber.org/ratelimit&quot;
+	&quot;time&quot;
+)
+
+var rl ratelimit.Limiter
+
+func leakyBucketRateLimiter() gin.HandlerFunc {
+	prev := time.Now()
+	return func(c *gin.Context) {
+		now := rl.Take()
+		fmt.Println(now.Sub(prev)) // 这里不需要, 只是打印下多次请求之间的时间间隔
+		prev = now // 这里不需要, 只是打印下多次请求之间的时间间隔
+	}
+}
+
+func main() {
+	engine := gin.Default()
+	engine.GET(&quot;/test&quot;, leakyBucketRateLimiter(), func(context *gin.Context) {
+		context.JSON(200, true)
+	})
+	engine.Run(&quot;:9191&quot;)
+}
+
+func init() {
+	rl = ratelimit.New(10)
+}
+</code></pre>
+<p>Output:</p>
+<pre><code>[GIN] 2020/06/29 - 23:21:22 | 200 |     166.119µs |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:22 | 200 |  116.954372ms |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:23 | 200 |  203.502985ms |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:23 | 200 |  303.266345ms |       127.0.0.1 | GET      /test
+
+....
+
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899798034s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899258055s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899960588s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899834294s |       127.0.0.1 | GET      /test
+</code></pre>
+<p>从这个例子的输出结果, 有下面这些特点:</p>
+<ul>
+<li>输出结果是间隔仍然是 10ms</li>
+<li>当漏斗桶溢出后, 请求处理耗时越来越长</li>
+</ul>
+<h3 id="疑问">疑问</h3>
+<ol>
+<li>Uber Ratelimiter 溢出后为什么请求耗时越来越长?</li>
+<li>为什么 Uber ratelimiter 不需要返回 429?</li>
+</ol>
+<h2 id="源码分析">源码分析</h2>
+<h3 id="new-初始化函数">New 初始化函数</h3>
+<pre><code class="language-go">func New(rate int, opts ...Option) Limiter {
+	l := &amp;limiter{
+		perRequest: time.Second / time.Duration(rate),
+		maxSlack:   -10 * time.Second / time.Duration(rate), // 最大松弛度
+	}
+
+	// ...
+
+	return l
+}
+</code></pre>
+<p>Uber Leaky Bucket 的设计有点取巧. <code>New(10)</code> 传入的 10 指的是 1s 内只有能有 10 个请求通过, 于是算出来每个请求之间应该间隔 100 ms. 如果两个请求之间间隔时间过短, 那么需要第二个请求 sleep 一段时间, 这样保证请求能够匀速从桶内流出. 如下图</p>
+<p><img src="https://images.haohongfan.com/uber_sleep_for.png?imageView2/2/w/500/h/500" alt=""></p>
+<p>对比上面漏斗桶的概念, 我们发现当请求通过 Uber 限流器的时候, 如果溢出了, 就只能强行 sleep, 造成后续请求排队, 处理时长越来越长. 另外上游服务必须得有超时机制.</p>
+<h3 id="take">Take()</h3>
+<pre><code class="language-go">func (t *limiter) Take() time.Time {
+	t.Lock()
+	defer t.Unlock()
+
+	now := t.clock.Now()
+
+	// 如果是第一次请求, 直接让通过
+	if t.last.IsZero() {
+		t.last = now
+		return t.last
+	}
+
+	// 这里有个最大松弛量的概念maxSlack
+	t.sleepFor += t.perRequest - now.Sub(t.last)
+	if t.sleepFor &lt; t.maxSlack {
+		t.sleepFor = t.maxSlack
+	}
+
+	// 判断是否桶溢出. 如果桶溢出了, 需要sleep一段时间
+	if t.sleepFor &gt; 0 {
+		t.clock.Sleep(t.sleepFor)
+		t.last = now.Add(t.sleepFor)
+		t.sleepFor = 0
+	} else {
+		t.last = now
+	}
+	return t.last
+}
+</code></pre>
+<h3 id="最大松弛量">最大松弛量</h3>
+<p>漏斗桶有个天然缺陷就是无法应对突发流量, 对于这种情况，uber-go 对 Leaky Bucket 做了一些改良，引入了最大松弛量 (maxSlack) 的概念</p>
+<p>上面计算 sleepFor 的第 14 行代码如果按下面这样写:</p>
+<pre><code class="language-go">t.sleepFor = t.perRequest - now.Sub(t.last)
+</code></pre>
+<p>请求 1 完成后，15ms 后，请求 2 才到来，可以对请求 2 立即处理。请求 2 完成后，5ms 后，请求 3 到来，这个时候距离上次请求还不足 10ms，因此还需要等待 5ms, 但是，对于这种情况，实际上三个请求一共消耗了 25ms 才完成，并不是预期的 20ms</p>
+<p><img src="https://images.haohongfan.com/uber_max_slack1.png?imageView2/2/w/500/h/500" alt=""></p>
+<p>Uber 实现的 ratelimit 中，可以把之前间隔比较长的请求的时间，匀给后面的使用，保证每秒请求数 (RPS). 对于以上 case，因为请求 2 相当于多等了 5ms，我们可以把这 5ms 移给请求 3 使用。加上请求 3 本身就是 5ms 之后过来的，一共刚好 10ms，所以请求 3 无需等待，直接可以处理。此时三个请求也恰好一共是 20ms</p>
+<p><img src="https://images.haohongfan.com/uber_max_slack2.png?imageView2/2/w/500/h/500" alt=""></p>
+<p>但是也有特殊情况, 假设计算出来的间隔时间 100ms, 但是 <code>请求1</code> 和 <code>请求2</code> 之间的间隔时间 2h, 如果没有<code>t.sleepFor = t.maxSlack</code> 这段 <code>最大松弛量</code> 的代码, 那么 <code>请求2</code> 需要 sleep 2h 才能继续执行, 显然这不符合实际情况. 故引入了最大松弛量 (maxSlack), 表示允许抵消的最长时间</p>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a href="https://www.infoq.cn/article/Qg2tX8fyw5Vt-f3HH673">分布式服务限流实战，已经为你排好坑了</a></li>
+<li><a href="https://www.cyhone.com/articles/analysis-of-uber-go-ratelimit/">uber-go 漏桶限流器使用与原理分析</a></li>
+</ol>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/kratos/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#kratos</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-06-30-token-bucket/" class="block">限流器系列(2) -- Token Bucket 令牌桶</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" class="block">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/">一次错误使用 go-cache 导致出现的线上问题</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/">打造 Zap 开箱即用日志组件</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

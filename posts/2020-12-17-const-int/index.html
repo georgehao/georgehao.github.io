@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>疑惑: Go const 会导致程序结果错乱 ? | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果 场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字. 这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"疑惑: Go const 会导致程序结果错乱 ?",
+      "item":"https://www.haohongfan.com/posts/2020-12-17-const-int/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-12-17-const-int/"
+    },
+    "headline": "疑惑: Go const 会导致程序结果错乱 ? | HHFCodeRv","datePublished": "2020-12-17T23:32:12+08:00",
+    "dateModified": "2020-12-17T23:32:12+08:00",
+    "wordCount":  2973 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果 场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字. 这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大"
+}
+</script><meta property="og:title" content="疑惑: Go const 会导致程序结果错乱 ? | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-12-17-const-int/" />
+
+
+
+
+<meta property="og:description" content="const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果 场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字. 这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-12-17T23:32:12&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-12-17T23:32:12&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">疑惑: Go const 会导致程序结果错乱 ?</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-12-17</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>6分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p><img src="https://images.haohongfan.com/what-const1.png" alt=""></p>
+<p><code>const</code> 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 <code>const</code> 会出现你意想不到的结果</p>
+<h2 id="场景模拟">场景模拟</h2>
+<p>某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.</p>
+<p>这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:</p>
+<pre><code class="language-go">func main() {
+	var totalPrice uint32 = 500
+	const couponPrice = 550
+
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice-couponPrice)
+}
+</code></pre>
+<p>先别运行程序, 你觉得应该返回的结果是多少?</p>
+<pre><code>A. 程序无法编译
+B. -50
+C. 50
+D. 4294967246
+</code></pre>
+<p>结果是 <code>D</code>, 你会不会觉得很意外?</p>
+<p>一些疑问:</p>
+<ol>
+<li>500 - 550 的结果为什么不是 -50 ?</li>
+<li>你是否注意过 const 的类型 ?</li>
+<li>如果你注意过 const 类型, 为什么程序能正常编译 ?</li>
+</ol>
+<h2 id="500---550-的结果为什么不是--50-">500 - 550 的结果为什么不是 -50 ?</h2>
+<p>重写再写一段新的代码, 我们把数值缩小一点, 方便后面的阐述</p>
+<pre><code class="language-go">func main() {
+	var totalPrice uint8 = 1
+	var couponPrice uint8 = 2
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice-couponPrice)
+}
+</code></pre>
+<p>结果: <code>用户需要支付金额:  255</code></p>
+<p>你是否听说过 <code>原码</code>, <code>反码</code>, <code>补码</code> 这三个概念? 如果不知道的话, 请继续往下看马上就能揭开天文数字的真相.</p>
+<h3 id="原码">原码</h3>
+<p>使用二进制如何标识 1 和 -1 呢?</p>
+<pre><code> 1  :  0000 0001
+-1  :  1000 0001
+</code></pre>
+<p>我们通过对比能很快发现第一位是符号位, 这其实是易于人来理解和计算的一种表示方式, 这个表示方式叫: <code>原码</code>. 计算机本身就只识别 0(低电位) 和 1(高电位), 说的再彻底点 0 和 1 其实就是 CPU 逻辑运算单元里面的二极管的导通和阻断. 这么看来, 如果让一个 <code>1</code> 来代表符号位, 能让计算机能识别出来, 并且还让这一位不参与计算, 这基本是不现实的.</p>
+<p>这怎么办呢? 有人曾经说过: 计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决? 同样对于 <code>原码</code> 也可以转换成计算机能够识别二进制编码.</p>
+<h3 id="反码">反码</h3>
+<p>接下来我们看另外一种表示方式, 使用 <code>1 - 1 = 0</code> 来解释. 假如我们符号位也参与计算, 同时让<code>正数</code>的二进制保持不变. <code>负数</code>的二进制符号位保持不变, 其他位按位取反.</p>
+<pre><code>1 - 1 =&gt; 0000 0001 + 1111 1110 = 1111 1111  
+</code></pre>
+<p>这其实就是反码. 我们将<code>1111 1111</code>转换成我们能识别的原码就是<code>1000 0000</code>, 其实也就是 -0. 于是就出现另外一个问题, <code>0000 0000</code>也代表 0. 于是就出现了 <code>1000 0000</code> 和 <code>0000 0000</code> 的原码都代表 0. 这是不行的.</p>
+<h3 id="补码">补码</h3>
+<p>终极奥义出场. 同样让符号位参与计算, 我们让正数的二进制保持不变, 负数的二进制的符号位保持不变, 其余各位取反, 最后+1, 其实负数的补码就是这个先找个数的反码, 然后反码加 1.</p>
+<p>于是 1 - 1 就可以标识为:</p>
+<pre><code>1 - 1 =&gt; 0000 0001 + 1111 1110  =&gt;  0000 0001 + 1111 1111  =&gt; 0000 0000(补码)
+         ---------   ---------      ---------   ---------
+		    反码         反码           补码         补码
+</code></pre>
+<p>补码 <code>0000 0000</code> 其实也是原码, 也就是 0. 这下就没问题了.</p>
+<h3 id="1---2-的问题">1 - 2 的问题</h3>
+<p>我们使用补码来解释下 <code>1 - 2</code>的结果:</p>
+<pre><code>1 - 2 =&gt; [0000 0001]反 + [1111 1101]反 =&gt; [0000 0001]补 + [1111 1110]补 = 1111 1111(补码)
+</code></pre>
+<p>将补码 1111 1111 转换成原码 1000 0001 =&gt; -1</p>
+<p>看到这里你是不是又奇怪了? 结果明明是: 4294967295.</p>
+<p>对于写 Java 同学来说, 他们绝大多数场景下 int 代表一个整数就足够了. 对于 Php 那就更放肆了, 不仅不关心数字的大小, 有可能传给你一个 &ldquo;2&rdquo; 来当整数 2 用. 但你是否注意到 golang 里面分有符号和无符号类型的数, 如 int8 和 uint8 ?</p>
+<p>所以, 我们能看出来, 有符号数的减法基本在我们认知范围之内. 那无符号数为何就如何神奇呢?</p>
+<h3 id="无符号数">无符号数</h3>
+<pre><code class="language-go">func main() {
+	var totalPrice uint8 = 1
+	var couponPrice uint8 = 2
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice-couponPrice)
+}
+</code></pre>
+<p>还是这段代码, 我们看到 totalPrice, couponPrice 都是 uint32 类型的整数, 他们都是无符号类型的整数. 所以当看到程序用<code>uintx</code>来定义变量的, 这个变量就是无符号类型的.</p>
+<p>为什么 Go 不像 Java 那样一个 int 类型吃遍天呢, 搞出无符号类型的目的何在?</p>
+<ol>
+<li>有符号数是可以表示负数的. 如 int8 的范围区间是[-128, 127]. 而有些场景下我们只想要正数, 那么就可以用无符号数来表示, 同样 uint8 就可以代表 [0, 255]</li>
+<li>其实我觉得更大的可能性是由于 Go 是那帮写 C 的人写的, 他们继续沿用了 C 里面这个传统的数值表示方式.</li>
+</ol>
+<p>无符号的数的减法来说, 我们要把 1 - 2 同样也看成 1 + (-2), 于是同样需要将 -2 转换成补码形式.</p>
+<pre><code> 1 - 2 =&gt; [0000 0001]反 + [1111 1101]反 =&gt; [0000 0001]补 + [1111 1110]补 = 1111 1111(补码)
+</code></pre>
+<p>由于无符号数的加减结果仍然是无符号数, 那么 1111 1111 就是一个无符号的数, 所以最高位不是符号位, 正数的补码和原码一样, 于是 1 - 2 的结果就是 255.</p>
+<p>我们现在用的是 <code>uint8</code> 类型的数, 如果换成 <code>uint16</code>, <code>uint32</code>, <code>uint64</code> 会怎么样呢? 同样的 1-2 对于 <code>uint64</code> 结果就会变成 18446744073709551615. 是不是很夸张???</p>
+<p>我们上面都说的减法, 那加法会不会出现这个情况呢? 这个我就不在展开了, 聪明的你可以试试下面的代码, 然后思考下为啥?</p>
+<pre><code>func main() {
+	var totalPrice uint8 = 255
+	var couponPrice uint8 = 1
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice+couponPrice)
+}
+</code></pre>
+<p>终于说完了 Go 的无符号类型的计算过程, 我们由此可以看出, Go 在做加减预算时要注意下面几点:</p>
+<ol>
+<li>选择不同的类型的变量时, 要特别注意该类型的取值范围, 防止数值越界</li>
+<li>节省计算机资源. 声明同一个变量, 使用 int8 占一个字节, uint32 就占用 4 个字节</li>
+<li>在使用 uint 家族的类型的变量做减法时, 一定要判断变量的大小, 不然开篇我说的场景就是你们线上将要发生的事情.</li>
+</ol>
+<h2 id="你是否注意过-const-的类型-">你是否注意过 const 的类型 ?</h2>
+<pre><code class="language-go">func main() {
+	var totalPrice uint8 = 1
+	var couponPrice int8 = 2
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice+couponPrice)
+}
+</code></pre>
+<p>这段代码你觉得结果是什么?</p>
+<pre><code>A. 程序无法编译
+B. -1
+C. 255
+D. 4294967246
+</code></pre>
+<p>结果是 <code>A</code>, 你是不是又很意外. 其实你应该不意外才对, Go 不支持隐式类型转换, 不同种类型的变量之间不能直接做相互转换, 必须做类型的强转. 上面的代码是编译不过的.</p>
+<p>其实类型直接做强转有的时候也是会有问题的. 我这里就不详细展开了, 不然就越扯越多了. 请自行执行下面这段代码的结果, 然后分析一下吧, 原因还是还是上面说的, 一定要注意类型的取值范围.</p>
+<pre><code class="language-go">func main() {
+	var a int64 = 922372037
+	fmt.Println(&quot;a:&quot;, a)
+	
+	var b int8 = int8(a)
+	fmt.Println(&quot;b:&quot;, b)
+}
+</code></pre>
+<p>结果:</p>
+<pre><code>a: 922372037
+b: -59
+</code></pre>
+<p>继续回到 const 的类型上面, 我猜大部分人其实没关注过 const 的类型吧</p>
+<pre><code>func main() {
+	const a = 10
+	fmt.Println(&quot;type:&quot;, reflect.TypeOf(a))
+}
+</code></pre>
+<p>结果: type: int</p>
+<p>再回到开篇的那段代码, 为啥就可以正常编译过而且能输出一个不正确的结果呢?</p>
+<pre><code class="language-go">func main() {
+	var totalPrice uint32 = 500
+	const couponPrice = 550
+
+	fmt.Println(&quot;用户需要支付金额: &quot;, totalPrice-couponPrice)
+}
+</code></pre>
+<p>const 仍然和普通变量的默认类型保持一致. 整数常量的默认类型是 int, 浮点数常量的默认类型是 float64, 字符串常量的默认类型是 string</p>
+<p>这里就要到说到 Go 的特殊法则:</p>
+<p>Go 里没有默认类型是无符号类型的整数变量, 但是为了灵活, 可以使用 untyped const 类型的变量给无符号类型变量赋值(这是官方博客里的话). 这也就是意味着 untyped const 的变量打破了 Go 里面不同类型之间不能做隐式类型转换的规定. 于是 const 变量可以给同族类型之间的变量做任意的加减乘除. 这就造成了一个 uint32 类型数减一个 unsigned const int 类型的数搞出来一个天文数字出来. 这里要注意的是: constant 分为 typed 和 untyped，只有untyped才能隐式转换.</p>
+<h2 id="一些总结吧">一些总结吧</h2>
+<ol>
+<li>Go 里面提供了多种多样的类型的变量, 使用对了固然可以让程序节省更多的资源, 但是使用时要特别注意选择适当的类型, 避免造成一些莫名其妙的问题. 推荐大家程序里尽量使用 int 类型, 其实 int 就是 int32 类型, 与 Java 的 int 的数值范围是一样的 [-2147483648, 2147483647]. 我们现在的服务器真的不缺这点资源. 除非你真的特别能把握这个变量的大小.</li>
+<li>做无符号类型的加法时, 要特别注意, 一定要先去判断做减法的变量的大小.</li>
+</ol>
+<p>本篇题目是 <code>const 导致程序结果错乱 ?</code>, 其实也并不全是 const 造成的, 归根到底是无符号类型的数在做减法运算时的坑. 我们写 Go 的时候要注意这一点. 当然 const 的类型大家也可以留心下, 说不定就是你下次的面试题.</p>
+<p>看完本篇文章, 你是不是对 Go 的类型有了新的认识, 欢迎关注我的公众号: <code>HHFCodeRv</code> 交流</p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-12-22-struct-sync/" class="block">当 Go struct 遇上 sync</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-10-20-golang-slice/" class="block">你真的懂 golang reslice 吗</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

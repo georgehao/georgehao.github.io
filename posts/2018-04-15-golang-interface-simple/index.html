@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Golang interface入门 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&quot;hello&quot;} i.M() } Interface本质 inter">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Golang interface入门",
+      "item":"https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
+    },
+    "headline": "Golang interface入门 | HHFCodeRv","datePublished": "2018-04-15T01:50:43+00:00",
+    "dateModified": "2018-04-15T01:50:43+00:00",
+    "wordCount":  1219 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } \/\/ T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter"
+}
+</script><meta property="og:title" content="Golang interface入门 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" />
+
+
+
+
+<meta property="og:description" content="定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&quot;hello&quot;} i.M() } Interface本质 inter" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-04-15T01:50:43&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2018-04-15T01:50:43&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Golang interface入门</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-04-15</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h3 id="定义">定义</h3>
+<p><code>Interface</code>是定义一组方法的集合</p>
+<h3 id="如何实现接口">如何实现接口</h3>
+<p>任何<code>type</code>只要实现了<code>interface</code>的所有方法, 即可实现接口. 不需要像<code>java</code>需要使用<code>implements</code>关键字来显式声明.</p>
+<p>所有的类型都实现了<code>empty interfa1ce</code></p>
+<pre><code>type I interface {
+	M()
+}
+
+type T struct {
+	S string
+}
+
+// T就实现了interface I, 不需要显式声明
+func (t T) M() {
+	fmt.Println(t.S)
+}
+
+func main() {
+	var i I = T{&quot;hello&quot;}
+	i.M()
+}
+</code></pre>
+<h3 id="interface本质">Interface本质</h3>
+<p>interface本质是一个(value, type)元组. interface的value是有一个潜在的类型.</p>
+<pre><code>type I interface {
+	M()
+}
+
+type T struct {
+	S string
+}
+
+func (t *T) M() {
+	fmt.Println(t.S)
+}
+
+type F float64
+
+func (f F) M() {
+	fmt.Println(f)
+}
+
+func main() {
+	var i I
+
+	i = &amp;T{&quot;Hello&quot;}
+	describe(i)
+	i.M()
+
+	i = F(math.Pi)
+	describe(i)
+	i.M()
+}
+
+func describe(i I) {
+	fmt.Printf(&quot;(%v, %T)\n&quot;, i, i)
+}
+</code></pre>
+<p>output:</p>
+<pre><code>(&amp;{Hello}, *main.T)
+Hello
+(3.141592653589793, main.F)
+3.141592653589793
+</code></pre>
+<h3 id="interface值是nil">interface值是nil</h3>
+<p>如果interface的值是<code>nil</code>, 那么实现这个接口的类型的<code>receiver</code>也是<code>nil</code></p>
+<p>在其他语言中, 用空指针或者空对象调用对象的函数, 这将会抛出异常. 但是在go中这是很普遍的, 可以被完美的解决, 例如像下面的<code>M</code>一样.</p>
+<pre><code>type I interface {
+	M()
+}
+
+type T struct {
+	S string
+}
+
+func (t *T) M() {
+	if t == nil {
+		fmt.Println(&quot;&lt;nil&gt;&quot;)
+		return
+	}
+	fmt.Println(t.S)
+}
+
+func main() {
+	var i I
+	var t *T
+	i = t
+	describe(i)
+	i.M()
+}
+
+func describe(i I) {
+	fmt.Printf(&quot;(%v, %T)\n&quot;, i, i)
+}
+
+</code></pre>
+<p>output:</p>
+<pre><code>(&lt;nil&gt;, *main.T)
+&lt;nil&gt;
+</code></pre>
+<h3 id="nil-interface">nil interface</h3>
+<p>nil interface既没有值也没有类型</p>
+<pre><code>type I interface {
+	M()
+}
+
+func main() {
+	var i I
+	describe(i)
+	//i.M()   panic: runtime error
+}
+
+func describe(i I) {
+	fmt.Printf(&quot;(%v, %T)\n&quot;, i, i)
+}
+
+</code></pre>
+<p>output</p>
+<pre><code>(&lt;nil&gt;, &lt;nil&gt;)
+</code></pre>
+<p><strong>注意:</strong>
+和 <strong>interface值是nil</strong> 相比, <strong>nil interface</strong>的<code>i.M()</code>直接就崩掉了, 而<strong>interface值是nil</strong>的<code>i.M()</code>能够正常执行. 这是因为<strong>interface值是nil</strong>, 但是inteface本身却不是nil.</p>
+<h3 id="空interface">空interface</h3>
+<p>interface没有方法的叫空interface. 空interface可以表示任何类型的值.</p>
+<pre><code>func main() {
+	var i interface{}
+	describe(i) // 这里i是个nil interface 同时也是一个empty interface
+
+	i = 42
+	describe(i)
+
+	i = &quot;hello&quot;
+	describe(i)
+}
+
+func describe(i interface{}) {
+	fmt.Printf(&quot;(%v, %T)\n&quot;, i, i)
+}
+
+</code></pre>
+<h3 id="interface-类型断言">interface 类型断言</h3>
+<pre><code>t := i.(T)
+</code></pre>
+<p>断言表达式的意思: <code>i</code>interface的值的具体类型是<code>T</code>, 并且把类型为T的值赋值给变量<code>t</code>. 如果interface <code>i</code>不是<code>T</code>这个类型, 那么这个表达式会<code>panic</code></p>
+<pre><code>t, ok := i.(T)
+</code></pre>
+<p>判断interface是否是指定的类型, 类型断言返回两个结果: 值 和 boolean.</p>
+<p>如果<code>i</code>是<code>T</code>类型, 那么<code>t</code>是具体的值, <code>ok</code>是<code>true</code></p>
+<p>如果<code>i</code>不是<code>T</code>类型, 那么<code>t</code>将会是类型<code>T</code>的<code>0</code>值, <code>ok</code>是<code>false</code>, 不会有panic发生.</p>
+<pre><code>func main() {
+	var i interface{} = &quot;hello&quot;
+
+	s := i.(string)
+	fmt.Println(s)
+
+	s, ok := i.(string)
+	fmt.Println(s, ok)
+
+	f, ok := i.(float64)
+	fmt.Println(f, ok)
+
+	f = i.(float64) // panic
+	fmt.Println(f)
+}
+</code></pre>
+<h3 id="类型switch">类型switch</h3>
+<p>类型switch跟switch一样, 不同在于类型switch的case是指定的type(不是值).</p>
+<pre><code>switch v := i.(type) {
+case T:
+    // here v has type T
+case S:
+    // here v has type S
+default:
+    // no match; here v has the same type as i
+}
+</code></pre>
+<h3 id="stringers">Stringers</h3>
+<p>Stringer是<code>fmt</code>定义的非常实用的interface</p>
+<pre><code>type Stringer interface {
+    String() string
+}
+</code></pre>
+<p>任何类型只要实现<code>Stringer</code>接口, 那么就可以使用<code>fmt</code>来打印值.</p>
+<pre><code>type Person struct {
+	Name string
+	Age  int
+}
+
+func (p Person) String() string {
+	return fmt.Sprintf(&quot;%v (%v years)&quot;, p.Name, p.Age)
+}
+
+func main() {
+	a := Person{&quot;Arthur Dent&quot;, 42}
+	z := Person{&quot;Zaphod Beeblebrox&quot;, 9001}
+	fmt.Println(a, z)
+}
+
+</code></pre>
+<h3 id="errors">Errors</h3>
+<pre><code>type error interface {
+    Error() string
+}
+</code></pre>
+<p>error是内置的interface.</p>
+<pre><code>type ErrNegativeSqrt float64
+
+func (e ErrNegativeSqrt) Error() string {
+	return fmt.Sprintf(&quot;cannot Sqrt negative number: %f&quot;, e)
+}
+
+func Sqrt(x float64) (float64, error) {
+	if x &lt; 0 {
+		return x, ErrNegativeSqrt(x)
+	}
+	return x, nil
+}
+
+func main() {
+	fmt.Println(Sqrt(2))
+	fmt.Println(Sqrt(-2))
+}
+
+</code></pre>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="block">go 跨平台编译</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="block">Golang指针vs值</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

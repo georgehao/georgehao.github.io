@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>go 跨平台编译 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"go 跨平台编译",
+      "item":"https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
+    },
+    "headline": "go 跨平台编译 | HHFCodeRv","datePublished": "2018-05-04T05:30:16+00:00",
+    "dateModified": "2018-05-04T05:30:16+00:00",
+    "wordCount":  808 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不"
+}
+</script><meta property="og:title" content="go 跨平台编译 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" />
+
+
+
+
+<meta property="og:description" content="Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-05-04T05:30:16&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2018-05-04T05:30:16&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">go 跨平台编译</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-05-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="go编译支持的平台类型">Go编译支持的平台类型</h2>
+<ol>
+<li><code>amd64</code> (also known as <code>x86-64</code>)</li>
+<li><code>386</code> (<code>x86</code> or <code>x86-32</code>)</li>
+<li><code>arm</code> (<code>ARM</code>)</li>
+<li><code>arm64</code> (<code>AArch64</code>)  version &gt;= 1.5</li>
+<li><code>ppc64, ppc64le</code>    version &gt;= 1.5</li>
+<li><code>mips, mipsle</code> (32-bit MIPS big- and little-endian)  version &gt;= 1.8</li>
+<li><code>mips64, mips64le</code> (64-bit MIPS big- and little-endian) version &gt;= 1.6</li>
+<li><code>s390x</code> (IBM System z) version &gt;= 1.7</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>$GOOS</th>
+<th>$GOARCH</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>android</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td>386</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td>arm64</td>
+</tr>
+<tr>
+<td>dragonfly</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>freebsd</td>
+<td>386</td>
+</tr>
+<tr>
+<td>freebsd</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>freebsd</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>386</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>arm64</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>ppc64</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>ppc64le</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>mips</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>mipsle</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>mips64</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>mips64le</td>
+</tr>
+<tr>
+<td>linux</td>
+<td>s390x</td>
+</tr>
+<tr>
+<td>netbsd</td>
+<td>386</td>
+</tr>
+<tr>
+<td>netbsd</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>netbsd</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>openbsd</td>
+<td>386</td>
+</tr>
+<tr>
+<td>openbsd</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>openbsd</td>
+<td>arm</td>
+</tr>
+<tr>
+<td>plan9</td>
+<td>386</td>
+</tr>
+<tr>
+<td>plan9</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>solaris</td>
+<td>amd64</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>386</td>
+</tr>
+<tr>
+<td>windows</td>
+<td>amd64</td>
+</tr>
+</tbody>
+</table>
+<h2 id="源码安装go">源码安装go</h2>
+<h4 id="需要安装软件">需要安装软件</h4>
+<pre><code>apt-get install gcc git bzip2
+</code></pre>
+<h4 id="note">note</h4>
+<blockquote>
+<p>想要go支持<code>cgo</code>,  <code>c</code>编译器(比如: gcc, clang)必须先安装. 如果不安装<code>cgo</code>, 必须设置<code>CGO_ENABLED=0</code>.</p>
+</blockquote>
+<h4 id="安装go14">安装go1.4</h4>
+<ol>
+<li>wget <a href="https://dl.google.com/go/go1.4-bootstrap-20170518.tar.gz">https://dl.google.com/go/go1.4-bootstrap-20170518.tar.gz</a></li>
+<li>解压到go1.4</li>
+<li>export GOROOT_BOOTSTRAP=/go/go1.4</li>
+<li>./all.bash</li>
+<li>export PATH=&quot;$PATH:/go/go1.4/bin&quot;</li>
+</ol>
+<h4 id="note-1">note</h4>
+<blockquote>
+<p>需要首先配置<code>GOROOT_BOOTSTRAP</code>.  <code>GOROOT_BOOTSTRAP</code>默认值是<code>$HOME/go1.4</code></p>
+</blockquote>
+<blockquote>
+<p><code>bootstrap toolchain</code>有很多选项. 设置<code>GOROOT_BOOTSTRAP</code>为解压的目录. <code>$GOROOT_BOOTSTRAP/bin/go</code>必须是可执行文件<code>go</code></p>
+</blockquote>
+<h4 id="安装最新版本">安装最新版本</h4>
+<ol>
+<li>wget <a href="https://dl.google.com/go/go1.10.2.src.tar.gz">https://dl.google.com/go/go1.10.2.src.tar.gz</a></li>
+<li>解压到g1.10</li>
+<li>cd src</li>
+<li>GOOS=linux GOARCH=mipsle ./bootstrap.bash</li>
+<li>会在<code>../../go-${GOOS}-${GOARCH}-bootstrap</code>形成这个文件夹, 将这个文件夹拷贝到目标环境中就可以了.</li>
+</ol>
+<h4 id="安装go">安装go</h4>
+<pre><code>$ cd src
+$ ./all.bash
+</code></pre>
+<p>如果安装成功, 会显示:</p>
+<pre><code>ALL TESTS PASSED
+
+---
+Installed Go for linux/amd64 in /home/you/go.
+Installed commands in /home/you/go/bin.
+*** You need to add /home/you/go/bin to your $PATH. ***
+</code></pre>
+<h4 id="测试安装成功">测试安装成功</h4>
+<pre><code>package main
+
+import &quot;fmt&quot;
+
+func main() {
+    fmt.Printf(&quot;hello, world\n&quot;)
+}
+</code></pre>
+<p>Then run it with the <code>go</code> tool:</p>
+<pre><code>$ go run hello.go
+hello, world
+</code></pre>
+<h2 id="使用官方编译好的">使用官方编译好的</h2>
+<blockquote>
+<p>下载地址: <a href="https://golang.google.cn/dl/">https://golang.google.cn/dl/</a></p>
+</blockquote>
+<h4 id="linux安装方式">linux安装方式:</h4>
+<ol>
+<li>wget <a href="https://dl.google.com/go/go1.10.2.linux-amd64.tar.gz">https://dl.google.com/go/go1.10.2.linux-amd64.tar.gz</a></li>
+<li><code>tar zxvf go1.10.2.linux-amd64.tar.gz  -C  $HOME</code></li>
+<li><code>export GOROOT=$HOME/go </code></li>
+<li><code>export GOPATH=$HOME/gopath</code></li>
+<li><code>export PATH=$PATH:$GOROOT/bin:$GOPATH/bin</code></li>
+</ol>
+<blockquote>
+<p>其他安装方式参见 <a href="https://golang.google.cn/doc/install">官方</a></p>
+</blockquote>
+<h4 id="测试安装成功-1">测试安装成功</h4>
+<pre><code>package main
+
+import &quot;fmt&quot;
+
+func main() {
+    fmt.Printf(&quot;hello, world\n&quot;)
+}
+</code></pre>
+<p>Then run it with the <code>go</code> tool:</p>
+<pre><code>$ go run hello.go
+hello, world
+</code></pre>
+<h4 id="编译跨平台程序">编译跨平台程序</h4>
+<pre><code>GOARCH=mipsle GOOS=linux go build  test.go  // 具体支持的查看Go编译支持的平台类型
+</code></pre>
+<h4 id="note-2">Note</h4>
+<blockquote>
+<ol>
+<li>如何查看编译的程序是否是对应的平台的程序 ?</li>
+</ol>
+</blockquote>
+<p>利用file, xxd命令</p>
+<pre><code>file test
+
+test: ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), statically linked, with debug_info, not stripped
+</code></pre>
+<h2 id="结论">结论</h2>
+<p>一般情况下, 没有必要从源码编译go, 直接使用官方编译好的就可以. 确定一下几个条件:</p>
+<ol>
+<li>目标平台</li>
+<li>选用正确的<code>GOARCH</code>, <code>GOOS</code></li>
+<li>正确的go版本</li>
+</ol>
+<h3 id="参考文章">参考文章</h3>
+<ol>
+<li><a href="https://golang.google.cn//doc/install/source">Installing Go from source</a></li>
+<li><a href="https://github.com/xtaci/kcptun/issues/79">go-mips32 交叉编译go程序 编译kcptun例子</a></li>
+<li><a href="http://iytc.net/wordpress/?p=1564">Ubuntu下交叉编译kcptun go语言源码 for openwrt</a></li>
+<li><a href="https://www.jianshu.com/p/23fa1d177a20">搭建go-mips32的docker镜像</a></li>
+</ol>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" class="block">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="block">Golang interface入门</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>graphql on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/categories/graphql/</link>
+    <description>Recent content in graphql on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Wed, 19 Sep 2018 16:44:46 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/graphql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Graphql最大复杂度和最大深度设置</title>
+      <link>https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/</link>
+      <pubDate>Wed, 19 Sep 2018 16:44:46 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/</guid>
+      <description>设置最大深度和最大负责度的好处 因为把查询的权利交给了客户端, 客户端可以进行非常复杂的查询. 因为客户端可能进行恶意的查询或者进行非常大的查询, 因此服务端要拒绝这样的查询. 总共有三种方式可以进行: 设置响应过期时间 设置查询最大深度 设置查询最大复杂度 设置响应过期时间需要对服务端代码和性能要求比较高, 可以先不管, 当服务器代码和性能上去再设置. 如何判断最大深度</description>
+    </item>
+    
+  </channel>
+</rss>

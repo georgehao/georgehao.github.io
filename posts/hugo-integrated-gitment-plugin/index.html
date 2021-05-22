@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>GraphQL N&#43;1 问题解决方案 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="什么是N&#43;1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"GraphQL N+1 问题解决方案",
+      "item":"https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/"
+    },
+    "headline": "GraphQL N\u002b1 问题解决方案 | HHFCodeRv","datePublished": "2018-11-12T18:43:15+08:00",
+    "dateModified": "2018-11-12T18:43:15+08:00",
+    "wordCount":  1483 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "什么是N\u002b1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,"
+}
+</script><meta property="og:title" content="GraphQL N&#43;1 问题解决方案 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/" />
+
+
+
+
+<meta property="og:description" content="什么是N&#43;1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构," />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-11-12T18:43:15&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2018-11-12T18:43:15&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">GraphQL N&#43;1 问题解决方案</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-11-12</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/php/" class="hover:text-eureka">php</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h1 id="什么是n1问题">什么是N+1问题</h1>
+<pre><code>{
+  topStories(limit: 10) {
+    title
+    author {
+      name
+      email
+    }
+  }
+}
+</code></pre>
+<p>这个简单的查询, 在<code>Query</code>resolve里面会查询到top10 story, 但是<code>StoryType</code>却会调用10次<code>author</code>查询.</p>
+<p>大概的SQL查询:</p>
+<pre><code>select * from stories limit 10
+select * from author where stories.author_id = x
+select * from author where stories.author_id = x
+select * from author where stories.author_id = x
+...
+select * from author where stories.author_id = x
+</code></pre>
+<p>这个简单的Query就会查询11次数据库.</p>
+<p>我们要知道Graphql的图形结构可能是个闭环结构, 例如, stories-&gt;authors-&gt;&hellip;-&gt;stories(这个树形图, 可以使用voyager来查看), 所以如果不解决<code>N+1</code>问题, 那么<code>Graphql</code>接口将会严重拖慢的<code>Server</code>的性能.</p>
+<h1 id="解决完n1问题的效果">解决完<code>N+1</code>问题的效果</h1>
+<p><img src="http://images.haohongfan.com/graphql-n-1-qian.png" width="70%" height="50%" />
+<img src="http://images.haohongfan.com/graphl-n-1-youhuahou.png" width="70%" height="50%" />
+<img src="http://images.haohongfan.com/22.png" width="70%" height="70%" /></p>
+<h1 id="解决方案">解决方案</h1>
+<p>目前<code>GraphQL</code>通用的解决方案是<code>Facebook</code>提供的<a href="https://github.com/facebook/dataloader">Dataloader</a>, 他的核心思想是<code>Batch Query</code>和<code>Cached</code>. 每种语言都有自己的<code>DataLoader</code>的实现, 去Github都能找到</p>
+<h1 id="laravel-n1的解决方法">Laravel N+1的解决方法</h1>
+<p>目前我们采用的是PHP的<a href="https://github.com/Folkloreatelier/laravel-graphql">Laravel GraphQL</a>框架. 这个框架有两种解决<code>N+1</code>的问题</p>
+<ol>
+<li><code>DataLoader</code>, 这个有个现成的Laravel的<a href="https://github.com/KevinAsher/DataLoaderTraitExample/tree/master/app/GraphQL">Demo</a></li>
+<li><code>GraphQL\Deferred</code>, laravel-graphql使用的是<a href="https://github.com/webonyx/graphql-php">webonyx/graphql-php</a>, 这个框架封装了<code>Deferred</code>的方法.</li>
+</ol>
+<p>经过综合考虑, 选择了<code>Deferred</code>方法.</p>
+<h1 id="laravel-deferred">Laravel Deferred</h1>
+<p>以下面<code>BlogStory</code>为例:</p>
+<pre><code>&lt;?php
+'resolve' =&gt; function($blogStory) {
+    MyUserBuffer::add($blogStory['authorId']);
+    return new GraphQL\Deferred(function () use ($blogStory) {
+        MyUserBuffer::loadBuffered();
+        return MyUserBuffer::get($blogStory['authorId']);
+    });
+}
+</code></pre>
+<p>整体思路:</p>
+<ol>
+<li>先将要查询的字段先存起来</li>
+<li>在<code>resolve</code>的<code>GraphQL\Deferred</code>返回一个<code>Promise</code>, 这个<code>Promise</code>不会真正查询数据.</li>
+<li>当所有的逻辑全部执行完毕后, 才会真正查询数据库.</li>
+</ol>
+<p>这里<code>MyUserBuffer</code>需要自己实现.</p>
+<h1 id="我的实现">我的实现</h1>
+<pre><code>$fieldAndIds = [
+    'user_id' =&gt; $root['id'],
+    'order_by' =&gt; [
+        'id' =&gt; 'DESC',
+    ],
+];
+
+UsersRobotsChild::add($fieldAndIds);
+return new Deferred(function () use ($fieldAndIds) {
+    UsersRobotsChild::loadBuffers();
+    return UsersRobotsChild::get($fieldAndIds);
+});
+</code></pre>
+<pre><code>trait Deferred
+{
+    private static $fieldAndIds = [];
+    private static $buffer = [];
+
+    /**
+     * @param $arr
+     *
+     * 这个函数的目的:
+     * 首先获取这个函数是被哪个类调用的 + 按照查询的字段, 放入到数组中.
+     * 例如:
+     * UsersRobotsChild::where('user_id', 11)-&gt;where('child_id', 1)-&gt;get()
+     * 就会调用UsersRobotsChild::add(['user_id', 11, 'child_Id', 1]);
+     * 这个时候就会变成下面这个样子:
+     * $fieldAndIds['Luka\Models\Account\UsersRobotsChild']['user_id-child_id'][] = ['user_id', 11, 'child_Id', 1];
+     */
+    public static function add($arr)
+    {
+        $className = get_called_class();
+        $fieldKey = null;
+        foreach ($arr as $field =&gt; $id) {
+            if ($fieldKey) {
+                $fieldKey = $fieldKey . '-' . $field;
+            } else {
+                $fieldKey = $field;
+            }
+        }
+        self::$fieldAndIds[$className][$fieldKey][] = $arr;
+    }
+
+    public static function get($arr)
+    {
+        $name = get_called_class();
+        $key = self::encode($arr, $name);
+        return isset(self::$buffer[$key]) ? self::$buffer[$key] : null;
+    }
+
+    public static function first($arr)
+    {
+        $name = get_called_class();
+        $key = self::encode($arr, $name);
+        if (!isset(self::$buffer[$key])) {
+            return null;
+        }
+
+        if (count(self::$buffer[$key]) &lt; 1) {
+            return null;
+        }
+        return self::$buffer[$key][0];
+    }
+
+    public static function loadBuffers()
+    {
+        $t1 = microtime(true);
+        $name = get_called_class();
+        if (!isset(self::$fieldAndIds[$name])) {
+            return;
+        }
+
+        $allFields = self::$fieldAndIds[$name];
+
+        // 1. 将这个$name的所有记录全部一次查出来
+        foreach ($allFields as $fieldSplice =&gt; $allField) {
+            // 将同一种相关字段查询的集合起来一次查询完毕. 比如:
+            // UsersRobotsChild::where('user_id', 15)-&gt;where('child_id', 100)-&gt;first();
+            // UsersRobotsChild::where('user_id', 16)-&gt;where('child_id', 201)-&gt;first();
+            // 经过下面的操作之后会变成这样:
+            // $valuesOfField = [
+            //      'user_id' =&gt; [15, 16],
+            //      'child_id' =&gt; [100, 201'],
+            // ];
+            $valuesOfField = [];
+            $orderBy = [];
+            $isContinueQueryDb = false;
+            foreach ($allField as $singleFieldAndId) {
+                $key = self::encode($singleFieldAndId, $name);
+                if (array_key_exists($key, self::$buffer)) {
+                    continue;
+                }
+
+                foreach ($singleFieldAndId as $field =&gt; $id) {
+                    if ($field == 'order_by') {
+                        $orderBy = $id;
+                        continue;
+                    }
+                    $isContinueQueryDb = true;
+                    $valuesOfField[$field][] = $id;
+                    $valuesOfField[$field] = array_unique($valuesOfField[$field]);
+                }
+            }
+
+            if (!$isContinueQueryDb) {
+                return;
+            }
+
+            // 拿到$valuesOfField后, 做一次查询
+            // $values = UsersRobotsChild::whereIn('user_id', $valuesOfField['user_id'])
+            //                   -&gt;whereIn('child_id', $valuesOfField['child_id'])
+            //                   -&gt;get();
+            $values = $name::deferredField($valuesOfField, $orderBy)-&gt;get();
+
+            $fields = explode('-', $fieldSplice);
+            // 3. 将结果写入到Buffer里
+            foreach ($values as $value) {
+                // 下面这段程序的目的是:
+                // $values查出来是个集合, 现在需要根据查出来的数据encode出来一个key, 然后把结果放入到buffer中.
+                $fieldAndId = [];
+                foreach ($fields as $field) {
+                    if ($field == 'order_by') {
+                        continue;
+                    }
+                    $fieldAndId[$field] = $value-&gt;$field;
+                }
+                $key = self::encode($fieldAndId, $name);
+                self::$buffer[$key][] = self::filter($value, $name);
+            }
+        }
+
+        // 2. 将$fieldAndIds这个key的记录清空
+        if (isset(self::$fieldAndIds[$name])) {
+            unset(self::$fieldAndIds[$name]);
+        }
+        $t2 = microtime(true);
+        \Log::info((($t2 - $t1) * 1000));
+    }
+
+    public function scopeDeferredField($query, $fieldAndId, $orderBy)
+    {
+        foreach ($fieldAndId as $field =&gt; $id) {
+            if ($field == 'order_by') {
+                continue;
+            }
+
+            $query-&gt;whereIn($field, $id);
+        }
+
+        foreach ($orderBy as $key =&gt; $value) {
+            $query-&gt;orderBy($key, $value);
+        }
+        return $query;
+    }
+
+    private static function encode($arr, $name)
+    {
+        if (isset($arr['order_by'])) {
+            unset($arr['order_by']);
+        }
+        return $name . ' - ' . json_encode($arr);
+    }
+
+    private static function decode($key)
+    {
+        $arr = explode(' - ', $key);
+        if (count($arr) != 2) {
+            return null;
+        }
+        return json_decode($arr[1], true);
+    }
+}
+
+</code></pre>
+<p>注意: 我这里的实现利用了PHP的特性, 每次请求完毕都会释放内存, 所以buffer我就没有管理. 如果使用其他语言实现时, 一定要注意要释放内存.</p>
+<h1 id="参考">参考</h1>
+<ol>
+<li><a href="https://github.com/graphql/graphql-js/issues/819">GraphQl\Deferred</a></li>
+<li><a href="https://secure.phabricator.com/book/phabcontrib/article/n_plus_one/">Performance: N+1 Query Problem</a></li>
+</ol>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2019-02-17-gin-01/" class="block">gin源码阅读之一 -- net/http的大概流程</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/" class="block">MongoDB 数据重复的处理方法</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/">Graphql最大复杂度和最大深度设置</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

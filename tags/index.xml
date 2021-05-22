@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/</link>
+    <description>Recent content in Tags on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Sat, 22 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go</title>
+      <link>https://www.haohongfan.com/tags/go/</link>
+      <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/go/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>golang</title>
+      <link>https://www.haohongfan.com/tags/golang/</link>
+      <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>slice</title>
+      <link>https://www.haohongfan.com/tags/slice/</link>
+      <pubDate>Tue, 20 Oct 2020 10:17:05 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/slice/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kratos</title>
+      <link>https://www.haohongfan.com/tags/kratos/</link>
+      <pubDate>Sun, 23 Aug 2020 11:59:45 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/kratos/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>cache</title>
+      <link>https://www.haohongfan.com/tags/cache/</link>
+      <pubDate>Wed, 11 Mar 2020 16:30:35 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/cache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>logrus</title>
+      <link>https://www.haohongfan.com/tags/logrus/</link>
+      <pubDate>Sat, 05 Oct 2019 11:21:24 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/logrus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>源码阅读</title>
+      <link>https://www.haohongfan.com/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</link>
+      <pubDate>Tue, 16 Jul 2019 20:06:27 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>每日一译</title>
+      <link>https://www.haohongfan.com/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/</link>
+      <pubDate>Tue, 04 Jun 2019 11:11:54 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mongodb</title>
+      <link>https://www.haohongfan.com/tags/mongodb/</link>
+      <pubDate>Sun, 30 Sep 2018 20:47:53 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/mongodb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>elasticsearch</title>
+      <link>https://www.haohongfan.com/tags/elasticsearch/</link>
+      <pubDate>Thu, 27 Sep 2018 11:44:44 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/elasticsearch/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>es</title>
+      <link>https://www.haohongfan.com/tags/es/</link>
+      <pubDate>Thu, 27 Sep 2018 11:44:44 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/es/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>compose</title>
+      <link>https://www.haohongfan.com/tags/compose/</link>
+      <pubDate>Wed, 13 Jun 2018 21:59:26 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/compose/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>transporter</title>
+      <link>https://www.haohongfan.com/tags/transporter/</link>
+      <pubDate>Wed, 13 Jun 2018 21:59:26 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/transporter/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>爬虫</title>
+      <link>https://www.haohongfan.com/tags/%E7%88%AC%E8%99%AB/</link>
+      <pubDate>Tue, 03 Oct 2017 13:44:30 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/%E7%88%AC%E8%99%AB/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>aggregation</title>
+      <link>https://www.haohongfan.com/tags/aggregation/</link>
+      <pubDate>Sat, 17 Jun 2017 14:36:31 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/aggregation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>php</title>
+      <link>https://www.haohongfan.com/tags/php/</link>
+      <pubDate>Sat, 17 Jun 2017 14:36:31 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/tags/php/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

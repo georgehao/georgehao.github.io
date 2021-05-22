@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Bilibili Kratos 框架源码分析(1) -- 启动流程 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Bilibili Kratos 框架源码分析(1) -- 启动流程",
+      "item":"https://www.haohongfan.com/posts/2020-05-08-kratos-flow/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2020-05-08-kratos-flow/"
+    },
+    "headline": "Bilibili Kratos 框架源码分析(1) -- 启动流程 | HHFCodeRv","datePublished": "2020-05-08T14:42:38+08:00",
+    "dateModified": "2020-05-08T14:42:38+08:00",
+    "wordCount":  1835 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on \u0026amp;\u0026amp; go get -u github.com\/go-kratos\/kratos\/tool\/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili\/kratos 迁移到 go-kratos\/kratos 之后,"
+}
+</script><meta property="og:title" content="Bilibili Kratos 框架源码分析(1) -- 启动流程 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" />
+
+
+
+
+<meta property="og:description" content="这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后," />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2020-05-08T14:42:38&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2020-05-08T14:42:38&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="kratos" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2020-03-11-go-cache/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Bilibili Kratos 框架源码分析(1) -- 启动流程</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-05-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p><img src="https://raw.githubusercontent.com/go-kratos/kratos/master/doc/img/kratos.png" alt=""></p>
+<p>这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多.</p>
+<p>这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程</p>
+<h2 id="安装-kratos">安装 kratos</h2>
+<p>至于如何安装 kratos, 请参考 官方<a href="https://github.com/go-kratos/kratos#quick-start">wiki</a>,</p>
+<p>Kratos 官方推荐方式: <code>GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos</code>, 不过有可能你依然无法安装成功.</p>
+<p>特别是 <code>bilibili/kratos</code> 迁移到 <code>go-kratos/kratos</code> 之后, 如果你之前安装过 kratos, 使用上面的方式基本就 gg 了, 会遇到下面问题 <code>module declares its path as: github.com/go-kratos/kratos but was required as: github.com/bilibili/kratos</code></p>
+<p>解决方案:</p>
+<ul>
+<li>方案1: kratos 维护人员推荐的方案, 将整个代码拷贝下来, <code>cd kratos/tool &amp;&amp; go install ./...</code></li>
+<li>方案2: 彻底清理以前安装的 kratos 相关的组件(kratos, kratos-gen-bts, kratos-gen-mc, kratos-gen-project, kratos-protoc, testgen, swagger, wire, testcli), 然后<code>GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos</code> 应该就能安装成功了, 如果还不成功, <code>多试几次</code>或者尝试 方案1</li>
+</ul>
+<h2 id="初始化demo">初始化demo</h2>
+<p>使用 <code>kratos new kratos-demo</code> 生成一个demo项目</p>
+<pre><code>cd kratos-demo/cmd
+go build
+./cmd -conf ../configs
+</code></pre>
+<p>打开浏览器访问：<code>http://localhost:8000/kratos-demo/start</code>，你会看到输出了Golang 大法好 ！！！</p>
+<h2 id="整体流程">整体流程</h2>
+<p>接下来看下程序的启动流程, 主函数在 cmd/main.go 中</p>
+<pre><code class="language-go">func main() {
+	flag.Parse()
+	log.Init(nil) // debug flag: log.dir={path} ---&gt; 启动log
+	defer log.Close()
+	log.Info(&quot;kratos-demo start&quot;)
+	paladin.Init()  // ----&gt; 启动配置文件
+	_, closeFunc, err := di.InitApp() // ----&gt; 利用依赖注入, 初始化各个组件
+	if err != nil {
+		panic(err)
+	}
+	c := make(chan os.Signal, 1)  // ---&gt; 优雅重启
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		s := &lt;-c
+		log.Info(&quot;get a signal %s&quot;, s.String())
+		switch s {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			closeFunc()
+			log.Info(&quot;kratos-demo exit&quot;)
+			time.Sleep(time.Second)
+			return
+		case syscall.SIGHUP:
+		default:
+			return
+		}
+	}
+}
+</code></pre>
+<ol>
+<li>启动 log</li>
+<li>启动启动配置文件 [config]</li>
+<li>利用依赖注入(wire), 初始化各个组件(redis, mc, db, dao, service, http server, grpc server), 并将整体串联起来</li>
+<li>优雅重启</li>
+</ol>
+<h3 id="1-启动-log">1. 启动 log</h3>
+<p>这里先不对 log 做详细的分析, 后面连载章节介绍</p>
+<blockquote>
+<p>官方介绍:</p>
+<p>基于zap的field方式实现的高性能log库，提供Info、Warn、Error日志级别；
+并提供了context支持，方便打印环境信息以及日志的链路追踪，在框架中都通过field方式实现，避免format日志带来的性能消耗。</p>
+</blockquote>
+<h3 id="2-启动启动配置文件">2. 启动启动配置文件</h3>
+<p>这里先不对 配置文件 做详细的分析, 后面连载章节介绍</p>
+<blockquote>
+<p>官方介绍</p>
+<p>初看起来，配置管理可能很简单，但是这其实是不稳定的一个重要来源。
+即变更管理导致的故障，我们目前基于配置中心（config-service）的部署方式，二进制文件的发布与配置文件的修改是异步进行的，每次变更配置，需要重新构建发布版。</p>
+<p>由此，我们整体对配置文件进行梳理，对配置进行模块化，以及方便易用的paladin config sdk</p>
+</blockquote>
+<h3 id="3-利用依赖注入初始化各个组件">3. 利用依赖注入初始化各个组件</h3>
+<p>想要了解这个过程, 需要先简单了解 wire 的运作流程. 关于 wire 库是如何使用的, 我这里就不做 demo 过多的介绍, 推荐查看公众号: <strong>GoUpUp</strong>  <a href="https://mp.weixin.qq.com/s/GFN6PWg6hfSFvPkWqHwNKw">Go 每日一库之 wire</a></p>
+<p>下面直接进入 kratos 的依赖注入过程</p>
+<h4 id="provider构造器">Provider(构造器)</h4>
+<p><code>internal/dao/dao.go</code> 有下面一段代码:</p>
+<pre><code class="language-go">var Provider = wire.NewSet(New, NewDB, NewRedis, NewMC)
+</code></pre>
+<p><code>internal/service/service.go</code> 也有差不多的一段代码:</p>
+<pre><code class="language-go">var Provider = wire.NewSet(New, wire.Bind(new(pb.DemoServer), new(*Service)))
+</code></pre>
+<h4 id="injector注入器">Injector(注入器)</h4>
+<pre><code class="language-go">// +build wireinject ----&gt; 尤其要注意这里
+// The build tag makes sure the stub is not built in the final build.
+
+package di
+
+import (
+	&quot;kratos-demo/internal/dao&quot;
+	&quot;kratos-demo/internal/service&quot;
+	&quot;kratos-demo/internal/server/grpc&quot;
+	&quot;kratos-demo/internal/server/http&quot;
+
+	&quot;github.com/google/wire&quot;
+)
+
+//go:generate kratos t wire
+func InitApp() (*App, func(), error) {
+	panic(wire.Build(dao.Provider, service.Provider, http.New, grpc.New, NewApp))
+}
+</code></pre>
+<p>特别要注意: <code>// +build wireinject</code> , +build不是一个注释这么简单, 其实是 Go 语言的一个特性。类似 C/C++ 的条件编译，在执行go build时可传入一些选项，根据这个选项决定某些文件是否编译(引用Go 每日一库之 wire), 还要注意 <strong>注释跟 package 之间要有空行(<a href="https://github.com/google/wire/issues/117">https://github.com/google/wire/issues/117</a>)</strong></p>
+<h4 id="几个非常重要的-new">几个非常重要的 New</h4>
+<pre><code class="language-go">// NewApp 串联整个kraots的组件
+func NewApp(svc *service.Service, h *bm.Engine, g *warden.Server) (app *App, closeFunc func(), err error){
+	app = &amp;App{
+		svc: svc,
+		http: h,
+		grpc: g,
+	}
+	closeFunc = func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
+		if err := g.Shutdown(ctx); err != nil {
+			log.Error(&quot;grpcSrv.Shutdown error(%v)&quot;, err)
+		}
+		if err := h.Shutdown(ctx); err != nil {
+			log.Error(&quot;httpSrv.Shutdown error(%v)&quot;, err)
+		}
+		cancel()
+	}
+	return
+}
+
+// http.New 初始化和启动 Http Server(gin)
+func New(s pb.DemoServer) (engine *bm.Engine, err error) {
+	var (
+		cfg bm.ServerConfig
+		ct paladin.TOML
+	)
+	if err = paladin.Get(&quot;http.toml&quot;).Unmarshal(&amp;ct); err != nil {
+		return
+	}
+	if err = ct.Get(&quot;Server&quot;).UnmarshalTOML(&amp;cfg); err != nil {
+		return
+	}
+	svc = s
+	engine = bm.DefaultServer(&amp;cfg)
+	pb.RegisterDemoBMServer(engine, s)
+	initRouter(engine)
+	err = engine.Start()
+	return
+}
+
+// grpc.New 初试化和启动 grpc server
+func New(svc pb.DemoServer) (ws *warden.Server, err error) {
+	var (
+		cfg warden.ServerConfig
+		ct paladin.TOML
+	)
+	if err = paladin.Get(&quot;grpc.toml&quot;).Unmarshal(&amp;ct); err != nil {
+		return
+	}
+	if err = ct.Get(&quot;Server&quot;).UnmarshalTOML(&amp;cfg); err != nil {
+		return
+	}
+	ws = warden.NewServer(&amp;cfg)
+	pb.RegisterDemoServer(ws.Server(), svc)
+	ws, err = ws.Start()
+	return
+}
+</code></pre>
+<p>直接在 <code>internal/di</code> 下运行 wire 或者执行 <code>kratos tool wire</code>, 最终会在 <code>internal/di</code>下生成 <code>wire_gen.go</code>, 其生成的具体启动步骤:</p>
+<ol>
+<li>dao.NewRedis(): 生成 redis handler 及 cleanup 清理函数(给优雅重启使用)</li>
+<li>dao.NewMC(): 生成 memcache handler 及 cleanup 清理函数(给优雅重启使用)</li>
+<li>dao.NewDB(): 生成 db handler 及 cleanup 清理函数(给优雅重启使用)</li>
+<li>dao.New(redis, memcache, db): 将 redis, mc, db handler 传给 dao 的初始化函数, 初始化Dao</li>
+<li>service.New(daoDao): 将 dao 传给 service, 将 service 初始化</li>
+<li>http.New(serviceService): 将 service 传给 http, 启动 http server</li>
+<li>grpc.New(serviceService): 将 service 传给 grpc, 启动 grpc server</li>
+<li>NewApp(serviceService, engine, server): 将 http 和 grpc server 整体跟框架串联起来</li>
+</ol>
+<h3 id="4-优雅重启">4. 优雅重启</h3>
+<pre><code class="language-go">c := make(chan os.Signal, 1)
+signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+for {
+	s := &lt;-c
+	log.Info(&quot;get a signal %s&quot;, s.String())
+	switch s {
+	case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+		closeFunc()
+		log.Info(&quot;kratos-demo exit&quot;)
+		time.Sleep(time.Second)
+		return
+	case syscall.SIGHUP:
+	default:
+		return
+	}
+}
+</code></pre>
+<p>这个就比较简单了, 主要利用各个组件的初始化函数返回的 cleanup 函数, 在程序收到 <code>syscall.SIGQUIT(3)</code>, <code>syscall.SIGTERM(15)</code>, <code>syscall.SIGINT(2)</code> 优雅关闭各个组件</p>
+<h2 id="总结">总结</h2>
+<p>至此, 输出 <code>Golang 大法好 ！！！</code> 的整个流程大概介绍了一遍. 下面一篇会写一个简单的 demo, postman 通过 <code>/check_role</code> 接口 访问 biz 项目, biz 通过 grpc 和 http 两种方式访问 up 项目</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/kratos/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#kratos</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" class="block">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/" class="block">一次错误使用 go-cache 导致出现的线上问题</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/">一次错误使用 go-cache 导致出现的线上问题</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/">打造 Zap 开箱即用日志组件</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/">Golang是否真的没有指针运算?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/">Logrus源码阅读(1)--基本用法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/">一次golang deadlock的讨论</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/">我所理解的Sync Pool</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

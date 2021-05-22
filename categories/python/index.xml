@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>python on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/categories/python/</link>
+    <description>Recent content in python on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.wangchucheng.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Tue, 03 Oct 2017 13:44:30 +0000</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>爬虫小试-抓取JD图片</title>
+      <link>https://www.haohongfan.com/posts/2017-10-03-spider-jd/</link>
+      <pubDate>Tue, 03 Oct 2017 13:44:30 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2017-10-03-spider-jd/</guid>
+      <description>因为项目需要, 要抓取京东一些图片, 来进行分析使用.如https://item.jd.com/bigimage.aspx?id=11921955 我们想抓取的就是这个图片右侧的8张图片. 进过分析这个系列html源码, 发现8张图片的地址在js数组中. curl https://item.jd.com/bigimage.aspx?id=11921955 如果利用常规的requests + BeautifulSoup的话, 感觉只获取这个js数组就是一个挺麻烦的</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+      "item":"https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
+    },
+    "headline": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 | HHFCodeRv","datePublished": "2018-06-13T21:59:26+08:00",
+    "dateModified": "2018-06-13T21:59:26+08:00",
+    "wordCount":  1799 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans"
+}
+</script><meta property="og:title" content="Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" />
+
+
+
+
+<meta property="og:description" content="工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2018-06-13T21:59:26&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2018-06-13T21:59:26&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="compose" />
+
+<meta property="article:tag" content="transporter" />
+
+<meta property="article:tag" content="elasticsearch" />
+
+<meta property="article:tag" content="mongodb" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="/docs/gohandbook" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-06-13</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h2 id="工具选型">工具选型</h2>
+<p>主要查看<a href="https://code.likeagirl.io/5-different-ways-to-synchronize-data-from-mongodb-to-elasticsearch-d8456b83d44f">这篇文章</a></p>
+<ul>
+<li><a href="https://github.com/mongodb-labs/mongo-connector">mongo-connector</a></li>
+<li><a href="https://github.com/richardwilly98/elasticsearch-river-mongodb">elasticsearch-river-mongodb</a></li>
+<li><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html">Logstash</a></li>
+<li><a href="https://github.com/compose/transporter">transporter</a></li>
+<li><a href="https://www.compose.com/articles/mongoosastic-the-power-of-mongodb-and-elasticsearch-together/">Mongoosastic</a></li>
+</ul>
+<p><code>mongo-connector</code>是<a href="https://github.com/mongodb-labs/mongo-connector">mongodb-labs</a>官方的开源项目. 但是官方不在支持, 关闭了<code>issue</code>, 导致很多问题无法找到答案, 也就无法解决遇到的问题</p>
+<blockquote>
+<p>mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact <a href="mailto:seth.payne@mongodb.com">seth.payne@mongodb.com</a>`</p>
+</blockquote>
+<p><code>elasticsearch-river-mongodb</code>不支持<code>elasticsearch</code>5.0以版本.</p>
+<p>最终选择<code>Transporter</code>.</p>
+<h2 id="选择transporter原因">选择<code>Transporter</code>原因</h2>
+<ol>
+<li>项目活跃度较高</li>
+<li>实时同步</li>
+<li>配置简单</li>
+<li><code>golang</code>写的(golang忠实粉丝)</li>
+<li>IBM公司产品</li>
+</ol>
+<p>开头文章提到的问题:</p>
+<blockquote>
+<p>It’s important to know that the transporter synchronizing only once. When the job is done, the transporter comes to its end.</p>
+</blockquote>
+<p>这个问题已经不存在了. 查看这个<a href="https://www.compose.com/articles/transporter-mongodb-and-synchronization/">文章</a></p>
+<blockquote>
+<p>And the Transporter starts copying the collection&hellip; and when it&rsquo;s done it stops running. That&rsquo;s great for this collection because of its historical data. But what if that collection was live data; how would we manage to copy it consistently. With the MongoDB adaptor, there&rsquo;s an option to tail the oplog, MongoDB&rsquo;s replication trail and this lets programs see changes in real time. Turn the option on and when the initial copying has finished, the Transporter stays running listening to the oplog and creating new messages which contain documents with all the changes. So all you need to add to the source properties is &ldquo;tail&rdquo;: true.</p>
+</blockquote>
+<p>可以看出来, <code>transporter</code>和<code>mongo-connector</code>都是监听<code>oplog</code>的变化来实现数据的实时同步.</p>
+<h2 id="oplog">Oplog</h2>
+<h3 id="查看oplog大小">查看<code>oplog</code>大小</h3>
+<pre><code>db.printReplicationInfo()
+db.oplog.rs.stats().maxSize 单位k
+</code></pre>
+<p>一般复制集的oplog size 默认是磁盘容量的5%(最小1G，最大50G）</p>
+<h3 id="如何估算oplog大小">如何估算oplog大小</h3>
+<p><a href="http://www.mongoing.com/blog/oplog-size">http://www.mongoing.com/blog/oplog-size</a></p>
+<h3 id="如何修改oplog大小">如何修改oplog大小</h3>
+<p>官方文档: <a href="https://docs.mongodb.com/v3.4/tutorial/change-oplog-size/">https://docs.mongodb.com/v3.4/tutorial/change-oplog-size/</a></p>
+<p>不过阿里云官方不支持修改oplog, 所以如果遇到oplog过小导致同步失败的问题, 只能增加磁盘大小</p>
+<h2 id="transporter使用">transporter使用</h2>
+<p>官方: <a href="https://github.com/compose/transporter">https://github.com/compose/transporter</a></p>
+<p>博客: <a href="https://www.compose.com/articles/search/?s=transporter">https://www.compose.com/articles/search/?s=transporter</a></p>
+<p>WIKI: <a href="https://github.com/compose/transporter/wiki">https://github.com/compose/transporter/wiki</a></p>
+<p>Compose官网: <a href="https://www.compose.com/">https://www.compose.com/</a></p>
+<h3 id="命令">命令</h3>
+<pre><code>run       run pipeline loaded from a file
+test      display the compiled nodes without starting a pipeline
+about     show information about available adaptors
+init      initialize a config and pipeline file based from provided adaptors
+xlog      manage the commit log
+offset    manage the offset for sinks
+</code></pre>
+<h3 id="查看支持的adaptors">查看支持的adaptors</h3>
+<pre><code>root@364293f04e45:~# ./transporter about
+rabbitmq - an adaptor that handles publish/subscribe messaging with RabbitMQ
+rethinkdb - a rethinkdb adaptor that functions as both a source and a sink
+elasticsearch - an elasticsearch sink adaptor
+file - an adaptor that reads / writes files
+mongodb - a mongodb adaptor that functions as both a source and a sink
+postgres - a postgres adaptor that functions as both a source and a sink
+</code></pre>
+<h3 id="初始化配置文件">初始化配置文件</h3>
+<pre><code>root@364293f04e45:~# ./transporter init mongodb elasticsearch
+Writing pipeline.js...
+</code></pre>
+<p>会生成一个<code>pipeline.js</code></p>
+<h3 id="配置文件">配置文件</h3>
+<p>默认:</p>
+<pre><code>var source = mongodb({
+  &quot;uri&quot;: &quot;${MONGODB_URI}&quot;
+  // &quot;timeout&quot;: &quot;30s&quot;,
+  // &quot;tail&quot;: false,
+  // &quot;ssl&quot;: false,
+  // &quot;cacerts&quot;: [&quot;/path/to/cert.pem&quot;],
+  // &quot;wc&quot;: 1,
+  // &quot;fsync&quot;: false,
+  // &quot;bulk&quot;: false,
+  // &quot;collection_filters&quot;: &quot;{}&quot;,
+  // &quot;read_preference&quot;: &quot;Primary&quot;
+})
+
+var sink = elasticsearch({
+  &quot;uri&quot;: &quot;${ELASTICSEARCH_URI}&quot;
+  // &quot;timeout&quot;: &quot;10s&quot;, // defaults to 30s
+  // &quot;aws_access_key&quot;: &quot;ABCDEF&quot;, // used for signing requests to AWS Elasticsearch service
+  // &quot;aws_access_secret&quot;: &quot;ABCDEF&quot; // used for signing requests to AWS Elasticsearch service
+  // &quot;parent_id&quot;: &quot;elastic_parent&quot; // defaults to &quot;elastic_parent&quot; parent identifier for Elasticsearch
+})
+
+t.Source(&quot;source&quot;, source, &quot;/.*/&quot;).Save(&quot;sink&quot;, sink, &quot;/.*/&quot;)
+</code></pre>
+<p>主要参考<a href="https://github.com/compose/transporter/wiki/Configuration">Configuration</a>, <a href="https://github.com/compose/transporter/wiki/Pipelines">Pipelines</a>, <a href="https://github.com/compose/transporter/wiki/Transformers">Transformers</a> 进行配置.</p>
+<p><code>t.Source(&quot;source&quot;, source, &quot;/.*/&quot;).Save(&quot;sink&quot;, sink, &quot;/.*/&quot;)</code>的<code>namespaces</code>(<code>/.*/</code>)是一个正则表达式. 以<code>^</code>开头并以<code>$</code>结尾</p>
+<p>关于这一块查看issue的时候要注意, 尽量不看<code>2017年</code>之前的<code>issue</code>, 因为在<a href="https://www.compose.com/articles/transporter-0-3-0-released-transporter-streamlined/">0.3.0</a>改变了<code>transporter</code>的使用方式. 尽量按照wiki的方式来.</p>
+<p>我的配置文件</p>
+<pre><code>var source = mongodb({
+  &quot;uri&quot;: &quot;mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin&quot;
+  // &quot;timeout&quot;: &quot;30s&quot;,
+  &quot;tail&quot;: true,
+  // &quot;ssl&quot;: false,
+  // &quot;cacerts&quot;: [&quot;/path/to/cert.pem&quot;],
+  // &quot;wc&quot;: 1,
+  // &quot;fsync&quot;: false,
+  // &quot;bulk&quot;: false,
+  //&quot;collection_filters&quot;: &quot;{ }&quot;,
+  // &quot;read_preference&quot;: &quot;Primary&quot;
+})
+
+
+var sink = elasticsearch({
+  &quot;uri&quot;: &quot;http://***:***@es-cn-mp90mbej1000dyum9.elasticsearch.aliyuncs.com:9200/story&quot;
+  // &quot;timeout&quot;: &quot;10s&quot;, // defaults to 30s
+  // &quot;aws_access_key&quot;: &quot;ABCDEF&quot;, // used for signing requests to AWS Elasticsearch service
+  // &quot;aws_access_secret&quot;: &quot;ABCDEF&quot; // used for signing requests to AWS Elasticsearch service
+  // &quot;parent_id&quot;: &quot;elastic_parent&quot; // defaults to &quot;elastic_parent&quot; parent identifier for Elasticsearch
+})
+
+t.Source(&quot;source&quot;, source, &quot;/^tracks$|^albums$|^picture_books$|^picture_books_items$/&quot;).Transform(omit({&quot;fields&quot;:[&quot;code&quot;]})).Save(&quot;sink&quot;, sink, &quot;/^tracks$|^albums$|^picture_books$|^picture_books_items$/&quot;)
+</code></pre>
+<p>还存在两个问题:</p>
+<ol>
+<li>如何<code>mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin</code>换成MongoDB connection string?</li>
+<li>如何在同一脚本中同时同步多个数据库?</li>
+</ol>
+<h3 id="测试配置文件是否正常">测试配置文件是否正常</h3>
+<pre><code>root@364293f04e45:~# ./transporter test
+Transporter:
+ - Source:         source                                   mongodb         ^tracks$|^albums$|^picture_books$|^picture_books_items$
+  - Sink:          sink                                     elasticsearch   ^tracks$|^albums$|^picture_books$|^picture_books_items$
+</code></pre>
+<h3 id="运行">运行</h3>
+<pre><code>root@364293f04e45:~# ./transporter run
+INFO[0000] adaptor Listening...                          name=sink path=&quot;source/sink&quot; type=elasticsearch
+INFO[0000] starting with metadata map[]                  name=source path=source type=mongodb
+INFO[0000] adaptor Starting...                           name=source path=source type=mongodb
+INFO[0000] boot map[source:mongodb sink:elasticsearch]   ts=1529296920584180591
+INFO[0000] testing oplog access                          uri=&quot;mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin&quot;
+INFO[0000] oplog access good
+INFO[0000] starting Read func                            db=story
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+INFO[0000] collection count                              db=story num_collections=39
+INFO[0000] skipping iteration...                         collection=abc db=story
+INFO[0000] adding for iteration...                       collection=albums db=story
+INFO[0000] skipping iteration...                         collection=&quot;cartoon_albums&quot; db=story
+INFO[0000] skipping iteration...                         collection=categories db=story
+INFO[0000] skipping iteration...                         collection=&quot;category_groups&quot; db=story
+INFO[0000] skipping iteration...                         collection=&quot;child_ugcs&quot; db=story
+INFO[0000] skipping iteration...                         collection=&quot;feedback_categories&quot; db=story
+INFO[0000] skipping iteration...                         collection=feedbacks db=story
+INFO[0000] skipping iteration...                         collection=handpicks db=story
+INFO[0000] skipping iteration...                         collection=languages db=story
+INFO[0000] skipping iteration...                         collection=&quot;picture_book_items&quot; db=story
+INFO[0000] adding for iteration...                       collection=&quot;picture_books&quot; db=story
+INFO[0000] skipping iteration...                         collection=system.profile db=story
+INFO[0000] skipping iteration...                         collection=tags db=story
+INFO[0000] skipping iteration...                         collection=testcoll db=story
+INFO[0000] adding for iteration...                       collection=tracks db=story
+INFO[0000] done iterating collections                    db=story
+INFO[0000] iterating...                                  collection=albums
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+INFO[0000] iterating complete                            collection=albums db=story
+INFO[0000] oplog start timestamp: 6568280257273528320    collection=albums
+INFO[0000] tailing oplog with query map[ns:story.albums ts:map[$gte:6568280257273528320]]  db=story
+INFO[0000] iterating...                                  collection=&quot;picture_books&quot;
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+^CINFO[0000] adaptor Stopping...                           name=source path=source type=mongo
+</code></pre>
+<p>默认打印<code>INFO</code>级别的log, 其他级别的还有<code>debug</code>,<code>error</code>, 只需要加上参数: <code>-log.level &quot;debug&quot;</code></p>
+<h3 id="docker运行">Docker运行</h3>
+<p><a href="https://github.com/compose/transporter/wiki/Running-with-Docker">https://github.com/compose/transporter/wiki/Running-with-Docker</a></p>
+<pre><code>docker pull quay.io/compose/transporter
+docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter init mongodb file
+#!/bin/sh
+docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter run
+</code></pre>
+<h3 id="创建mapping">创建mapping</h3>
+<p>在使用<code>transporter</code>的时候最好要提前创建好index, 这样通过到ES的数据才会按照我们想要的格式建立索引. 如果不提前设置创建index, 那么ES需要打开<code>自动创建索引</code>选项, 不建议这么做.</p>
+<h4 id="创建index">创建index</h4>
+<pre><code>{
+    &quot;index&quot;:{
+        &quot;analysis&quot;:{
+            &quot;analyzer&quot;:{
+                &quot;by_smart&quot;:{
+                    &quot;type&quot;:&quot;custom&quot;,
+                    &quot;tokenizer&quot;:&quot;ik_smart&quot;,
+                    &quot;filter&quot;:[
+                        &quot;by_tfr&quot;,
+                        &quot;by_sfr&quot;
+                    ],
+                    &quot;char_filter&quot;:[
+                        &quot;by_cfr&quot;
+                    ]
+                },
+                &quot;by_max_word&quot;:{
+                    &quot;type&quot;:&quot;custom&quot;,
+                    &quot;tokenizer&quot;:&quot;ik_max_word&quot;,
+                    &quot;filter&quot;:[
+                        &quot;by_tfr&quot;,
+                        &quot;by_sfr&quot;
+                    ],
+                    &quot;char_filter&quot;:[
+                        &quot;by_cfr&quot;
+                    ]
+                }
+            },
+            &quot;filter&quot;:{
+                &quot;by_tfr&quot;:{
+                    &quot;type&quot;:&quot;stop&quot;,
+                    &quot;stopwords&quot;:[
+                        &quot; &quot;
+                    ]
+                },
+                &quot;by_sfr&quot;:{
+                    &quot;type&quot;:&quot;synonym&quot;,
+                    &quot;synonyms_path&quot;:&quot;analysis/synonyms.txt&quot;
+                }
+            },
+            &quot;char_filter&quot;:{
+                &quot;by_cfr&quot;:{
+                    &quot;type&quot;:&quot;mapping&quot;,
+                    &quot;mappings&quot;:[
+                        &quot;| =&gt; |&quot;
+                    ]
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h4 id="创建type">创建type</h4>
+<pre><code>{
+	&quot;properties&quot;: {
+	    &quot;title&quot;: {
+	    	&quot;type&quot;: &quot;text&quot;,
+	    	&quot;fields&quot;: {
+		    	&quot;keyword&quot;: {
+		        	&quot;type&quot;: &quot;keyword&quot;,
+		        	&quot;ignore_above&quot;: 256
+		    	}
+	    	},
+			&quot;index&quot;: &quot;analyzed&quot;,
+		    &quot;analyzer&quot;: &quot;by_max_word&quot;,
+		    &quot;search_analyzer&quot;: &quot;by_smart&quot;
+    	},
+    	&quot;authors&quot;: {
+    		&quot;properties&quot;:{
+    			&quot;name&quot;: {
+    				&quot;type&quot;: &quot;text&quot;,
+			    	&quot;fields&quot;: {
+				    	&quot;keyword&quot;: {
+				        	&quot;type&quot;: &quot;keyword&quot;,
+				        	&quot;ignore_above&quot;: 256
+				    	}
+			    	},
+					&quot;index&quot;: &quot;analyzed&quot;,
+				    &quot;analyzer&quot;: &quot;by_max_word&quot;,
+				    &quot;search_analyzer&quot;: &quot;by_smart&quot;		
+    			}
+    		}
+    	},
+    	&quot;nickname&quot;: {
+	    	&quot;type&quot;: &quot;text&quot;,
+	    	&quot;fields&quot;: {
+		    	&quot;keyword&quot;: {
+		        	&quot;type&quot;: &quot;keyword&quot;,
+		        	&quot;ignore_above&quot;: 256
+		    	}
+	    	},
+			&quot;index&quot;: &quot;analyzed&quot;,
+		    &quot;analyzer&quot;: &quot;by_max_word&quot;,
+		    &quot;search_analyzer&quot;: &quot;by_smart&quot;
+    	}
+	}
+}
+</code></pre>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/compose/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#compose</a>
+    
+    <a href="https://www.haohongfan.com/tags/transporter/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#transporter</a>
+    
+    <a href="https://www.haohongfan.com/tags/elasticsearch/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#elasticsearch</a>
+    
+    <a href="https://www.haohongfan.com/tags/mongodb/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#mongodb</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/" class="block">Graphql最大复杂度和最大深度设置</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="block">go 跨平台编译</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/">mongodb联表查询</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>
