@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width">
 
 
-<title>sync.Map | Go 源码分析与实战 | HHFCodeRv</title>
+<title>一文完全掌握 Go math/rand | Go 源码分析与实战 | HHFCodeRv</title>
 
 <meta name="generator" content="Hugo Eureka 0.8.0" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
@@ -58,7 +58,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
 
 <meta name="description"
-  content="hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex &#43; Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完">
+  content="Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &gt;= 0 { var u int64 u = int64(x) &lt;&lt; 40 x = seedrand(x) u ^= int64(x) &lt;&lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -74,12 +74,12 @@
       "item":"https://www.haohongfan.com/docs/gohandbook/"},{
       "@type": "ListItem",
       "position": 3 ,
-      "name":"并发原语",
-      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
+      "name":"随机数",
+      "item":"https://www.haohongfan.com/docs/gohandbook/rand-chapter/"},{
       "@type": "ListItem",
       "position": 4 ,
-      "name":"sync.Map",
-      "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/"}]
+      "name":"一文完全掌握 Go math/rand",
+      "item":"https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/"}]
 }
 </script>
 
@@ -91,11 +91,11 @@
     "@type": "Article",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/"
+        "@id": "https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/"
     },
-    "headline": "sync.Map | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
-    "dateModified": "2021-04-01T09:57:16+08:00",
-    "wordCount":  2085 ,
+    "headline": "一文完全掌握 Go math\/rand | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-01-23T09:57:16+08:00",
+    "dateModified": "2021-01-23T09:57:16+08:00",
+    "wordCount":  1764 ,
     "author": {
         "@type": "Person",
         "name": "hhf"
@@ -108,21 +108,21 @@
             "url": "https://www.haohongfan.com/images/icon.png"
         }
         },
-    "description": "hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex \u002b Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() \/\/ double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完"
+    "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math\/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math\/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap \/\/... x := int32(seed) for i := -20; i \u0026lt; rngLen; i\u002b\u002b { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设"
 }
-</script><meta property="og:title" content="sync.Map | Go 源码分析与实战 | HHFCodeRv" />
+</script><meta property="og:title" content="一文完全掌握 Go math/rand | Go 源码分析与实战 | HHFCodeRv" />
 <meta property="og:type" content="article" />
 
 
 <meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
 
 
-<meta property="og:url" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" />
+<meta property="og:url" content="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" />
 
 
 
 
-<meta property="og:description" content="hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex &#43; Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完" />
+<meta property="og:description" content="Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &gt;= 0 { var u int64 u = int64(x) &lt;&lt; 40 x = seedrand(x) u ^= int64(x) &lt;&lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设" />
 
 
 
@@ -139,10 +139,10 @@
 
 
 
-<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+<meta property="article:published_time" content="2021-01-23T09:57:16&#43;08:00" />
 
 
-<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+<meta property="article:modified_time" content="2021-01-23T09:57:16&#43;08:00" />
 
 
 
@@ -173,6 +173,8 @@
 
 
 
+<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/" />
+
 
 
 <meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" />
@@ -190,8 +192,6 @@
 <meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" />
 
 
-
-<meta property="og:see_also" content="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" />
 
 
 
@@ -356,7 +356,7 @@
     
     <li class="py-2">
         <div class="">
-            <a class=" text-eureka  hover:text-eureka"
+            <a class=" hover:text-eureka"
                 href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
         </div>
         
@@ -395,7 +395,7 @@
     
     <li class="py-2">
         <div class="">
-            <a class=" hover:text-eureka"
+            <a class=" text-eureka  hover:text-eureka"
                 href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
         </div>
         
@@ -423,15 +423,15 @@
         </div>
         <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
             <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
-                <h1 class="font-bold text-3xl text-primary-text">sync.Map</h1>
+                <h1 class="font-bold text-3xl text-primary-text">一文完全掌握 Go math/rand</h1>
                 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-04-01</span>
+        <span>2021-01-23</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
+        <span>4分钟阅读时长</span>
     </div>
     
     
@@ -462,181 +462,164 @@
                     
                     
                     <div class="content">
-                        <p>hi, 大家好，我是 haohongfan。</p>
-<p>本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map  来使用。</p>
-<p>下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。</p>
-<pre><code class="language-go">instance, ok := instanceMap[name]
-if ok {
-    return instance, nil
-}
+                        <p>Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand.</p>
+<p>开篇一问: 你觉得 rand 会 panic 吗 ?</p>
+<p><img src="https://images.haohongfan.com/rand_panic1.png" alt="rand panic"></p>
+<h2 id="源码剖析">源码剖析</h2>
+<p>math/rand 源码其实很简单, 就两个比较重要的函数</p>
+<pre><code class="language-go">func (rng *rngSource) Seed(seed int64) {
+	rng.tap = 0
+	rng.feed = rngLen - rngTap
 
-initLock.Lock()
-defer initLock.Unlock()
-
-// double check
-instance, ok = instanceMap[name]
-if ok {
-    return instance, nil
-}
-</code></pre>
-<p>这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完全包含了这个逻辑。可能写 Java 的同学看着上面这段代码很眼熟，但确实是用错了，关于为什么用错了以及会造成什么影响，请大家关注后续的文章。</p>
-<p>我大概分析了下大家宁愿使用 Mutex + Map，也不愿使用 sync.Map 的原因：</p>
-<ol>
-<li>sync.Map 本身就很难用，使用起来并不像一个 Map。失去了 map 应有的特权语法，如：make,  map[1] 等</li>
-<li>sync.Map 方法较多。让一个简单的 Map 使用起来有了较高的学习成本。</li>
-</ol>
-<p>不管什么样的原因吧，当你读过这篇文章后，在某些特定的并发场景下，建议使用 sync.Map 代替 Map + Mutex 的。</p>
-<h2 id="用法全解">用法全解</h2>
-<pre><code class="language-go">package main
-
-import (
-	&quot;fmt&quot;
-	&quot;sync&quot;
-)
-
-func main() {
-	var syncMap sync.Map
-	syncMap.Store(&quot;11&quot;, 11)
-	syncMap.Store(&quot;22&quot;, 22)
-
-	fmt.Println(syncMap.Load(&quot;11&quot;)) // 11
-	fmt.Println(syncMap.Load(&quot;33&quot;)) // 空
-
-	fmt.Println(syncMap.LoadOrStore(&quot;33&quot;, 33)) // 33
-	fmt.Println(syncMap.Load(&quot;33&quot;)) // 33
-	fmt.Println(syncMap.LoadAndDelete(&quot;33&quot;)) // 33
-	fmt.Println(syncMap.Load(&quot;33&quot;)) // 空
-
-	syncMap.Range(func(key, value interface{}) bool {
-		fmt.Printf(&quot;key:%v value:%v\n&quot;, key, value)
-		return true
-	})
-    // key:22 value:22
-	// key:11 value:11
-}
-</code></pre>
-<p>其实 sync.Map 并不复杂，只是将普通 map 的相关操作转成对应函数而已。</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>普通 map</th>
-<th>sync.Map</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>map 获取某个 key</td>
-<td>map[1]</td>
-<td>sync.Load(1)</td>
-</tr>
-<tr>
-<td>map 添加元素</td>
-<td>map[1] = 10</td>
-<td>sync.Store(1, 10)</td>
-</tr>
-<tr>
-<td>map 删除一个 key</td>
-<td>delete(map, 1)</td>
-<td>sync.Delete(1)</td>
-</tr>
-<tr>
-<td>遍历 map</td>
-<td>for&hellip;range</td>
-<td>sync.Range()</td>
-</tr>
-</tbody>
-</table>
-<p>sync.Map 两个特有的函数，不过从字面就能理解是什么意思了。
-LoadOrStore：sync.Map 存在就返回，不存在就插入
-LoadAndDelete：sync.Map 获取某个 key，如果存在的话，同时删除这个 key</p>
-<h2 id="源码解析">源码解析</h2>
-<pre><code class="language-go">type Map struct {
-	mu Mutex
-	read atomic.Value // readOnly  read map
-	dirty map[interface{}]*entry  // dirty map
-	misses int
-}
-</code></pre>
-<p><img src="https://images.haohongfan.com/sync_map_all1.png" alt="sync map 全景图"></p>
-<p><img src="https://images.haohongfan.com/sync_map_load.png" alt="Load"></p>
-<p><img src="https://images.haohongfan.com/sync_map_store.png" alt="store"></p>
-<p><img src="https://images.haohongfan.com/sync_map_delete.png" alt="Delete"></p>
-<h3 id="read-map-的值是什么时间更新的-">read map 的值是什么时间更新的 ？</h3>
-<ol>
-<li>Load/LoadOrStore/LoadAndDelete 时，当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map</li>
-<li>Store/LoadOrStore 时，当 read map 中存在这个key，则更新</li>
-<li>Delete/LoadAndDelete 时，如果 read map 中存在这个key，则设置这个值为 nil</li>
-</ol>
-<h3 id="dirty-map-的值是什么时间更新的-">dirty map 的值是什么时间更新的 ？</h3>
-<ol>
-<li>完全是一个新 key， 第一次插入 sync.Map，必先插入 dirty map</li>
-<li>Store/LoadOrStore 时，当 read map 中不存在这个key，在 dirty map 存在这个key，则更新</li>
-<li>Delete/LoadAndDelete 时，如果 read map 中不存在这个key，在 dirty map 存在这个key，则从 dirty map 中删除这个key</li>
-<li>当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map，同时设置 dirty map 为 nil</li>
-</ol>
-<p><strong>疑问：当 dirty map 复制到 read map 后，将 dirty map 设置为 nil，也就是 dirty map 中就不存在这个 key 了。如果又新插入某个 key，多次访问后达到了 dirty map 往 read map 复制的条件，如果直接用 read map 覆盖 dirty map，那岂不是就丢了之前在 read map 但不在 dirty map 的 key ?</strong></p>
-<p>答：其实并不会。当 dirty map 向 read map 复制后，readOnly.amended 等于了 false。当新插入了一个值时，会将 read map 中的值，重新给 dirty map 赋值一遍，也就是 read map 也会向 dirty map 中复制。</p>
-<pre><code class="language-go">func (m *Map) dirtyLocked() {
-	if m.dirty != nil {
-		return
-	}
-
-	read, _ := m.read.Load().(readOnly)
-	m.dirty = make(map[interface{}]*entry, len(read.m))
-	for k, e := range read.m {
-		if !e.tryExpungeLocked() {
-			m.dirty[k] = e
+	//...
+	x := int32(seed)
+	for i := -20; i &lt; rngLen; i++ {
+		x = seedrand(x)
+		if i &gt;= 0 {
+			var u int64
+			u = int64(x) &lt;&lt; 40
+			x = seedrand(x)
+			u ^= int64(x) &lt;&lt; 20
+			x = seedrand(x)
+			u ^= int64(x)
+			u ^= rngCooked[i]
+			rng.vec[i] = u
 		}
 	}
 }
 </code></pre>
-<h3 id="read-map-和-dirty-map-是什么时间删除的">read map 和 dirty map 是什么时间删除的？</h3>
-<ul>
-<li>当 read map 中存在某个 key 的时候，这个时候只会删除 read map， 并不会删除 dirty map（因为 dirty map 不存在这个值）</li>
-<li>当 read map 中不存在时，才会去删除 dirty map 里面的值</li>
-</ul>
-<p><strong>疑问：如果按照这个删除方式，那岂不是 dirty map 中会有残余的 key，导致没删除掉？</strong></p>
-<p>答：其实并不会。当 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map。这个过程中还附带了另外一个操作：将 dirty map 置为 nil。</p>
-<pre><code class="language-go">func (m *Map) missLocked() {
-	m.misses++
-	if m.misses &lt; len(m.dirty) {
-		return
+<p>这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设置对应的值. rng.vec 的大小是 607.</p>
+<pre><code class="language-go">func (rng *rngSource) Uint64() uint64 {
+	rng.tap--
+	if rng.tap &lt; 0 {
+		rng.tap += rngLen
 	}
-	m.read.Store(readOnly{m: m.dirty})
-	m.dirty = nil
-	m.misses = 0
+
+	rng.feed--
+	if rng.feed &lt; 0 {
+		rng.feed += rngLen
+	}
+
+	x := rng.vec[rng.feed] + rng.vec[rng.tap]
+	rng.vec[rng.feed] = x
+	return uint64(x)
 }
 </code></pre>
-<h3 id="read-map-与-dirty-map-的关系-">read map 与 dirty map 的关系 ？</h3>
-<ol>
-<li>在 read map 中存在的值，在 dirty map 中可能不存在。</li>
-<li>在 dirty map 中存在的值，在 read map 中也可能存在。</li>
-<li>当访问多次，发现 dirty map 中存在，read map  中不存在，导致 misses 数量大于等于 dirty map 的元素个数时，会整体复制 dirty map 到 read map。</li>
-<li>当出现 dirty map 向 read map 复制后，dirty map 会被置成 nil。</li>
-<li>当出现 dirty map 向 read map 复制后，readOnly.amended 等于了 false。当新插入了一个值时，会将 read map 中的值，重新给 dirty map 赋值一遍</li>
-</ol>
-<h3 id="readdirty-map-中的值一定是有效的吗">read/dirty map 中的值一定是有效的吗？</h3>
-<p>并不一定。放入到 read/dirty map 中的值总共有 3 种类型：</p>
-<ul>
-<li>nil：如果获取到的 value 是 nil，那说明这个 key 是已经删除过的。既不在 read map，也不在 dirty map</li>
-<li>expunged：这个 key 在 dirty map 中是不存在的</li>
-<li>valid：其实就正常的情况，要么这个值存在在 read map 中，要么存在在 dirty map 中</li>
-</ul>
-<h2 id="syncmap-是如何提高性能的">sync.Map 是如何提高性能的？</h2>
-<p>通过源码解析，我们知道 sync.Map 里面有两个普通 map，read map主要是负责读，dirty map 是负责读和写（加锁）。在读多写少的场景下，read map 的值基本不发生变化，可以让 read map 做到无锁操作，就减少了使用 Mutex + Map 必须的加锁/解锁环节，因此也就提高了性能。</p>
-<p>不过也能够看出来，read map 也是会发生变化的，如果某些 key 写操作特别频繁的话，sync.Map 基本也就退化成了 Mutex + Map（有可能性能还不如 Mutex + Map）。</p>
-<p>所以，不是说使用了 sync.Map 就一定能提高程序性能，我们日常使用中尽量注意拆分粒度来使用 sync.Map。</p>
-<p>关于如何分析 sync.Map 是否优化了程序性能，同样可以使用 pprof。具体过程可以参考 《这可能是最容易理解的 Go Mutex 源码剖析》</p>
-<h2 id="syncmap-应用场景">sync.Map 应用场景</h2>
-<ol>
-<li>读多写少</li>
-<li>写操作也多，但是修改的 key 和读取的 key 特别不重合。</li>
-</ol>
-<p>关于第二点我觉得挺扯的，毕竟我们很难把控这一点，不过由于是官方的注释还是放在这里。</p>
-<p>实际开发中我们要注意使用场景和擅用 pprof 来分析程序性能。</p>
-<h2 id="syncmap-使用注意点">sync.Map 使用注意点</h2>
-<p>和 Mutex 一样， sync.Map 也同样不能被复制，因为 atomic.Value 是不能被复制的。</p>
+<p>我们在使用不管调用 Intn(), Int31n() 等其他函数, 最终调用到就是这个函数. 可以看到每次调用就是利用 rng.feed rng.tap 从 rng.vec 中取到两个值相加的结果返回了. 同时还是这个结果又重新放入 rng.vec.</p>
+<p>在这里需要注意使用 rng.go 的 rngSource 时, 由于 rng.vec 在获取随机数时会同时设置 rng.vec 的值, 当多 goroutine 同时调用时就会有数据竞争问题. math/rand 采用在调用 rngSource 时加锁  sync.Mutex 解决.</p>
+<pre><code class="language-go">func (r *lockedSource) Uint64() (n uint64) {
+	r.lk.Lock()
+	n = r.src.Uint64()
+	r.lk.Unlock()
+	return
+}
+</code></pre>
+<p>另外我们能直接使用 <code>rand.Seed()</code>, <code>rand.Intn(100)</code>, 是因为 math/rand 初始化了一个全局的 globalRand 变量.</p>
+<pre><code class="language-go">var globalRand = New(&amp;lockedSource{src: NewSource(1).(*rngSource)})
+
+func Seed(seed int64) { globalRand.Seed(seed) }
+
+func Uint32() uint32 { return globalRand.Uint32() }
+</code></pre>
+<p>需要注意到由于调用 rngSource 加了锁, 所以直接使用 <code>rand.Int32()</code> 会导致全局的 goroutine 锁竞争, 所以在高并发场景时, 当你的程序的性能是卡在这里的话, 你需要考虑利用 <code>New(&amp;lockedSource{src: NewSource(1).(*rngSource)})</code> 为不同的模块生成单独的 rand. 不过根据目前的实践来看, 使用全局的 globalRand 锁竞争并没有我们想象中那么激烈.  使用 New 生成新的 rand 里面是有坑的, 开篇的 panic 就是这么产生的, 后面具体再说.</p>
+<h2 id="种子seed到底起什么作用-">种子(seed)到底起什么作用 ?</h2>
+<pre><code class="language-go">func main() {
+	for i := 0; i &lt; 10; i++ {
+		fmt.Printf(&quot;current:%d\n&quot;, time.Now().Unix())
+		rand.Seed(time.Now().Unix())
+		fmt.Println(rand.Intn(100))
+	}
+}
+</code></pre>
+<p>结果:</p>
+<pre><code>current:1613814632
+65
+current:1613814632
+65
+current:1613814632
+65
+...
+</code></pre>
+<p>这个例子能得出一个结论: 相同种子，每次运行的结果都是一样的. 这是为什么呢?</p>
+<p>在使用 math/rand 的时候, 一定需要通过调用 rand.Seed 来设置种子, 其实就是给 rng.vec 的 607 个槽设置对应的值. 通过上面的源码那可以看出来, rand.Seed 会调用一个 seedrand 的函数, 来计算对应槽的值.</p>
+<pre><code class="language-go">func seedrand(x int32) int32 {
+	const (
+		A = 48271
+		Q = 44488
+		R = 3399
+	)
+
+	hi := x / Q
+	lo := x % Q
+	x = A*lo - R*hi
+	if x &lt; 0 {
+		x += int32max
+	}
+	return x
+}
+</code></pre>
+<p>这个函数的计算结果并不是随机的, 而是根据 seed 实际算出来的. 另外这个函数并不是随便写的, 是有相关的数学证明的.</p>
+<p>这也导致了相同的 seed, 最终设置到 rng.vec里面的值是相同的, 通过 Intn 取出的也是相同的值</p>
+<h2 id="我遇到的那些坑">我遇到的那些坑</h2>
+<h3 id="1-rand-panic">1. rand panic</h3>
+<p>文章开头的截图就是项目开发中使用别人封装的底层库, 在某天出现的 panic. 大概实现的代码</p>
+<pre><code class="language-go">// random.go
+
+var (
+	rrRand = rand.New(rand.NewSource(time.Now().Unix()))
+)
+
+type Random struct{}
+
+func (r *Random) Balance(sf *service.Service) ([]string, error) {
+	// .. 通过服务发现获取到一堆ip+port, 然后随机拿到其中的一些ip和port出来
+	randIndexes := rrRand.Perm(randMax)
+
+	// 返回这些ip 和port
+}
+
+</code></pre>
+<p>这个 Random 会被并发调用, 由于 rrRand 不是并发安全的, 所以就导致了调用 rrRand.Perm 时偶尔会出现 panic 情况.</p>
+<p>在使用 math/rand 的时候, 有些人使用 math.Intn() 看了下注释发现是全局共享了一个锁, 担心出现锁竞争, 所以用 rand.New 来初始化一个新的 rand, 但是要注意到 rand.New 初始化出来的 rand 并不是并发安全的.</p>
+<p>修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.</p>
+<h3 id="2-获取的都是同一个机器">2. 获取的都是同一个机器</h3>
+<p><img src="https://images.haohongfan.com/acc.png?imageView2/1/w/700/h/500" alt="流量不均匀"></p>
+<p>同样也是底层封装的 rpc 库, 使用 random 的方式来流量分发, 在线上跑了一段时间后, 流量都路由到一台机器上了, 导致服务直接宕机. 大概实现代码:</p>
+<pre><code class="language-go">func Call(ctx *gin.Context, method string, service string, data map[string]interface{}) (buf []byte, err error) {
+	ins, err := ral.GetInstance(ctx, ral.TYPE_HTTP, service)
+	if err != nil {
+		// 错误处理
+	}
+	defer ins.Release()
+
+	if b, e := ins.Request(ctx, method, data, head); e == nil {
+		// 错误处理
+	}
+	// 其他逻辑, 重试等等
+}
+
+func GetInstance(ctx *gin.Context, modType string, name string) (*Instance, error) {
+	// 其他逻辑..
+
+	switch res.Strategy {
+	case WITH_RANDOM:
+		if res.rand == nil {
+			res.rand = rand.New(rand.NewSource(time.Now().Unix()))
+		}
+		which = res.rand.Intn(res.count)
+	case 其他负载均衡查了
+	}
+
+	// 返回其中一个ip和port
+}
+</code></pre>
+<p>引起问题的原因: 可以看出来每次请求到来都是利用 GetInstance 来获取一个 ip 和 port, 如果采用 Random 方式的流量负载均衡, 每次都是重新初始化一个 rand. 我们已经知道当设置相同的种子，每次运行的结果都是一样的. 当瞬间流量过大时, 并发请求 GetInstance, 由于那一刻 time.Now().Unix() 的值是一样的, 这样就会导致获取到随机数都是一样的, 所以就导致最后获取到的 ip, port都是一样的, 流量都分发到这台机器上了.</p>
+<p>修复方案: 修改成 globalRand 即可.</p>
+<h2 id="rand-未来期望">rand 未来期望</h2>
+<p>说到这里基本上可以看出来, 为了防止全局锁竞争问题, 在使用 math/rand 的时候, 首先都会想到自定义 rand, 但是就容易整出来莫名其妙的问题.</p>
+<p>为什么 math/rand 需要加锁呢?</p>
+<p>大家都知道 math/rand 是伪随机的, 但是在设置完 seed 后, rng.vec 数组的值基本上就确定下来了, 这明显就不是随机了, 为了增加随机性, 通过 Uint64() 获取到随机数后, 还会重新去设置 rng.vec. 由于存在并发获取随机数的需求, 也就有了并发设置 rng.vec 的值, 所以需要对 rng.vec 加锁保护.</p>
+<p>使用 rand.Intn() 确实会有全局锁竞争问题, 你觉得 math/rand 未来会优化吗? 以及如何优化? 欢迎留言讨论</p>
 <p><img src="https://images.haohongfan.com/gzh1.png" alt="gzh"></p>
 <h2 id="版权">版权</h2>
 <p>以上内容均不得复制用于商业用途或发行</p>
@@ -685,21 +668,6 @@ LoadAndDelete：sync.Map 获取某个 key，如果存在的话，同时删除这
 
 
                     
-<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
-    <div>
-        
-        <span class="block font-bold">上一页</span>
-        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="block">WaitGroup</a>
-        
-    </div>
-    <div class="md:text-right mt-4 md:mt-0">
-        
-        <span class="block font-bold">下一页</span>
-        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/" class="block">sync.Pool</a>
-        
-    </div>
-</div>
-
                     
 
 
@@ -727,19 +695,15 @@ LoadAndDelete：sync.Map 获取某个 key，如果存在的话，同时删除这
 <div class="sticky-toc hidden lg:block px-6 pb-6  pt-10 -mt-10 border-l ">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#用法全解">用法全解</a></li>
-    <li><a href="#源码解析">源码解析</a>
+    <li><a href="#源码剖析">源码剖析</a></li>
+    <li><a href="#种子seed到底起什么作用-">种子(seed)到底起什么作用 ?</a></li>
+    <li><a href="#我遇到的那些坑">我遇到的那些坑</a>
       <ul>
-        <li><a href="#read-map-的值是什么时间更新的-">read map 的值是什么时间更新的 ？</a></li>
-        <li><a href="#dirty-map-的值是什么时间更新的-">dirty map 的值是什么时间更新的 ？</a></li>
-        <li><a href="#read-map-和-dirty-map-是什么时间删除的">read map 和 dirty map 是什么时间删除的？</a></li>
-        <li><a href="#read-map-与-dirty-map-的关系-">read map 与 dirty map 的关系 ？</a></li>
-        <li><a href="#readdirty-map-中的值一定是有效的吗">read/dirty map 中的值一定是有效的吗？</a></li>
+        <li><a href="#1-rand-panic">1. rand panic</a></li>
+        <li><a href="#2-获取的都是同一个机器">2. 获取的都是同一个机器</a></li>
       </ul>
     </li>
-    <li><a href="#syncmap-是如何提高性能的">sync.Map 是如何提高性能的？</a></li>
-    <li><a href="#syncmap-应用场景">sync.Map 应用场景</a></li>
-    <li><a href="#syncmap-使用注意点">sync.Map 使用注意点</a></li>
+    <li><a href="#rand-未来期望">rand 未来期望</a></li>
     <li><a href="#版权">版权</a></li>
   </ul>
 </nav>

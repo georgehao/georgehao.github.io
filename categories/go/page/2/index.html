@@ -94,6 +94,18 @@
             "name": "并发原语",
             "description": "sync 包相关内容的解析",
             "url": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
+            "name": "随机数",
+            "description": "随机数相关",
+            "url": "https://www.haohongfan.com/docs/gohandbook/rand-chapter/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "一文完全掌握 Go math/rand",
+            "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i \u0026lt; rngLen; i++ { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设",
+            "url": "https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/"
         }
     ]
 }
@@ -234,6 +246,15 @@
       <div class="">本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</div>
   </div>
   
+  
+  <div class="-mx-4 my-4 border-t"></div>
+  <div class="">
+      <div class="mb-2">
+          <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-semibold hover:text-eureka">随机数</a>
+      </div>
+      <div class="">本章节是对 sync 包的剖析，包括：math/rand math/rand 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</div>
+  </div>
+  
   <div class="pt-6 hover:text-eureka">
       <a href="https://www.haohongfan.com/docs/gohandbook/" class="font-semibold">阅读更多</a>
       <i class="fas fa-caret-right ml-1"></i>
@@ -286,6 +307,63 @@
   
   <div class="pt-6 hover:text-eureka">
       <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" class="font-semibold">阅读更多</a>
+      <i class="fas fa-caret-right ml-1"></i>
+  </div>
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-bold text-xl hover:text-eureka">随机数</a>
+</div>
+<div class="content">
+  本章节是对 sync 包的剖析，包括：math/rand math/rand 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0
+</div>
+
+<div class="px-6 pt-4">
+  
+  <div class="">
+      <div class="mb-2">
+          <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-semibold hover:text-eureka">一文完全掌握 Go math/rand</a>
+      </div>
+      <div class="">Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &amp;lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &amp;gt;= 0 { var u int64 u = int64(x) &amp;lt;&amp;lt; 40 x = seedrand(x) u ^= int64(x) &amp;lt;&amp;lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设</div>
+  </div>
+  
+  <div class="pt-6 hover:text-eureka">
+      <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-semibold">阅读更多</a>
+      <i class="fas fa-caret-right ml-1"></i>
+  </div>
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-bold text-xl hover:text-eureka">一文完全掌握 Go math/rand</a>
+</div>
+<div class="content">
+  Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &amp;lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &amp;gt;= 0 { var u int64 u = int64(x) &amp;lt;&amp;lt; 40 x = seedrand(x) u ^= int64(x) &amp;lt;&amp;lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设
+</div>
+
+<div class="px-6 pt-4">
+  
+  <div class="pt-6 hover:text-eureka">
+      <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-semibold">阅读更多</a>
       <i class="fas fa-caret-right ml-1"></i>
   </div>
 </div>
