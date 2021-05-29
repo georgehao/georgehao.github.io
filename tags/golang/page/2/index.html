@@ -288,7 +288,7 @@
   
   <div class="">
       <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" class="font-semibold hover:text-eureka">Mutex</a>
+          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" class="font-semibold hover:text-eureka">这可能是最容易理解的 Go Mutex 源码剖析</a>
       </div>
       <div class="">Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争</div>
   </div>
@@ -297,7 +297,7 @@
   <div class="-mx-4 my-4 border-t"></div>
   <div class="">
       <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="font-semibold hover:text-eureka">Cond</a>
+          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="font-semibold hover:text-eureka">这一次，彻底搞懂 Go Cond</a>
       </div>
       <div class="">hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &amp;quot;fmt&amp;quot; &amp;quot;time&amp;quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &amp;lt;- 1 }() fmt.Println(&amp;quot;waiting&amp;quot;) &amp;lt;-done fmt.Println(&amp;quot;done&amp;quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &amp;quot;fmt&amp;quot; &amp;quot;sync&amp;quot; &amp;quot;time&amp;quot; ) func main() { cond := sync.NewCond(&amp;amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag</div>
   </div>
@@ -306,7 +306,7 @@
   <div class="-mx-4 my-4 border-t"></div>
   <div class="">
       <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="font-semibold hover:text-eureka">WaitGroup</a>
+          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="font-semibold hover:text-eureka">最清晰易懂的 Go WaitGroup 源码剖析</a>
       </div>
       <div class="">hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为</div>
   </div>

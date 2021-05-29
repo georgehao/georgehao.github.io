@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width">
 
 
-<title>Mutex | Go 源码分析与实战 | HHFCodeRv</title>
+<title>这可能是最容易理解的 Go Mutex 源码剖析 | Go 源码分析与实战 | HHFCodeRv</title>
 
 <meta name="generator" content="Hugo Eureka 0.8.0" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
@@ -78,7 +78,7 @@
       "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
       "@type": "ListItem",
       "position": 4 ,
-      "name":"Mutex",
+      "name":"这可能是最容易理解的 Go Mutex 源码剖析",
       "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/"}]
 }
 </script>
@@ -93,7 +93,7 @@
         "@type": "WebPage",
         "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/"
     },
-    "headline": "Mutex | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "headline": "这可能是最容易理解的 Go Mutex 源码剖析 | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
     "dateModified": "2021-04-01T09:57:16+08:00",
     "wordCount":  3277 ,
     "author": {
@@ -110,7 +110,7 @@
         },
     "description": "Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math\/rand》，我们知道 math\/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争"
 }
-</script><meta property="og:title" content="Mutex | Go 源码分析与实战 | HHFCodeRv" />
+</script><meta property="og:title" content="这可能是最容易理解的 Go Mutex 源码剖析 | Go 源码分析与实战 | HHFCodeRv" />
 <meta property="og:type" content="article" />
 
 
@@ -324,7 +324,7 @@
     <li class="py-2">
         <div class="">
             <a class=" text-eureka  hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">Mutex</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
         </div>
         
     </li>
@@ -335,7 +335,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">Cond</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
         </div>
         
     </li>
@@ -346,7 +346,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">WaitGroup</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
         </div>
         
     </li>
@@ -357,7 +357,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
         </div>
         
     </li>
@@ -368,7 +368,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">sync.Pool</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
         </div>
         
     </li>
@@ -423,7 +423,7 @@
         </div>
         <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
             <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
-                <h1 class="font-bold text-3xl text-primary-text">Mutex</h1>
+                <h1 class="font-bold text-3xl text-primary-text">这可能是最容易理解的 Go Mutex 源码剖析</h1>
                 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
@@ -716,7 +716,7 @@ func main() {
     <div class="md:text-right mt-4 md:mt-0">
         
         <span class="block font-bold">下一页</span>
-        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="block">Cond</a>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="block">这一次，彻底搞懂 Go Cond</a>
         
     </div>
 </div>

@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width">
 
 
-<title>Cond | Go 源码分析与实战 | HHFCodeRv</title>
+<title>这一次，彻底搞懂 Go Cond | Go 源码分析与实战 | HHFCodeRv</title>
 
 <meta name="generator" content="Hugo Eureka 0.8.0" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
@@ -78,7 +78,7 @@
       "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/"},{
       "@type": "ListItem",
       "position": 4 ,
-      "name":"Cond",
+      "name":"这一次，彻底搞懂 Go Cond",
       "item":"https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/"}]
 }
 </script>
@@ -93,7 +93,7 @@
         "@type": "WebPage",
         "@id": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/"
     },
-    "headline": "Cond | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "headline": "这一次，彻底搞懂 Go Cond | Go 源码分析与实战 | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
     "dateModified": "2021-04-01T09:57:16+08:00",
     "wordCount":  1253 ,
     "author": {
@@ -110,7 +110,7 @@
         },
     "description": "hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( \u0026quot;fmt\u0026quot; \u0026quot;time\u0026quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done \u0026lt;- 1 }() fmt.Println(\u0026quot;waiting\u0026quot;) \u0026lt;-done fmt.Println(\u0026quot;done\u0026quot;) } 同样可以使用 sync.Cond 来实现 package main import ( \u0026quot;fmt\u0026quot; \u0026quot;sync\u0026quot; \u0026quot;time\u0026quot; ) func main() { cond := sync.NewCond(\u0026amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag"
 }
-</script><meta property="og:title" content="Cond | Go 源码分析与实战 | HHFCodeRv" />
+</script><meta property="og:title" content="这一次，彻底搞懂 Go Cond | Go 源码分析与实战 | HHFCodeRv" />
 <meta property="og:type" content="article" />
 
 
@@ -324,7 +324,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">Mutex</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
         </div>
         
     </li>
@@ -335,7 +335,7 @@
     <li class="py-2">
         <div class="">
             <a class=" text-eureka  hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">Cond</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
         </div>
         
     </li>
@@ -346,7 +346,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">WaitGroup</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
         </div>
         
     </li>
@@ -357,7 +357,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">sync.Map</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
         </div>
         
     </li>
@@ -368,7 +368,7 @@
     <li class="py-2">
         <div class="">
             <a class=" hover:text-eureka"
-                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">sync.Pool</a>
+                href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
         </div>
         
     </li>
@@ -423,7 +423,7 @@
         </div>
         <div class="w-full md:w-3/4 lg:w-4/5 pb-8 pt-2 md:pt-8">
             <div class="w-full lg:w-3/4 pl-6 ml-0 mr-auto">
-                <h1 class="font-bold text-3xl text-primary-text">Cond</h1>
+                <h1 class="font-bold text-3xl text-primary-text">这一次，彻底搞懂 Go Cond</h1>
                 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
@@ -629,13 +629,13 @@ func main() {
     <div>
         
         <span class="block font-bold">上一页</span>
-        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" class="block">Mutex</a>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" class="block">这可能是最容易理解的 Go Mutex 源码剖析</a>
         
     </div>
     <div class="md:text-right mt-4 md:mt-0">
         
         <span class="block font-bold">下一页</span>
-        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="block">WaitGroup</a>
+        <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="block">最清晰易懂的 Go WaitGroup 源码剖析</a>
         
     </div>
 </div>
