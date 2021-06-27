@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>这一次，彻底搞懂 Go Cond | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &quot;fmt&quot; &quot;time&quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&quot;waiting&quot;) &lt;-done fmt.Println(&quot;done&quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &quot;fmt&quot; &quot;sync&quot; &quot;time&quot; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"这一次，彻底搞懂 Go Cond",
+      "item":"https://www.haohongfan.com/posts/2021-05-10-sync-cond/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-05-10-sync-cond/"
+    },
+    "headline": "这一次，彻底搞懂 Go Cond | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
+    "dateModified": "2021-04-01T09:57:16+08:00",
+    "wordCount":  1253 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( \u0026quot;fmt\u0026quot; \u0026quot;time\u0026quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done \u0026lt;- 1 }() fmt.Println(\u0026quot;waiting\u0026quot;) \u0026lt;-done fmt.Println(\u0026quot;done\u0026quot;) } 同样可以使用 sync.Cond 来实现 package main import ( \u0026quot;fmt\u0026quot; \u0026quot;sync\u0026quot; \u0026quot;time\u0026quot; ) func main() { cond := sync.NewCond(\u0026amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag"
+}
+</script><meta property="og:title" content="这一次，彻底搞懂 Go Cond | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
+
+
+
+
+<meta property="og:description" content="hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &quot;fmt&quot; &quot;time&quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&quot;waiting&quot;) &lt;-done fmt.Println(&quot;done&quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &quot;fmt&quot; &quot;sync&quot; &quot;time&quot; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-04-01-mutex/" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-map/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-01-23-rand/" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">这一次，彻底搞懂 Go Cond</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>hi，大家好，我是 haohongfan。</p>
+<p>本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。</p>
+<p>比如下面这段代码：</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;time&quot;
+)
+
+func main() {
+	done := make(chan int, 1)
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		done &lt;- 1
+	}()
+
+	fmt.Println(&quot;waiting&quot;)
+	&lt;-done
+	fmt.Println(&quot;done&quot;)
+}
+</code></pre>
+<p>同样可以使用 sync.Cond 来实现</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
+)
+
+func main() {
+	cond := sync.NewCond(&amp;sync.Mutex{})
+	var flag bool
+	go func() {
+		time.Sleep(time.Second * 5)
+		cond.L.Lock()
+		flag = true
+		cond.Signal()
+		cond.L.Unlock()
+	}()
+
+	fmt.Println(&quot;waiting&quot;)
+	cond.L.Lock()
+	for !flag {
+		cond.Wait()
+	}
+	cond.L.Unlock()
+	fmt.Println(&quot;done&quot;)
+}
+</code></pre>
+<p>大部分场景下使用 channel 是比 sync.Cond方便的。不过我们要注意到，sync.Cond 提供了 Broadcast 方法，可以通知所有的等待者。想利用 channel 实现这个方法还是不容易的。我想这应该是 sync.Cond 唯一有用武之地的地方。</p>
+<p>先列出来一些问题吧，可以带着这些问题来阅读本文：</p>
+<ol>
+<li>cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</li>
+<li>sync.Cond 如何触发不能复制的 panic ?</li>
+<li>为什么 sync.Cond 不能被复制 ？</li>
+<li>cond.Signal 是如何通知一个等待的 goroutine ?</li>
+<li>cond.Broadcast 是如何通知等待的 goroutine 的？</li>
+</ol>
+<h2 id="源码剖析">源码剖析</h2>
+<p><img src="https://images.haohongfan.com/cond_wait1.png" alt="sync.cond wait"></p>
+<p><img src="https://images.haohongfan.com/cond_signal1.png" alt="sync.Cond Signal"></p>
+<p><img src="https://images.haohongfan.com/cond_broadcast1.png" alt="sync.Cond Broadcast"></p>
+<p><img src="https://images.haohongfan.com/1111.gif" alt="cond_notifyList1.gif"></p>
+<h3 id="condwait-是阻塞的吗是如何阻塞的">cond.Wait 是阻塞的吗？是如何阻塞的？</h3>
+<p>是阻塞的。不过不是 sleep 这样阻塞的。</p>
+<p>调用 <code>goparkunlock</code> 解除当前 goroutine 的 m 的绑定关系，将当前 goroutine 状态机切换为等待状态。等待后续 goready 函数时候能够恢复现场。</p>
+<h3 id="condsignal-是如何通知一个等待的-goroutine-">cond.Signal 是如何通知一个等待的 goroutine ?</h3>
+<ol>
+<li>判断是否有没有被唤醒的 goroutine，如果都已经唤醒了，直接就返回了</li>
+<li>将已通知 goroutine 的数量加1</li>
+<li>从等待唤醒的 goroutine 队列中，获取 head 指针指向的 goroutine，将其重新加入调度</li>
+<li>被阻塞的 goroutine 可以继续执行</li>
+</ol>
+<h3 id="condbroadcast-是如何通知等待的-goroutine-的">cond.Broadcast 是如何通知等待的 goroutine 的？</h3>
+<ol>
+<li>判断是否有没有被唤醒的 goroutine，如果都已经唤醒了，直接就返回了</li>
+<li>将等待通知的 goroutine 数量和已经通知过的 goroutine 数量设置成相等</li>
+<li>遍历等待唤醒的 goroutine 队列，将所有的等待的 goroutine 都重新加入调度</li>
+<li>所有被阻塞的 goroutine 可以继续执行</li>
+</ol>
+<h3 id="condwait本身就是阻塞状态为什么-condwait-需要在循环内-">cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</h3>
+<p>我们能注意到，调用 cond.Wait 的位置，使用的是 for 的方式来调用 wait 函数，而不是使用 if 语句。</p>
+<p>这是由于 wait 函数被唤醒时，存在虚假唤醒等情况，导致唤醒后发现，条件依旧不成立。因此需要使用 for 语句来循环地进行等待，直到条件成立为止。</p>
+<h2 id="使用中注意点">使用中注意点</h2>
+<h3 id="1-不能不加锁直接调用-condwait">1. 不能不加锁直接调用 cond.Wait</h3>
+<pre><code class="language-go">func (c *Cond) Wait() {
+	c.checker.check()
+	t := runtime_notifyListAdd(&amp;c.notify)
+	c.L.Unlock()
+	runtime_notifyListWait(&amp;c.notify, t)
+	c.L.Lock()
+}
+</code></pre>
+<p>我们看到 Wait 内部会先调用 c.L.Unlock()，来先释放锁。如果调用方不先加锁的话，会触发“fatal error: sync: unlock of unlocked mutex”。关于 mutex 的使用方法，推荐阅读下《这可能是最容易理解的 Go Mutex 源码剖析》</p>
+<h3 id="2-为什么不能-synccond-不能复制-">2. 为什么不能 sync.Cond 不能复制 ？</h3>
+<p>sync.Cond 不能被复制的原因，并不是因为 sync.Cond 内部嵌套了 Locker。因为 NewCond 时传入的 Mutex/RWMutex 指针，对于 Mutex 指针复制是没有问题的。</p>
+<p>主要原因是 sync.Cond 内部是维护着一个 notifyList。如果这个队列被复制的话，那么就在并发场景下导致不同 goroutine 之间操作的 notifyList.wait、notifyList.notify 并不是同一个，这会导致出现有些 goroutine 会一直堵塞。</p>
+<p>这里留下一个问题，sync.Cond 内部是有一段代码 check sync.Cond 是不能被复制的，下面这段代码能触发这个 panic 吗？</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;sync&quot;
+)
+
+func main() {
+	cond1 := sync.NewCond(new(sync.Mutex))
+	cond := *cond1
+	fmt.Println(cond)
+}
+</code></pre>
+<p>有兴趣的可以动手尝试下，以及尝试下如何才能触发这个panic &ldquo;sync.Cond is copied” 。</p>
+<p><img src="https://images.haohongfan.com/gzh1.png" alt="gzh"></p>
+<h2 id="版权">版权</h2>
+<p>以上内容均不得复制用于商业用途或发行</p>
+<p>© 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/" class="block">这可能是最容易理解的 Go Mutex 源码剖析</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" class="block">最清晰易懂的 Go WaitGroup 源码剖析</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+<div class="bg-secondary-bg rounded p-6">
+    <h3 class="text-lg font-semibold mb-4">系列文章</h3>
+    <div class="content">
+        
+        
+        <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
+        <br />
+        
+        
+    </div>
+</div>
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#源码剖析">源码剖析</a>
+      <ul>
+        <li><a href="#condwait-是阻塞的吗是如何阻塞的">cond.Wait 是阻塞的吗？是如何阻塞的？</a></li>
+        <li><a href="#condsignal-是如何通知一个等待的-goroutine-">cond.Signal 是如何通知一个等待的 goroutine ?</a></li>
+        <li><a href="#condbroadcast-是如何通知等待的-goroutine-的">cond.Broadcast 是如何通知等待的 goroutine 的？</a></li>
+        <li><a href="#condwait本身就是阻塞状态为什么-condwait-需要在循环内-">cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</a></li>
+      </ul>
+    </li>
+    <li><a href="#使用中注意点">使用中注意点</a>
+      <ul>
+        <li><a href="#1-不能不加锁直接调用-condwait">1. 不能不加锁直接调用 cond.Wait</a></li>
+        <li><a href="#2-为什么不能-synccond-不能复制-">2. 为什么不能 sync.Cond 不能复制 ？</a></li>
+      </ul>
+    </li>
+    <li><a href="#版权">版权</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2020-10-20-golang-slice/">你真的懂 golang reslice 吗</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

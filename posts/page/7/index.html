@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
-            "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans",
-            "url": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
+            "name": "gin源码阅读之二 -- 揭开gin的神秘面纱",
+            "description": "上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,",
+            "url": "https://www.haohongfan.com/posts/2019-02-18-gin-02/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "go 跨平台编译",
-            "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
-            "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
+            "name": "gin源码阅读之一 -- net/http的大概流程",
+            "description": "最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(\u0026quot;Listening",
+            "url": "https://www.haohongfan.com/posts/2019-02-17-gin-01/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "Golang interface入门",
-            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
-            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
+            "name": "GraphQL N+1 问题解决方案",
+            "description": "什么是N+1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,",
+            "url": "https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "Golang指针vs值",
-            "description": "Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(\u0026quot;%p\\n\u0026quot;, \u0026amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(\u0026quot;%p\u0026quot;, \u0026amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解",
-            "url": "https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"
+            "name": "MongoDB 数据重复的处理方法",
+            "description": "背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B",
+            "url": "https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "Golang命名规范",
-            "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https://studygolang.com/articles/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包",
-            "url": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
+            "name": "ES简单使用",
+            "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary\u0026amp;pretty' 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'match' =\u0026gt; [ 'title' =\u0026gt; '黑猫', ] ], ] ]; Bool查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;bool\u0026quot; : { \u0026quot;must\u0026quot;: [ { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } }, { \u0026quot;match\u0026quot; : { \u0026quot;testField2\u0026quot; : \u0026quot;xyz\u0026quot; } } ] } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'bool' =\u0026gt;",
+            "url": "https://www.haohongfan.com/posts/2018-09-28-es-simple/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-01-23T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
 
 
 
@@ -158,7 +158,7 @@
         class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
         <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
-            <a href="/docs/gohandbook/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
         </div>
 
@@ -222,16 +222,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" class="font-bold text-xl hover:text-eureka">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</a>
+  <a href="https://www.haohongfan.com/posts/2019-02-18-gin-02/" class="font-bold text-xl hover:text-eureka">gin源码阅读之二 -- 揭开gin的神秘面纱</a>
 </div>
 <div class="content">
-  工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans
+  上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import &amp;quot;github.com/gin-gonic/gin&amp;quot; func main() { r := gin.Default() r.GET(&amp;quot;/ping&amp;quot;, func(c *gin.Context) { c.JSON(200, gin.H{ &amp;quot;message&amp;quot;: &amp;quot;pong&amp;quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2018-06-13</span>
+        <span>2019-02-18</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -242,167 +242,160 @@
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-02-17-gin-01/" class="font-bold text-xl hover:text-eureka">gin源码阅读之一 -- net/http的大概流程</a>
+</div>
+<div class="content">
+  最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import &amp;quot;github.com/gin-gonic/gin&amp;quot; func main() { r := gin.Default() r.GET(&amp;quot;/ping&amp;quot;, func(c *gin.Context) { c.JSON(200, gin.H{ &amp;quot;message&amp;quot;: &amp;quot;pong&amp;quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(&amp;quot;Listening
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-02-17</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/" class="font-bold text-xl hover:text-eureka">GraphQL N&#43;1 问题解决方案</a>
+</div>
+<div class="content">
+  什么是N&#43;1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-11-12</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/php/" class="hover:text-eureka">php</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/" class="font-bold text-xl hover:text-eureka">MongoDB 数据重复的处理方法</a>
+</div>
+<div class="content">
+  背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-09-30</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>1分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-09-28-es-simple/" class="font-bold text-xl hover:text-eureka">ES简单使用</a>
+</div>
+<div class="content">
+  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-09-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/es/" class="hover:text-eureka">es</a>
         
         
         <span>, </span>
         <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
-</div>
-<div class="content">
-  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &amp;gt;= 1.5 ppc64, ppc64le version &amp;gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &amp;gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &amp;gt;= 1.6 s390x (IBM System z) version &amp;gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-05-04</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
-</div>
-<div class="content">
-  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&amp;quot;hello&amp;quot;} i.M() } Interface本质 inter
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-04-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
-</div>
-<div class="content">
-  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&amp;quot;%p\n&amp;quot;, &amp;amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&amp;quot;%p&amp;quot;, &amp;amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-03-24</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
-</div>
-<div class="content">
-  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&amp;lt;a href=&amp;quot;https://studygolang.com/articles/8542&amp;quot;&amp;gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-01-23</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -453,13 +446,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/posts/page/10/">10</a>
+    <a class="page-link" href="/posts/page/11/">11</a>
   </li>
   <li class="page-item">
     <a href="/posts/page/8/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/10/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/11/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

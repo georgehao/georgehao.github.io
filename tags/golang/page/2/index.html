@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Go 源码分析与实战",
-            "description": "Go 源码分析，项目实战系列教程，可以关注公众号：HHFCodeRv 随时关注我的动态。",
-            "url": "https://www.haohongfan.com/docs/gohandbook/"
+            "name": "Go sync.Pool 浅析",
+            "description": "hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个",
+            "url": "https://www.haohongfan.com/posts/2021-05-22-sync-pool/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "并发原语",
-            "description": "sync 包相关内容的解析",
-            "url": "https://www.haohongfan.com/docs/gohandbook/sync-chapter/"
+            "name": "一文完全掌握 Go math/rand",
+            "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i \u0026lt; rngLen; i++ { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设",
+            "url": "https://www.haohongfan.com/posts/2021-01-23-rand/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "随机数",
-            "description": "随机数相关",
-            "url": "https://www.haohongfan.com/docs/gohandbook/rand-chapter/"
-        },{
-            "@type":"ListItem",
-            "position":  4 ,
-            "name": "一文完全掌握 Go math/rand",
-            "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i \u0026lt; rngLen; i++ { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设",
-            "url": "https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
             "name": "你真的懂 golang reslice 吗",
             "description": "package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(\u0026quot;a[1:]\u0026quot;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体",
             "url": "https://www.haohongfan.com/posts/2020-10-20-golang-slice/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "限流器系列(3)--自适应限流",
+            "description": "漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找",
+            "url": "https://www.haohongfan.com/posts/2020-07-05-bbr/"
+        },{
+            "@type":"ListItem",
+            "position":  5 ,
+            "name": "限流器系列(2) -- Token Bucket 令牌桶",
+            "description": "上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket \u0026ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器",
+            "url": "https://www.haohongfan.com/posts/2020-06-30-token-bucket/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-05-22T00:00:00&#43;00:00" />
+<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
 
 
 
@@ -173,7 +173,7 @@
         class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
         <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
-            <a href="/docs/gohandbook/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
         </div>
 
@@ -237,34 +237,43 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/docs/gohandbook/" class="font-bold text-xl hover:text-eureka">Go 源码分析与实战</a>
+  <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" class="font-bold text-xl hover:text-eureka">Go sync.Pool 浅析</a>
 </div>
 <div class="content">
-  Go 源码分析，项目实战系列教程，这个系列教程还在更新中，可以关注公众号：HHFCodeRv 第一时间阅读最新章节（公众号二维码在文末）。 当前内容基于 Go 源码 1.16.2 这个系列文章的目标 Go 业务开发中你是否遇到过这些问题？ 程序出现问题时，定位到某个关键字，才恍然大悟：哦，原来是这么用的！ 看别人代码，看到某段代码时，顿时愣住：这么写是为啥？ 同事间讨论问题，说到某个知识
+  hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个
 </div>
 
-<div class="px-6 pt-4">
-  
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" class="font-semibold hover:text-eureka">并发原语</a>
-      </div>
-      <div class="">本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</div>
-  </div>
-  
-  
-  <div class="-mx-4 my-4 border-t"></div>
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-semibold hover:text-eureka">随机数</a>
-      </div>
-      <div class="">本章节是对 sync 包的剖析，包括：math/rand math/rand 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</div>
-  </div>
-  
-  <div class="pt-6 hover:text-eureka">
-      <a href="https://www.haohongfan.com/docs/gohandbook/" class="font-semibold">阅读更多</a>
-      <i class="fas fa-caret-right ml-1"></i>
-  </div>
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
 </div>
 
   </div>
@@ -278,100 +287,43 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" class="font-bold text-xl hover:text-eureka">并发原语</a>
-</div>
-<div class="content">
-  本章节是对 sync 包的剖析，包括：Mutex, Cond, sync.Map, WaitGroup, Pool Mutex Cond sync.Map WaitGroup Pool 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0
-</div>
-
-<div class="px-6 pt-4">
-  
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-04-01-mutex/" class="font-semibold hover:text-eureka">这可能是最容易理解的 Go Mutex 源码剖析</a>
-      </div>
-      <div class="">Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争</div>
-  </div>
-  
-  
-  <div class="-mx-4 my-4 border-t"></div>
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-cond/" class="font-semibold hover:text-eureka">这一次，彻底搞懂 Go Cond</a>
-      </div>
-      <div class="">hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &amp;quot;fmt&amp;quot; &amp;quot;time&amp;quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &amp;lt;- 1 }() fmt.Println(&amp;quot;waiting&amp;quot;) &amp;lt;-done fmt.Println(&amp;quot;done&amp;quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &amp;quot;fmt&amp;quot; &amp;quot;sync&amp;quot; &amp;quot;time&amp;quot; ) func main() { cond := sync.NewCond(&amp;amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag</div>
-  </div>
-  
-  
-  <div class="-mx-4 my-4 border-t"></div>
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/2021-05-10-sync-waitgroup/" class="font-semibold hover:text-eureka">最清晰易懂的 Go WaitGroup 源码剖析</a>
-      </div>
-      <div class="">hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为</div>
-  </div>
-  
-  <div class="pt-6 hover:text-eureka">
-      <a href="https://www.haohongfan.com/docs/gohandbook/sync-chapter/" class="font-semibold">阅读更多</a>
-      <i class="fas fa-caret-right ml-1"></i>
-  </div>
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-bold text-xl hover:text-eureka">随机数</a>
-</div>
-<div class="content">
-  本章节是对 sync 包的剖析，包括：math/rand math/rand 版权 以上内容均不得复制用于商业用途或发行 © 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0
-</div>
-
-<div class="px-6 pt-4">
-  
-  <div class="">
-      <div class="mb-2">
-          <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-semibold hover:text-eureka">一文完全掌握 Go math/rand</a>
-      </div>
-      <div class="">Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &amp;lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &amp;gt;= 0 { var u int64 u = int64(x) &amp;lt;&amp;lt; 40 x = seedrand(x) u ^= int64(x) &amp;lt;&amp;lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设</div>
-  </div>
-  
-  <div class="pt-6 hover:text-eureka">
-      <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/" class="font-semibold">阅读更多</a>
-      <i class="fas fa-caret-right ml-1"></i>
-  </div>
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-bold text-xl hover:text-eureka">一文完全掌握 Go math/rand</a>
+  <a href="https://www.haohongfan.com/posts/2021-01-23-rand/" class="font-bold text-xl hover:text-eureka">一文完全掌握 Go math/rand</a>
 </div>
 <div class="content">
   Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &amp;lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &amp;gt;= 0 { var u int64 u = int64(x) &amp;lt;&amp;lt; 40 x = seedrand(x) u ^= int64(x) &amp;lt;&amp;lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设
 </div>
 
-<div class="px-6 pt-4">
-  
-  <div class="pt-6 hover:text-eureka">
-      <a href="https://www.haohongfan.com/docs/gohandbook/rand-chapter/2021-01-23-rand/" class="font-semibold">阅读更多</a>
-      <i class="fas fa-caret-right ml-1"></i>
-  </div>
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-01-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
 </div>
 
   </div>
@@ -419,6 +371,92 @@
 </div>
   </div>
   
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-07-05-bbr/" class="font-bold text-xl hover:text-eureka">限流器系列(3)--自适应限流</a>
+</div>
+<div class="content">
+  漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-08-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-06-30-token-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(2) -- Token Bucket 令牌桶</a>
+</div>
+<div class="content">
+  上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket &amp;ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-06-30</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
 </div>
 
 
@@ -440,17 +478,17 @@
   <li class="page-item">
     <a class="page-link" href="/tags/golang/page/3/">3</a>
   </li>
-  <li class="page-item disabled">
-    <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
+  <li class="page-item">
+    <a class="page-link" href="/tags/golang/page/4/">4</a>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/tags/golang/page/6/">6</a>
+    <a class="page-link" href="/tags/golang/page/5/">5</a>
   </li>
   <li class="page-item">
     <a href="/tags/golang/page/3/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/tags/golang/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/tags/golang/page/5/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

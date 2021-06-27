@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Go timer 是如何被调度的 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Go timer 是如何被调度的",
+      "item":"https://www.haohongfan.com/posts/2021-06-27-timer/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-06-27-timer/"
+    },
+    "headline": "Go timer 是如何被调度的 | HHFCodeRv","datePublished": "2021-06-27T09:57:16+08:00",
+    "dateModified": "2021-06-27T09:57:16+08:00",
+    "wordCount":  2509 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时"
+}
+</script><meta property="og:title" content="Go timer 是如何被调度的 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+
+
+
+<meta property="og:description" content="Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-06-27T09:57:16&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-06-27T09:57:16&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-04-01-mutex/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-map/" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-01-23-rand/" />
+
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Go timer 是如何被调度的</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-06-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>6分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h1 id="go-timer-是如何被调度的">Go timer 是如何被调度的？</h1>
+<p>hi，大家好，我是 haohongfan。</p>
+<p>本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。</p>
+<p>我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。</p>
+<p>全局的 timer 堆也经历过三个阶段的重要升级。</p>
+<ul>
+<li>Go 1.9 版本之前，所有的计时器由全局唯一的四叉堆维护，协程间竞争激烈。</li>
+<li>Go 1.10 - 1.13，全局使用 64 个四叉堆维护全部的计时器，没有本质解决 1.9 版本之前的问题</li>
+<li>Go 1.14 版本之后，每个 P 单独维护一个四叉堆。</li>
+</ul>
+<p>Go 1.14 以后的 timer 性能得到了质的飞升，不过伴随而来的是 timer 成了 Go 里面最复杂、最难梳理的数据结构。本文不会详细分析每一个细节，我们从大体来了解 Go timer 的工作原理。</p>
+<h2 id="1-使用场景">1. 使用场景</h2>
+<p>Go timer 在我们代码中会经常遇到。</p>
+<p>场景1：RPC 调用的防超时处理（下面代码节选 dubbogo)</p>
+<pre><code class="language-go">func (c *Client) Request(request *remoting.Request, timeout time.Duration, response *remoting.PendingResponse) error {
+    _, session, err := c.selectSession(c.addr)
+    // .. 省略
+    if totalLen, sendLen, err = c.transfer(session, request, timeout); err != nil {
+        if sendLen != 0 &amp;&amp; totalLen != sendLen {
+          // .. 省略
+        }
+        return perrors.WithStack(err)
+    }
+
+    // .. 省略
+    select {
+    case &lt;-getty.GetTimeWheel().After(timeout):
+        return perrors.WithStack(errClientReadTimeout)
+    case &lt;-response.Done:
+        err = response.Err
+    }
+    return perrors.WithStack(err)
+}
+</code></pre>
+<p>场景2：Context 的超时处理</p>
+<pre><code class="language-go">func main() {
+    ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+    defer cancel()
+    go doSomething()
+    
+    select {
+    case &lt;-ctx.Done():
+        fmt.Println(&quot;main&quot;, ctx.Err())
+    }
+}
+</code></pre>
+<h2 id="2-图解源码">2. 图解源码</h2>
+<h3 id="21-四叉堆原理">2.1 四叉堆原理</h3>
+<p>timer 的全局堆是一个四叉堆，特别是 Go 1.14 之后每个 P 都会维护着一个四叉堆，减少了 Goroutine 之间的并发问题，提升了 timer 了性能。</p>
+<p>四叉堆其实就是四叉树，Go timer 是如何维护四叉堆的呢？</p>
+<ul>
+<li>Go runtime 调度 timer 时，触发时间更早的 timer，要减少其查询次数，尽快被触发。所以四叉树的父节点的触发时间是一定小于子节点的。</li>
+<li>四叉树顾名思义最多有四个子节点，为了兼顾四叉树插、删除、重排速度，所以四个兄弟节点间并不要求其按触发早晚排序。</li>
+</ul>
+<p>这里用两张动图简单演示下 timer 的插入和删除</p>
+<p><strong>把 timer 插入堆</strong>
+<img src="https://cdn.jsdelivr.net/gh/georgehao/img/add_timer.gif" alt="add_timer"></p>
+<p><strong>把 timer 从堆中删除</strong>
+<img src="https://cdn.jsdelivr.net/gh/georgehao/img/delete_timer.gif" alt="delete_timer"></p>
+<h3 id="22-timer-是如何被调度的">2.2 timer 是如何被调度的？</h3>
+<ul>
+<li>调用 NewTimer，timer.After, timer.AfterFunc 生产 timer, 加入对应的 P 的堆上。</li>
+<li>调用 timer.Stop, timer.Reset 改变对应的 timer 的状态。</li>
+<li>GMP 在调度周期内中会调用 checkTimers ，遍历该 P 的 timer 堆上的元素，根据对应 timer 的状态执行真的操作。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/timer4.png" alt=""></p>
+<h3 id="23-timer-是如何加入到-timer-堆上的">2.3 timer 是如何加入到 timer 堆上的？</h3>
+<p>把 timer 加入调度总共有下面几种方式：</p>
+<ul>
+<li>通过 NewTimer, time.After, timer.AfterFunc 初始化 timer 后，相关 timer 就会被放入到对应 p 的 timer 堆上。</li>
+<li>timer 已经被标记为 timerRemoved，调用了 timer.Reset(d)，这个 timer 也会重新被加入到 p 的 timer 堆上</li>
+<li>timer 还没到需要被执行的时间，被调用了 timer.Reset(d)，这个 timer 会被 GMP 调度探测到，先将该 timer 从 timer 堆上删除，然后重新加入到 timer 堆上</li>
+<li>STW 时，runtime 会释放不再使用的 p 的资源，p.destroy()-&gt;timer.moveTimers，将不再被使用的 p 的 timers 上有效的 timer(状态是：timerWaiting，timerModifiedEarlier，timerModifiedLater) 都重新加入到一个新的 p 的 timer 上</li>
+</ul>
+<h3 id="24-reset-时-timer-是如何被操作的">2.4 Reset 时 timer 是如何被操作的？</h3>
+<p>Reset 的目的是把 timer 重新加入到 timer 堆中，重新等待被触发。不过分为两种情况：</p>
+<ul>
+<li>被标记为 timerRemoved 的 timer，这种 timer 是已经从 timer 堆上删除了，但会重新设置被触发时间，加入到 timer 堆中</li>
+<li>等待被触发的 timer，在 Reset 函数中只会修改其触发时间和状态（timerModifiedEarlier或timerModifiedLater）。这个被修改状态的 timer 也同样会被重新加入到 timer堆上，不过是由 GMP 触发的，由 checkTimers 调用 adjusttimers 或者 runtimer 来执行的。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/timer_reset110.png" alt=""></p>
+<h3 id="25-stop-时-timer-是如何被操作的">2.5 Stop 时 timer 是如何被操作的？</h3>
+<p>time.Stop 为了让 timer 停止，不再被触发，也就是从 timer 堆上删除。不过 timer.Stop 并不会真正的从 p 的 timer 堆上删除 timer，只会将 timer 的状态修改为 timerDeleted。然后等待 GMP 触发的 adjusttimers 或者 runtimer 来执行。</p>
+<p>真正删除 timer 的函数有两个 dodeltimer，dodeltimer0。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/timer_stop110.png" alt=""></p>
+<h3 id="26-timer-是如何被真正执行的">2.6 Timer 是如何被真正执行的？</h3>
+<p>timer 的真正执行者是 GMP。GMP 会在每个调度周期内，通过 runtime.checkTimers 调用 timer.runtimer(). timer.runtimer 会检查该 p 的 timer 堆上的所有 timer，判断这些 timer 是否能被触发。</p>
+<p>如果该 timer 能够被触发，会通过回调函数 sendTime 给 Timer 的 channel C 发一个当前时间，告诉我们这个 timer 已经被触发了。</p>
+<p>如果是 ticker 的话，被触发后，会计算下一次要触发的时间，重新将 timer 加入 timer 堆中。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/timer_runtimer110.png" alt=""></p>
+<h2 id="3-timer-使用中的坑">3. Timer 使用中的坑</h2>
+<p>确实 timer 是我们开发中比较常用的工具，但是 timer 也是最容易导致内存泄露，CPU 狂飙的杀手之一。</p>
+<p>不过仔细分析可以发现，其实能够造成问题就两个方面：</p>
+<ul>
+<li>错误创建很多的 timer，导致资源浪费</li>
+<li>由于 Stop 时不会主动关闭 C，导致程序阻塞</li>
+</ul>
+<h3 id="31-错误创建很多-timer导致资源浪费">3.1 错误创建很多 timer，导致资源浪费</h3>
+<pre><code class="language-go">func main() {
+    for {
+        // xxx 一些操作
+        timeout := time.After(30 * time.Second)
+        select {
+        case &lt;- someDone:
+            // do something
+        case &lt;-timeout:
+            return
+        }
+    }
+}
+</code></pre>
+<p>上面这段代码是造成 timer 异常的最常见的写法，也是我们最容易忽略的写法。</p>
+<p>造成问题的原因其实也很简单，因为 timer.After 底层是调用的 timer.NewTimer，NewTimer 生成 timer 后，会将 timer 放入到全局的 timer 堆中。</p>
+<p>for 会创建出来数以万计的 timer 放入到 timer 堆中，导致机器内存暴涨，同时不管 GMP 周期 checkTimers，还是插入新的 timer 都会疯狂遍历 timer 堆，导致 CPU 异常。</p>
+<p>要注意的是，不只 time.After 会生成 timer, NewTimer，time.AfterFunc 同样也会生成 timer 加入到 timer 中，也都要防止循环调用。</p>
+<p><strong>解决办法:</strong> 使用 time.Reset 重置 timer，重复利用 timer。</p>
+<p>我们已经知道 time.Reset 会重新设置 timer 的触发时间，然后将 timer 重新加入到 timer 堆中，等待被触发调用。</p>
+<pre><code class="language-go">func main() {
+    timer := time.NewTimer(time.Second * 5)    
+    for {
+        t.Reset(time.Second * 5)
+
+        select {
+        case &lt;- someDone:
+            // do something
+        case &lt;-timer.C:
+            return
+        }
+    }
+}
+</code></pre>
+<h3 id="32-程序阻塞造成内存或者-goroutine-泄露">3.2 程序阻塞，造成内存或者 goroutine 泄露</h3>
+<pre><code class="language-go">func main() {
+    timer1 := time.NewTimer(2 * time.Second)
+    &lt;-timer1.C
+    println(&quot;done&quot;)
+}
+</code></pre>
+<p>上面的代码可以看出来，只有等待 timer 超时 &ldquo;done&rdquo; 才会输出，原理很简单：程序阻塞在 &lt;-timer1.C 上，一直等待 timer 被触发时，回调函数 time.sendTime 才会发送一个当前时间到 timer1.C 上，程序才能继续往下执行。</p>
+<p>不过使用 timer.Stop 的时候就要特别注意了，比如：</p>
+<pre><code class="language-go">func main() {
+    timer1 := time.NewTimer(2 * time.Second)
+    go func() {
+        timer1.Stop()
+    }()
+    &lt;-timer1.C
+
+    println(&quot;done&quot;)
+}
+</code></pre>
+<p>程序就会一直死锁了，因为 timer1.Stop 并不会关闭 channel C，使程序一直阻塞在 timer1.C 上。</p>
+<p>上面这个例子过于简单了，试想下如果 &lt;- timer1.C 是阻塞在子协程中，timer 被的 Stop 方法被调用，那么子协程可能就会被永远的阻塞在那里，造成 goroutine 泄露，内存泄露。</p>
+<p>Stop 的正确的使用方式：</p>
+<pre><code class="language-go">func main() {
+    timer1 := time.NewTimer(2 * time.Second)
+    go func() {
+        if !timer1.Stop() {
+            &lt;-timer1.C
+        }
+    }()
+
+    select {
+    case &lt;-timer1.C:
+        fmt.Println(&quot;expired&quot;)
+    default:
+    }
+    println(&quot;done&quot;)
+}
+</code></pre>
+<p>到此，Go timer 基本已经结束了，有想跟我讨论的可以在留言区评论。</p>
+<hr>
+<p>Go timer 完整流程图获取链接：链接: 链接: <a href="https://pan.baidu.com/s/1nUvTK_0qBlwbS6LbZXKM7g">https://pan.baidu.com/s/1nUvTK_0qBlwbS6LbZXKM7g</a> 密码: t219 其他模块流程图，请关注公众号 HHFCodeRv 回复1获取。</p>
+<p>更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/" class="block">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" class="block">Go sync.Pool 浅析</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+<div class="bg-secondary-bg rounded p-6">
+    <h3 class="text-lg font-semibold mb-4">系列文章</h3>
+    <div class="content">
+        
+        
+        <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+        <br />
+        
+        <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
+        <br />
+        
+        
+    </div>
+</div>
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-使用场景">1. 使用场景</a></li>
+    <li><a href="#2-图解源码">2. 图解源码</a>
+      <ul>
+        <li><a href="#21-四叉堆原理">2.1 四叉堆原理</a></li>
+        <li><a href="#22-timer-是如何被调度的">2.2 timer 是如何被调度的？</a></li>
+        <li><a href="#23-timer-是如何加入到-timer-堆上的">2.3 timer 是如何加入到 timer 堆上的？</a></li>
+        <li><a href="#24-reset-时-timer-是如何被操作的">2.4 Reset 时 timer 是如何被操作的？</a></li>
+        <li><a href="#25-stop-时-timer-是如何被操作的">2.5 Stop 时 timer 是如何被操作的？</a></li>
+        <li><a href="#26-timer-是如何被真正执行的">2.6 Timer 是如何被真正执行的？</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-timer-使用中的坑">3. Timer 使用中的坑</a>
+      <ul>
+        <li><a href="#31-错误创建很多-timer导致资源浪费">3.1 错误创建很多 timer，导致资源浪费</a></li>
+        <li><a href="#32-程序阻塞造成内存或者-goroutine-泄露">3.2 程序阻塞，造成内存或者 goroutine 泄露</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>
