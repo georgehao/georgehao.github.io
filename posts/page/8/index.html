@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "ES简单使用",
+            "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary\u0026amp;pretty' 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'match' =\u0026gt; [ 'title' =\u0026gt; '黑猫', ] ], ] ]; Bool查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;bool\u0026quot; : { \u0026quot;must\u0026quot;: [ { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } }, { \u0026quot;match\u0026quot; : { \u0026quot;testField2\u0026quot; : \u0026quot;xyz\u0026quot; } } ] } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'bool' =\u0026gt;",
+            "url": "https://www.haohongfan.com/posts/2018-09-28-es-simple/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "Graphql最大复杂度和最大深度设置",
             "description": "设置最大深度和最大负责度的好处 因为把查询的权利交给了客户端, 客户端可以进行非常复杂的查询. 因为客户端可能进行恶意的查询或者进行非常大的查询, 因此服务端要拒绝这样的查询. 总共有三种方式可以进行: 设置响应过期时间 设置查询最大深度 设置查询最大复杂度 设置响应过期时间需要对服务端代码和性能要求比较高, 可以先不管, 当服务器代码和性能上去再设置. 如何判断最大深度",
             "url": "https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
             "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans",
             "url": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "go 跨平台编译",
             "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
             "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "Golang interface入门",
             "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
             "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "Golang指针vs值",
-            "description": "Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(\u0026quot;%p\\n\u0026quot;, \u0026amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(\u0026quot;%p\u0026quot;, \u0026amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解",
-            "url": "https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -216,6 +216,49 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-09-28-es-simple/" class="font-bold text-xl hover:text-eureka">ES简单使用</a>
+</div>
+<div class="content">
+  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-09-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/es/" class="hover:text-eureka">es</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -353,45 +396,6 @@
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
         <span>2018-04-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
-</div>
-<div class="content">
-  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&amp;quot;%p\n&amp;quot;, &amp;amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&amp;quot;%p&amp;quot;, &amp;amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-03-24</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>

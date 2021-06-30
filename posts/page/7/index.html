@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "gin源码阅读之三 -- gin牛逼的context",
+            "description": "Gin封装的最好的地方就是context和对response的处理. github的README的介绍, 基本就是对这两个东西的解释. 本篇文章主要解释context的使用方法, 以及其设计原理 为什么要将Request的处理封装到Context中 在阅读gin的源码时, 请求的处理是使用type HandlerFunc func(*Context)来处理的. 也就是 func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;some post\u0026quot;) } 参数是",
+            "url": "https://www.haohongfan.com/posts/2019-01-21-gin-03/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "gin源码阅读之二 -- 揭开gin的神秘面纱",
             "description": "上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,",
             "url": "https://www.haohongfan.com/posts/2019-02-18-gin-02/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "gin源码阅读之一 -- net/http的大概流程",
             "description": "最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(\u0026quot;Listening",
             "url": "https://www.haohongfan.com/posts/2019-02-17-gin-01/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "GraphQL N+1 问题解决方案",
             "description": "什么是N+1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,",
             "url": "https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "MongoDB 数据重复的处理方法",
             "description": "背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B",
             "url": "https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "ES简单使用",
-            "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary\u0026amp;pretty' 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'match' =\u0026gt; [ 'title' =\u0026gt; '黑猫', ] ], ] ]; Bool查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;bool\u0026quot; : { \u0026quot;must\u0026quot;: [ { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } }, { \u0026quot;match\u0026quot; : { \u0026quot;testField2\u0026quot; : \u0026quot;xyz\u0026quot; } } ] } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'bool' =\u0026gt;",
-            "url": "https://www.haohongfan.com/posts/2018-09-28-es-simple/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -216,6 +216,45 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-01-21-gin-03/" class="font-bold text-xl hover:text-eureka">gin源码阅读之三 -- gin牛逼的context</a>
+</div>
+<div class="content">
+  Gin封装的最好的地方就是context和对response的处理. github的README的介绍, 基本就是对这两个东西的解释. 本篇文章主要解释context的使用方法, 以及其设计原理 为什么要将Request的处理封装到Context中 在阅读gin的源码时, 请求的处理是使用type HandlerFunc func(*Context)来处理的. 也就是 func(context *gin.Context) { context.String(http.StatusOK, &amp;quot;some post&amp;quot;) } 参数是
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-02-21</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -355,49 +394,6 @@
         <span>1分钟阅读时长</span>
     </div>
     
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-09-28-es-simple/" class="font-bold text-xl hover:text-eureka">ES简单使用</a>
-</div>
-<div class="content">
-  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-09-27</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/es/" class="hover:text-eureka">es</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
-        
-    </div>
     
 
     

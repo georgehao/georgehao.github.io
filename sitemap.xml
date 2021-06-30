@@ -2,10 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.haohongfan.com/posts/2021-04-01-mutex/</loc>
-    <lastmod>2021-04-01T09:57:16+08:00</lastmod>
+    <loc>https://www.haohongfan.com/authors/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
   </url><url>
-    <loc>https://www.haohongfan.com/posts/2021-05-10-sync-cond/</loc>
+    <loc>https://www.haohongfan.com/categories/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/tags/go/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/categories/go/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/tags/golang/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/categories/golang/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/authors/hhf/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/tags/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-06-30-programer-design/</loc>
+    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-06-27-timer/</loc>
+    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/</loc>
+    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/series/</loc>
+    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-05-22-sync-pool/</loc>
     <lastmod>2021-04-01T09:57:16+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/</loc>
@@ -14,47 +53,11 @@
     <loc>https://www.haohongfan.com/posts/2021-05-10-sync-map/</loc>
     <lastmod>2021-04-01T09:57:16+08:00</lastmod>
   </url><url>
-    <loc>https://www.haohongfan.com/posts/2021-06-27-timer/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/posts/2021-05-22-sync-pool/</loc>
+    <loc>https://www.haohongfan.com/posts/2021-05-10-sync-cond/</loc>
     <lastmod>2021-04-01T09:57:16+08:00</lastmod>
   </url><url>
-    <loc>https://www.haohongfan.com/authors/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/categories/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/tags/go/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/categories/go/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/tags/golang/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/categories/golang/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/authors/hhf/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/posts/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/series/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/tags/</loc>
-    <lastmod>2021-06-27T09:57:16+08:00</lastmod>
+    <loc>https://www.haohongfan.com/posts/2021-04-01-mutex/</loc>
+    <lastmod>2021-04-01T09:57:16+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/posts/2021-01-23-rand/</loc>
     <lastmod>2021-01-23T09:57:16+08:00</lastmod>

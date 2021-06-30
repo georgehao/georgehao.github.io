@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "gin源码阅读之四 -- gin的路由算法",
+            "description": "gin的是路由算法其实就是一个Radix Tree. 有关数据结构的可以自己去网上找相关资料查看. 注册路由预处理 我们在使用gin时通过下面的代码注册路由 普通注册 router.POST(\u0026quot;/somePost\u0026quot;, func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;some post\u0026quot;) }) 使用中间件 router.Use(Logger()) 使用Group v1 := router.Group(\u0026quot;v1\u0026quot;) { v1.POST(\u0026quot;login\u0026quot;, func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;v1 login\u0026quot;) }) } 这些操作, 最终都会在反应到gin的路由树上 具体实现 // routergroup.go:L72-77 func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes { absolutePath := group.calculateAbsolutePath(relativePath) // \u0026lt;--- handlers = group.combineHandlers(handlers) // \u0026lt;--- group.engine.addRoute(httpMethod, absolutePath, handlers) return group.returnObj() } 在调用POST, GET, HEAD等",
+            "url": "https://www.haohongfan.com/posts/2019-03-04-gin-04/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "gin源码阅读之三 -- gin牛逼的context",
             "description": "Gin封装的最好的地方就是context和对response的处理. github的README的介绍, 基本就是对这两个东西的解释. 本篇文章主要解释context的使用方法, 以及其设计原理 为什么要将Request的处理封装到Context中 在阅读gin的源码时, 请求的处理是使用type HandlerFunc func(*Context)来处理的. 也就是 func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;some post\u0026quot;) } 参数是",
             "url": "https://www.haohongfan.com/posts/2019-01-21-gin-03/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "gin源码阅读之二 -- 揭开gin的神秘面纱",
             "description": "上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,",
             "url": "https://www.haohongfan.com/posts/2019-02-18-gin-02/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "gin源码阅读之一 -- net/http的大概流程",
             "description": "最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(\u0026quot;Listening",
             "url": "https://www.haohongfan.com/posts/2019-02-17-gin-01/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "go 跨平台编译",
             "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
             "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "Golang interface入门",
-            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
-            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -231,6 +231,45 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/" class="font-bold text-xl hover:text-eureka">gin源码阅读之四 -- gin的路由算法</a>
+</div>
+<div class="content">
+  gin的是路由算法其实就是一个Radix Tree. 有关数据结构的可以自己去网上找相关资料查看. 注册路由预处理 我们在使用gin时通过下面的代码注册路由 普通注册 router.POST(&amp;quot;/somePost&amp;quot;, func(context *gin.Context) { context.String(http.StatusOK, &amp;quot;some post&amp;quot;) }) 使用中间件 router.Use(Logger()) 使用Group v1 := router.Group(&amp;quot;v1&amp;quot;) { v1.POST(&amp;quot;login&amp;quot;, func(context *gin.Context) { context.String(http.StatusOK, &amp;quot;v1 login&amp;quot;) }) } 这些操作, 最终都会在反应到gin的路由树上 具体实现 // routergroup.go:L72-77 func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes { absolutePath := group.calculateAbsolutePath(relativePath) // &amp;lt;--- handlers = group.combineHandlers(handlers) // &amp;lt;--- group.engine.addRoute(httpMethod, absolutePath, handlers) return group.returnObj() } 在调用POST, GET, HEAD等
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-03-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -388,45 +427,6 @@
 </div>
   </div>
   
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
-</div>
-<div class="content">
-  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&amp;quot;hello&amp;quot;} i.M() } Interface本质 inter
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-04-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
 </div>
 
 
@@ -461,10 +461,13 @@
     <a class="page-link" href="/categories/golang/page/7/">7</a>
   </li>
   <li class="page-item">
+    <a class="page-link" href="/categories/golang/page/8/">8</a>
+  </li>
+  <li class="page-item">
     <a href="/categories/golang/page/7/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/categories/golang/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/golang/page/8/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

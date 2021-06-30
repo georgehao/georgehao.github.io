@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "Bilibili Kratos 框架源码分析(1) -- 启动流程",
+            "description": "这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on \u0026amp;\u0026amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,",
+            "url": "https://www.haohongfan.com/posts/2020-05-08-kratos-flow/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "一次错误使用 go-cache 导致出现的线上问题",
             "description": "话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说",
             "url": "https://www.haohongfan.com/posts/2020-03-11-go-cache/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "打造 Zap 开箱即用日志组件",
             "description": "logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap",
             "url": "https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "Logrus源码阅读(2)--logrus生命周期",
             "description": "Eureka is a elegant and powerful theme for Hugo.",
             "url": "https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "Golang是否真的没有指针运算?",
             "description": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := \u0026amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(\u0026quot;p1: \u0026quot;, *p1) // 1 fmt.Printf(\u0026quot;p1 address:%p\\n\u0026quot;, p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题) #include\u0026lt;stdio.h\u0026gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026amp;a+1); printf(\u0026quot;%d,%d\u0026quot;,*(a+1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量",
             "url": "https://www.haohongfan.com/posts/2019-07-22-golang-pointer/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "Logrus源码阅读(1)--基本用法",
-            "description": "选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(\u0026ldquo;hello logrus\u0026rdquo;) logrus.WithField(logruns.Fields{\u0026ldquo;key1\u0026rdquo;:\u0026ldquo;v1\u0026rdquo;}).Info(\u0026ldquo;hello logrus\u0026rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p",
-            "url": "https://www.haohongfan.com/posts/2019-06-11-logurs-1/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -231,6 +231,49 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
+</div>
+<div class="content">
+  这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;amp;&amp;amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-05-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -388,45 +431,6 @@
 </div>
   </div>
   
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" class="font-bold text-xl hover:text-eureka">Logrus源码阅读(1)--基本用法</a>
-</div>
-<div class="content">
-  选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&amp;ldquo;hello logrus&amp;rdquo;) logrus.WithField(logruns.Fields{&amp;ldquo;key1&amp;rdquo;:&amp;ldquo;v1&amp;rdquo;}).Info(&amp;ldquo;hello logrus&amp;rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2019-07-16</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
 </div>
 
 
@@ -458,13 +462,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/7/">7</a>
+    <a class="page-link" href="/categories/golang/page/8/">8</a>
   </li>
   <li class="page-item">
     <a href="/categories/golang/page/5/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/categories/golang/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/golang/page/8/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

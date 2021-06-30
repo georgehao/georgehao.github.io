@@ -70,24 +70,30 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "Golang Label使用方法",
+            "description": "写C/C++的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C++代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La",
+            "url": "https://www.haohongfan.com/posts/2017-08-10-label/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "golang面向对象分析",
             "description": "说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一",
             "url": "https://www.haohongfan.com/posts/2017-07-24-golang_oop/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "golang中defer, panic, recover用法",
             "description": "昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出 一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到. class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比",
             "url": "https://www.haohongfan.com/posts/2017-07-20-golang_defer_panic_recover/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "nginx代理wordpress无法访问的问题",
             "description": "先说说我遇到的问题, 这简直就是坑中之王. 最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了. 无论我怎么在浏览器中输入",
             "url": "https://www.haohongfan.com/posts/2017-07-19-wordpress_error/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "mongodb联表查询",
             "description": "picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的",
             "url": "https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/"
@@ -125,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -210,6 +216,45 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2017-08-10-label/" class="font-bold text-xl hover:text-eureka">Golang Label使用方法</a>
+</div>
+<div class="content">
+  写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-10</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">

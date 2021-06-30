@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width">
 
 
-<title>这一次，彻底搞懂 Go Cond | HHFCodeRv</title>
+<title>开发中的那些坑 | HHFCodeRv</title>
 
 <meta name="generator" content="Hugo Eureka 0.8.0" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
@@ -58,7 +58,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
 
 <meta name="description"
-  content="hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &quot;fmt&quot; &quot;time&quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&quot;waiting&quot;) &lt;-done fmt.Println(&quot;done&quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &quot;fmt&quot; &quot;sync&quot; &quot;time&quot; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag">
+  content="本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -70,8 +70,8 @@
       "item":"https://www.haohongfan.com/posts/"},{
       "@type": "ListItem",
       "position": 2 ,
-      "name":"这一次，彻底搞懂 Go Cond",
-      "item":"https://www.haohongfan.com/posts/2021-05-10-sync-cond/"}]
+      "name":"开发中的那些坑",
+      "item":"https://www.haohongfan.com/posts/2021-06-30-programer-design/"}]
 }
 </script>
 
@@ -83,11 +83,11 @@
     "@type": "Article",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https://www.haohongfan.com/posts/2021-05-10-sync-cond/"
+        "@id": "https://www.haohongfan.com/posts/2021-06-30-programer-design/"
     },
-    "headline": "这一次，彻底搞懂 Go Cond | HHFCodeRv","datePublished": "2021-04-01T09:57:16+08:00",
-    "dateModified": "2021-04-01T09:57:16+08:00",
-    "wordCount":  1253 ,
+    "headline": "开发中的那些坑 | HHFCodeRv","datePublished": "2021-06-30T23:27:21+08:00",
+    "dateModified": "2021-06-30T23:27:21+08:00",
+    "wordCount":  2119 ,
     "author": {
         "@type": "Person",
         "name": "hhf"
@@ -100,21 +100,21 @@
             "url": "https://www.haohongfan.com/images/icon.png"
         }
         },
-    "description": "hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( \u0026quot;fmt\u0026quot; \u0026quot;time\u0026quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done \u0026lt;- 1 }() fmt.Println(\u0026quot;waiting\u0026quot;) \u0026lt;-done fmt.Println(\u0026quot;done\u0026quot;) } 同样可以使用 sync.Cond 来实现 package main import ( \u0026quot;fmt\u0026quot; \u0026quot;sync\u0026quot; \u0026quot;time\u0026quot; ) func main() { cond := sync.NewCond(\u0026amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag"
+    "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不"
 }
-</script><meta property="og:title" content="这一次，彻底搞懂 Go Cond | HHFCodeRv" />
+</script><meta property="og:title" content="开发中的那些坑 | HHFCodeRv" />
 <meta property="og:type" content="article" />
 
 
 <meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
 
 
-<meta property="og:url" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-06-30-programer-design/" />
 
 
 
 
-<meta property="og:description" content="hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &quot;fmt&quot; &quot;time&quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&quot;waiting&quot;) &lt;-done fmt.Println(&quot;done&quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &quot;fmt&quot; &quot;sync&quot; &quot;time&quot; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag" />
+<meta property="og:description" content="本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不" />
 
 
 
@@ -131,10 +131,10 @@
 
 
 
-<meta property="article:published_time" content="2021-04-01T09:57:16&#43;08:00" />
+<meta property="article:published_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
-<meta property="article:modified_time" content="2021-04-01T09:57:16&#43;08:00" />
+<meta property="article:modified_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -149,35 +149,17 @@
 
 
 
-
-
-
-
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
-
-
 
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
 
-
-
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" />
-
-
 
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-map/" />
 
-
-
-
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
 
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-04-01-mutex/" />
-
-
-
-<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-01-23-rand/" />
-
-
 
 
 
@@ -256,15 +238,15 @@
 <div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
     <div
         class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
-        <h1 class="font-bold text-3xl text-primary-text">这一次，彻底搞懂 Go Cond</h1>
+        <h1 class="font-bold text-3xl text-primary-text">开发中的那些坑</h1>
         <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-04-01</span>
+        <span>2021-06-30</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
@@ -281,138 +263,111 @@
     
 
     
-    <div class="mr-6 my-2">
-        <i class="fas fa-th-list mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
-        
-    </div>
-    
 </div>
         
         
         
 
         <div class="content">
-            <p>hi，大家好，我是 haohongfan。</p>
-<p>本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。</p>
-<p>比如下面这段代码：</p>
-<pre><code class="language-go">package main
-
-import (
-	&quot;fmt&quot;
-	&quot;time&quot;
-)
-
-func main() {
-	done := make(chan int, 1)
-
-	go func() {
-		time.Sleep(5 * time.Second)
-		done &lt;- 1
-	}()
-
-	fmt.Println(&quot;waiting&quot;)
-	&lt;-done
-	fmt.Println(&quot;done&quot;)
-}
-</code></pre>
-<p>同样可以使用 sync.Cond 来实现</p>
-<pre><code class="language-go">package main
-
-import (
-	&quot;fmt&quot;
-	&quot;sync&quot;
-	&quot;time&quot;
-)
-
-func main() {
-	cond := sync.NewCond(&amp;sync.Mutex{})
-	var flag bool
-	go func() {
-		time.Sleep(time.Second * 5)
-		cond.L.Lock()
-		flag = true
-		cond.Signal()
-		cond.L.Unlock()
-	}()
-
-	fmt.Println(&quot;waiting&quot;)
-	cond.L.Lock()
-	for !flag {
-		cond.Wait()
-	}
-	cond.L.Unlock()
-	fmt.Println(&quot;done&quot;)
-}
-</code></pre>
-<p>大部分场景下使用 channel 是比 sync.Cond方便的。不过我们要注意到，sync.Cond 提供了 Broadcast 方法，可以通知所有的等待者。想利用 channel 实现这个方法还是不容易的。我想这应该是 sync.Cond 唯一有用武之地的地方。</p>
-<p>先列出来一些问题吧，可以带着这些问题来阅读本文：</p>
+            <p>本篇文章罗列一些开发业务时遇到的那些坑。</p>
+<h2 id="微服务银弹">微服务银弹</h2>
+<p>当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。</p>
+<p>某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/wfw1.png" alt=""></p>
+<p>这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不论架构师水平如何，当我看到 2 个后端开发，拆出了 17 个服务时，我的建议是<strong>立即开除这个人</strong>。</p>
+<p>我们在一个公司有一定的技术话语权时，想落地我们学到的技术时，一定要根据实际情况来，不能想当然的去横向、纵向拆分服务。</p>
+<p>是否拆分微服务条件：</p>
 <ol>
-<li>cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</li>
-<li>sync.Cond 如何触发不能复制的 panic ?</li>
-<li>为什么 sync.Cond 不能被复制 ？</li>
-<li>cond.Signal 是如何通知一个等待的 goroutine ?</li>
-<li>cond.Broadcast 是如何通知等待的 goroutine 的？</li>
+<li>公司业务是否到了一定规模</li>
+<li>人员数量是否到了一定数量</li>
+<li>服务治理能力是否完备，比如：配置中心，服务注册发现，日志系统等</li>
+<li>是否有了一套完整的监控方案</li>
+<li>持续集成，持续部署能力是否完备</li>
+<li>服务部署是虚拟机还是 kubernetes ? 是否有足够能力运维？</li>
+<li>&hellip;.</li>
 </ol>
-<h2 id="源码剖析">源码剖析</h2>
-<p><img src="https://images.haohongfan.com/cond_wait1.png" alt="sync.cond wait"></p>
-<p><img src="https://images.haohongfan.com/cond_signal1.png" alt="sync.Cond Signal"></p>
-<p><img src="https://images.haohongfan.com/cond_broadcast1.png" alt="sync.Cond Broadcast"></p>
-<p><img src="https://images.haohongfan.com/1111.gif" alt="cond_notifyList1.gif"></p>
-<h3 id="condwait-是阻塞的吗是如何阻塞的">cond.Wait 是阻塞的吗？是如何阻塞的？</h3>
-<p>是阻塞的。不过不是 sleep 这样阻塞的。</p>
-<p>调用 <code>goparkunlock</code> 解除当前 goroutine 的 m 的绑定关系，将当前 goroutine 状态机切换为等待状态。等待后续 goready 函数时候能够恢复现场。</p>
-<h3 id="condsignal-是如何通知一个等待的-goroutine-">cond.Signal 是如何通知一个等待的 goroutine ?</h3>
-<ol>
-<li>判断是否有没有被唤醒的 goroutine，如果都已经唤醒了，直接就返回了</li>
-<li>将已通知 goroutine 的数量加1</li>
-<li>从等待唤醒的 goroutine 队列中，获取 head 指针指向的 goroutine，将其重新加入调度</li>
-<li>被阻塞的 goroutine 可以继续执行</li>
-</ol>
-<h3 id="condbroadcast-是如何通知等待的-goroutine-的">cond.Broadcast 是如何通知等待的 goroutine 的？</h3>
-<ol>
-<li>判断是否有没有被唤醒的 goroutine，如果都已经唤醒了，直接就返回了</li>
-<li>将等待通知的 goroutine 数量和已经通知过的 goroutine 数量设置成相等</li>
-<li>遍历等待唤醒的 goroutine 队列，将所有的等待的 goroutine 都重新加入调度</li>
-<li>所有被阻塞的 goroutine 可以继续执行</li>
-</ol>
-<h3 id="condwait本身就是阻塞状态为什么-condwait-需要在循环内-">cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</h3>
-<p>我们能注意到，调用 cond.Wait 的位置，使用的是 for 的方式来调用 wait 函数，而不是使用 if 语句。</p>
-<p>这是由于 wait 函数被唤醒时，存在虚假唤醒等情况，导致唤醒后发现，条件依旧不成立。因此需要使用 for 语句来循环地进行等待，直到条件成立为止。</p>
-<h2 id="使用中注意点">使用中注意点</h2>
-<h3 id="1-不能不加锁直接调用-condwait">1. 不能不加锁直接调用 cond.Wait</h3>
-<pre><code class="language-go">func (c *Cond) Wait() {
-	c.checker.check()
-	t := runtime_notifyListAdd(&amp;c.notify)
-	c.L.Unlock()
-	runtime_notifyListWait(&amp;c.notify, t)
-	c.L.Lock()
+<p>总之，对于业务规模较小的公司，开发人员较少时，一定不要为了拆微服务而去拆，单体服务完全够用。</p>
+<h2 id="一个-class-走天下">一个 class 走天下</h2>
+<p>用这个 case 吐槽下某些 php 程序员。</p>
+<p>相信大部分同学都有一定的强迫症，比如：函数的参数个数，函数的行数，每行的最大长度等等。当然这些判断，借助 lint 工具都能完全解决。</p>
+<p>对于函数参数的控制，一般正确的做法：抽离程序逻辑，尽量控制函数逻辑。实在不行的可以借助 struct 或者 class 的封装特性，往下传递参数。</p>
+<p>不过有些 phper 却借助了 php 的特性，搞了一些骚操作：将所有的参数或者返回值全都放在一个全局的 Class 的 static 变量里面，这样就不需要函数间传递参数了。大概形式如下：</p>
+<pre><code>class CommonService
+{
+
+    //存储接口的入参
+    static public $inputParams = null;
+    static public $output = [];
+    static public $objMap = [];
+    
+    //....
 }
 </code></pre>
-<p>我们看到 Wait 内部会先调用 c.L.Unlock()，来先释放锁。如果调用方不先加锁的话，会触发“fatal error: sync: unlock of unlocked mutex”。关于 mutex 的使用方法，推荐阅读下《这可能是最容易理解的 Go Mutex 源码剖析》</p>
-<h3 id="2-为什么不能-synccond-不能复制-">2. 为什么不能 sync.Cond 不能复制 ？</h3>
-<p>sync.Cond 不能被复制的原因，并不是因为 sync.Cond 内部嵌套了 Locker。因为 NewCond 时传入的 Mutex/RWMutex 指针，对于 Mutex 指针复制是没有问题的。</p>
-<p>主要原因是 sync.Cond 内部是维护着一个 notifyList。如果这个队列被复制的话，那么就在并发场景下导致不同 goroutine 之间操作的 notifyList.wait、notifyList.notify 并不是同一个，这会导致出现有些 goroutine 会一直堵塞。</p>
-<p>这里留下一个问题，sync.Cond 内部是有一段代码 check sync.Cond 是不能被复制的，下面这段代码能触发这个 panic 吗？</p>
-<pre><code class="language-go">package main
-
-import (
-	&quot;fmt&quot;
-	&quot;sync&quot;
-)
-
-func main() {
-	cond1 := sync.NewCond(new(sync.Mutex))
-	cond := *cond1
-	fmt.Println(cond)
-}
-</code></pre>
-<p>有兴趣的可以动手尝试下，以及尝试下如何才能触发这个panic &ldquo;sync.Cond is copied” 。</p>
-<p><img src="https://images.haohongfan.com/gzh1.png" alt="gzh"></p>
-<h2 id="版权">版权</h2>
-<p>以上内容均不得复制用于商业用途或发行</p>
-<p>© 2020-2021 haohongfan. Licensed under CC-BY-NC-ND 4.0</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/static_class.png" alt=""></p>
+<p>这个写法有以下这些特点：</p>
+<ol>
+<li>这个 Common Service 基本贯穿了整个业务逻辑</li>
+<li>不同的位置都可能在更改或者读取某个字段</li>
+</ol>
+<p>造成的结果：</p>
+<ol>
+<li>不相关的业务逻辑强行耦合</li>
+<li>某些位置刚修改的字段，可能被再次更改</li>
+<li>预期之外的修改将整个逻辑污染</li>
+<li>业务逻辑变得晦涩难懂</li>
+</ol>
+<p>其实完全简单的封装就能解决的事情，搞出来的这种代码，让人实在忍不住吐槽。</p>
+<h2 id="mysql-里面全是-json">MySQL 里面全是 json</h2>
+<p>大部分互联网公司，MySQL 肯定是业务数据库的标配选择，毕竟运维成熟。</p>
+<p>我们设计数据库的时候，教科书是让我们至少遵守“第三范式”：</p>
+<p>不过真实业务开发中，设计 MySQL 的时候，有的时候为了查询简单，会将某些字段设计成 json, 这样就减少一张关联表的查询。这种设计其实还算是比较合理做法。</p>
+<p>但是更多的情况下，很多人把数据库字段设置成 json，美名是为了更好的扩展性。</p>
+<p>比如下面这种设计：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/json_goods.png" alt=""></p>
+<p>由于商品的属性字段是特别多的，不同商品的属性是不固定的。为了扩展性，将商品属性字段全都塞到一个 json 里面，而且 json 也有一套逻辑在里面：aflag 与 bflag 会互相覆盖。</p>
+<p>这么设计造成的结果：</p>
+<ol>
+<li>商品属性字段基本处于无法控制的地步</li>
+<li>哪些商品拥有哪些属性是不知道的</li>
+<li>一个商品拥有哪些属性，需要通过一系列复杂的解析，计算才能知道</li>
+<li>json 的字段是不确定的，golang/java 解析起来困难</li>
+</ol>
+<p>json 字段作为扩展性，这个扩展性是我觉得是值得商榷的，因为大部分场景下能做扩展的字段，基本都是业务逻辑没有想清楚。如果一个表的某个字段是 json 类型，而且 json 里的字段能新增、修改，删除，最终就会造成这个 json 最终变得不可控，早晚走上数据库数据治理的地步。</p>
+<h2 id="无脑吹-graphql">无脑吹 GraphQL</h2>
+<p>喜欢看博客或者公众号的同学，对 GraphQL 都不会陌生。看过 GraphqQL 的同学上来就被其特性吸引了。</p>
+<p>特性：</p>
+<ol>
+<li>请求你所要的数据不多不少</li>
+<li>获取多个资源只用一个请求</li>
+<li>描述所有的可能类型系统</li>
+<li>API 演进无需划分版本</li>
+</ol>
+<p>是不是很有吸引力？看到这些特性，我觉得大部分同学都会忍不住尝试下。</p>
+<p>我有幸具体落地过 GraphQL，这里就想吐槽一番。</p>
+<h3 id="开发流程">开发流程</h3>
+<p>GraphQL 是有默认的 Schema 的，这个 Schema 类似于 Protobuf。如果 Client、Server 对不齐这个 Schema 的话，Client 直接获取不到任何数据了。</p>
+<p>在使用 http RESTFUL 开发 api 接口时，差不多是这个流程：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/http_api3.png" alt=""></p>
+<p>但是使用了 GraphQL，需要 Client/Server 双方坐下来，将各个字段都仔细讨论清楚了。了解过 GraphQL 的同学都知道，GraphQL 能从一个类型访问到另外一个任意类型，为了这个实现这个目标，双方讨论字段的过程简直慢的不可想象。可能排期都过去一星期了，字段都没对清楚。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/graphql-api.png" alt=""></p>
+<p>固然字段对清楚对开发结果的反馈是正向的，但是这个 Client/Server 之间的沟通过程真的很慢。</p>
+<h3 id="网关">网关</h3>
+<p>GraphQL 最大的问题就是网关。</p>
+<p>客户端使用 Graphql 的最大问题是：客户端只能有一个 Schema。所以当你有多个 Graphql Server 时想对外提供服务时，就需要合并 Schema。目前市面流行的网关 Nginx, APISIX, Kong 都不支持将 Schema 合并。</p>
+<p>于是你只能将所有的业务都耦合到同一个 GraphQL 中，无形中将 GraphQL 做成了单体服务。</p>
+<p>曾经调研过这个问题，发现只有 JS 提供一个合并 schema 的功能，其他语言基本都没有这个实现。</p>
+<h3 id="复杂度">复杂度</h3>
+<p>GraphQL 另外一个问题就是对查询复杂度的控制。</p>
+<p>GraphQL 可用从一个类型任意查询到任意一个类型。假如没有任何控制的话，客户端一次请求能将所有的数据全都拉取出来。</p>
+<p>当时遇到过的一个问题：客户端拉取所有的列表，又将列表中每条记录的详情，通过一次请求全部请求，导致的结果：服务器直接就崩了。</p>
+<p>GraphQL 提供了复杂度和深度的控制功能，但是这个复杂度和深度是很难计算的。</p>
+<p>综上：不建议项目使用 GraphQL。</p>
+<p>本文先罗列这些开发中的坑，后续再补充。 更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
 
         </div>
         
@@ -461,14 +416,11 @@ func main() {
 <div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
     <div>
         
-        <span class="block font-bold">上一页</span>
-        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/" class="block">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
-        
     </div>
     <div class="md:text-right mt-4 md:mt-0">
         
         <span class="block font-bold">下一页</span>
-        <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/" class="block">这可能是最容易理解的 Go Mutex 源码剖析</a>
+        <a href="https://www.haohongfan.com/posts/2021-06-27-timer/" class="block">Go timer 是如何被调度的</a>
         
     </div>
 </div>
@@ -495,58 +447,22 @@ func main() {
     <div class="col-span-2">
         
         
-<div class="bg-secondary-bg rounded p-6">
-    <h3 class="text-lg font-semibold mb-4">系列文章</h3>
-    <div class="content">
-        
-        
-        <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
-        <br />
-        
-        <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
-        <br />
-        
-        
-    </div>
-</div>
-        
-        
         <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
     <span class="text-lg font-semibold">本页内容</span>
 </div>
 <div class="sticky-toc hidden lg:block px-6 pb-6 ">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#源码剖析">源码剖析</a>
+    <li><a href="#微服务银弹">微服务银弹</a></li>
+    <li><a href="#一个-class-走天下">一个 class 走天下</a></li>
+    <li><a href="#mysql-里面全是-json">MySQL 里面全是 json</a></li>
+    <li><a href="#无脑吹-graphql">无脑吹 GraphQL</a>
       <ul>
-        <li><a href="#condwait-是阻塞的吗是如何阻塞的">cond.Wait 是阻塞的吗？是如何阻塞的？</a></li>
-        <li><a href="#condsignal-是如何通知一个等待的-goroutine-">cond.Signal 是如何通知一个等待的 goroutine ?</a></li>
-        <li><a href="#condbroadcast-是如何通知等待的-goroutine-的">cond.Broadcast 是如何通知等待的 goroutine 的？</a></li>
-        <li><a href="#condwait本身就是阻塞状态为什么-condwait-需要在循环内-">cond.Wait本身就是阻塞状态，为什么 cond.Wait 需要在循环内 ？</a></li>
+        <li><a href="#开发流程">开发流程</a></li>
+        <li><a href="#网关">网关</a></li>
+        <li><a href="#复杂度">复杂度</a></li>
       </ul>
     </li>
-    <li><a href="#使用中注意点">使用中注意点</a>
-      <ul>
-        <li><a href="#1-不能不加锁直接调用-condwait">1. 不能不加锁直接调用 cond.Wait</a></li>
-        <li><a href="#2-为什么不能-synccond-不能复制-">2. 为什么不能 sync.Cond 不能复制 ？</a></li>
-      </ul>
-    </li>
-    <li><a href="#版权">版权</a></li>
   </ul>
 </nav>
 </div>
@@ -566,6 +482,9 @@ func main() {
         <h2 class="text-lg font-semibold mb-4">相关</h2>
         <div class="content">
             
+            <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+            <br />
+            
             <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
             <br />
             
@@ -575,13 +494,10 @@ func main() {
             <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
             <br />
             
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+            <br />
+            
             <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-01-23-rand/">一文完全掌握 Go math/rand</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2020-10-20-golang-slice/">你真的懂 golang reslice 吗</a>
             <br />
             
         </div>

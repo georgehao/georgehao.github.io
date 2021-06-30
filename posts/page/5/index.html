@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "Redigo Pool 源码解析",
+            "description": "Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要",
+            "url": "https://www.haohongfan.com/posts/2019-12-31-redigo-pool/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "打造 Zap 开箱即用日志组件",
             "description": "logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap",
             "url": "https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "Logrus源码阅读(2)--logrus生命周期",
             "description": "Eureka is a elegant and powerful theme for Hugo.",
             "url": "https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "Golang是否真的没有指针运算?",
             "description": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := \u0026amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(\u0026quot;p1: \u0026quot;, *p1) // 1 fmt.Printf(\u0026quot;p1 address:%p\\n\u0026quot;, p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题) #include\u0026lt;stdio.h\u0026gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026amp;a+1); printf(\u0026quot;%d,%d\u0026quot;,*(a+1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量",
             "url": "https://www.haohongfan.com/posts/2019-07-22-golang-pointer/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "Logrus源码阅读(1)--基本用法",
             "description": "选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(\u0026ldquo;hello logrus\u0026rdquo;) logrus.WithField(logruns.Fields{\u0026ldquo;key1\u0026rdquo;:\u0026ldquo;v1\u0026rdquo;}).Info(\u0026ldquo;hello logrus\u0026rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p",
             "url": "https://www.haohongfan.com/posts/2019-06-11-logurs-1/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "一次golang deadlock的讨论",
-            "description": "背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果 // 程序1 func main() { fmt.Println(\u0026quot;running, not deadlock\u0026quot;) server, err := net.Listen(\u0026quot;tcp\u0026quot;, \u0026quot;127.0.0.1:9001\u0026quot;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(\u0026quot;server\u0026quot;) } fmt.Printf(\u0026quot;Received connection from %s.\\n\u0026quot;, connection.RemoteAddr()) waitQueue \u0026lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue \u0026lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误 如下面这个例子 // 程序",
-            "url": "https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-27T09:57:16&#43;08:00" />
+<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
 
 
 
@@ -216,6 +216,38 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-12-31-redigo-pool/" class="font-bold text-xl hover:text-eureka">Redigo Pool 源码解析</a>
+</div>
+<div class="content">
+  Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-12-31</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -353,45 +385,6 @@
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
         <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" class="font-bold text-xl hover:text-eureka">一次golang deadlock的讨论</a>
-</div>
-<div class="content">
-  背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果 // 程序1 func main() { fmt.Println(&amp;quot;running, not deadlock&amp;quot;) server, err := net.Listen(&amp;quot;tcp&amp;quot;, &amp;quot;127.0.0.1:9001&amp;quot;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(&amp;quot;server&amp;quot;) } fmt.Printf(&amp;quot;Received connection from %s.\n&amp;quot;, connection.RemoteAddr()) waitQueue &amp;lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue &amp;lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误 如下面这个例子 // 程序
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2019-07-11</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
     </div>
     
     
