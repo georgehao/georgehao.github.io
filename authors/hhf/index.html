@@ -5,7 +5,7 @@
 
 <title>HHFCodeRv | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -85,48 +85,60 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "开发中的那些坑",
-            "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不",
-            "url": "https://www.haohongfan.com/posts/2021-06-30-programer-design/"
+            "name": "interface 原理 - 类型转换",
+            "description": "hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配+汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主",
+            "url": "https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/"
         },{
             "@type":"ListItem",
             "position":  2 ,
+            "name": "我为什么从 C++ 转到了 Go",
+            "description": "为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C++，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C++ 转到了 Go ? 为什么选择 C++ ？ 我本科毕业那会，Java 还没有那么卷，",
+            "url": "https://www.haohongfan.com/posts/2021-07-10-govscpp/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
+            "name": "开发中的那些坑",
+            "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不",
+            "url": "https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
             "name": "Go timer 是如何被调度的",
             "description": "Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时",
             "url": "https://www.haohongfan.com/posts/2021-06-27-timer/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  5 ,
             "name": "Go sync.Pool 浅析",
             "description": "hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个",
             "url": "https://www.haohongfan.com/posts/2021-05-22-sync-pool/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  6 ,
             "name": "最清晰易懂的 Go WaitGroup 源码剖析",
             "description": "hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为",
             "url": "https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/"
         },{
             "@type":"ListItem",
-            "position":  5 ,
+            "position":  7 ,
             "name": "看过这篇剖析，你还不懂 Go sync.Map 吗",
             "description": "hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完",
             "url": "https://www.haohongfan.com/posts/2021-05-10-sync-map/"
         },{
             "@type":"ListItem",
-            "position":  6 ,
+            "position":  8 ,
             "name": "这一次，彻底搞懂 Go Cond",
             "description": "hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( \u0026quot;fmt\u0026quot; \u0026quot;time\u0026quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done \u0026lt;- 1 }() fmt.Println(\u0026quot;waiting\u0026quot;) \u0026lt;-done fmt.Println(\u0026quot;done\u0026quot;) } 同样可以使用 sync.Cond 来实现 package main import ( \u0026quot;fmt\u0026quot; \u0026quot;sync\u0026quot; \u0026quot;time\u0026quot; ) func main() { cond := sync.NewCond(\u0026amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag",
             "url": "https://www.haohongfan.com/posts/2021-05-10-sync-cond/"
         },{
             "@type":"ListItem",
-            "position":  7 ,
+            "position":  9 ,
             "name": "这可能是最容易理解的 Go Mutex 源码剖析",
             "description": "Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争",
             "url": "https://www.haohongfan.com/posts/2021-04-01-mutex/"
         },{
             "@type":"ListItem",
-            "position":  8 ,
+            "position":  10 ,
             "name": "一文完全掌握 Go math/rand",
             "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i \u0026lt; rngLen; i++ { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设",
             "url": "https://www.haohongfan.com/posts/2021-01-23-rand/"
@@ -164,7 +176,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
 
 
 
@@ -193,6 +205,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -304,7 +317,93 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design/" class="font-bold text-xl hover:text-eureka">开发中的那些坑</a>
+  <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/" class="font-bold text-xl hover:text-eureka">interface 原理 - 类型转换</a>
+</div>
+<div class="content">
+  hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配&#43;汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-08-10</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/" class="font-bold text-xl hover:text-eureka">我为什么从 C&#43;&#43; 转到了 Go</a>
+</div>
+<div class="content">
+  为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C&#43;&#43;，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C&#43;&#43; 转到了 Go ? 为什么选择 C&#43;&#43; ？ 我本科毕业那会，Java 还没有那么卷，
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-07-10</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="font-bold text-xl hover:text-eureka">开发中的那些坑</a>
 </div>
 <div class="content">
   本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不
@@ -550,7 +649,7 @@
   <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" class="font-bold text-xl hover:text-eureka">这一次，彻底搞懂 Go Cond</a>
 </div>
 <div class="content">
-  hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &amp;quot;fmt&amp;quot; &amp;quot;time&amp;quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &amp;lt;- 1 }() fmt.Println(&amp;quot;waiting&amp;quot;) &amp;lt;-done fmt.Println(&amp;quot;done&amp;quot;) } 同样可以使用 sync.Cond 来实现 package main import ( &amp;quot;fmt&amp;quot; &amp;quot;sync&amp;quot; &amp;quot;time&amp;quot; ) func main() { cond := sync.NewCond(&amp;amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag
+  hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &#34;fmt&#34; &#34;time&#34; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&#34;waiting&#34;) &lt;-done fmt.Println(&#34;done&#34;) } 同样可以使用 sync.Cond 来实现 package main import ( &#34;fmt&#34; &#34;sync&#34; &#34;time&#34; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
@@ -650,7 +749,7 @@
   <a href="https://www.haohongfan.com/posts/2021-01-23-rand/" class="font-bold text-xl hover:text-eureka">一文完全掌握 Go math/rand</a>
 </div>
 <div class="content">
-  Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &amp;lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &amp;gt;= 0 { var u int64 u = int64(x) &amp;lt;&amp;lt; 40 x = seedrand(x) u ^= int64(x) &amp;lt;&amp;lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设
+  Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &gt;= 0 { var u int64 u = int64(x) &lt;&lt; 40 x = seedrand(x) u ^= int64(x) &lt;&lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">

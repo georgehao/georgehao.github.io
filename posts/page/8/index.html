@@ -5,7 +5,7 @@
 
 <title>HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "GraphQL N+1 问题解决方案",
+            "description": "什么是N+1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,",
+            "url": "https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
+            "name": "MongoDB 数据重复的处理方法",
+            "description": "背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B",
+            "url": "https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
             "name": "ES简单使用",
             "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary\u0026amp;pretty' 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'match' =\u0026gt; [ 'title' =\u0026gt; '黑猫', ] ], ] ]; Bool查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \u0026quot;query\u0026quot; : { \u0026quot;bool\u0026quot; : { \u0026quot;must\u0026quot;: [ { \u0026quot;match\u0026quot; : { \u0026quot;testField\u0026quot; : \u0026quot;abc\u0026quot; } }, { \u0026quot;match\u0026quot; : { \u0026quot;testField2\u0026quot; : \u0026quot;xyz\u0026quot; } } ] } } }' $data = [ 'body' =\u0026gt; [ 'query' =\u0026gt; [ 'bool' =\u0026gt;",
             "url": "https://www.haohongfan.com/posts/2018-09-28-es-simple/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  4 ,
             "name": "Graphql最大复杂度和最大深度设置",
             "description": "设置最大深度和最大负责度的好处 因为把查询的权利交给了客户端, 客户端可以进行非常复杂的查询. 因为客户端可能进行恶意的查询或者进行非常大的查询, 因此服务端要拒绝这样的查询. 总共有三种方式可以进行: 设置响应过期时间 设置查询最大深度 设置查询最大复杂度 设置响应过期时间需要对服务端代码和性能要求比较高, 可以先不管, 当服务器代码和性能上去再设置. 如何判断最大深度",
             "url": "https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  5 ,
             "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
             "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans",
             "url": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
-        },{
-            "@type":"ListItem",
-            "position":  4 ,
-            "name": "go 跨平台编译",
-            "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
-            "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "Golang interface入门",
-            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
-            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
 
 
 
@@ -160,6 +160,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -222,10 +223,81 @@
   
   <div class="w-full ">
     <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/hugo-integrated-gitment-plugin/" class="font-bold text-xl hover:text-eureka">GraphQL N&#43;1 问题解决方案</a>
+</div>
+<div class="content">
+  什么是N&#43;1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询. 大概的SQL查询: select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库. 我们要知道Graphql的图形结构可能是个闭环结构,
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-11-12</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/php/" class="hover:text-eureka">php</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-09-30-mongo-duplicate/" class="font-bold text-xl hover:text-eureka">MongoDB 数据重复的处理方法</a>
+</div>
+<div class="content">
+  背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法. 引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式: db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于B
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-09-30</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>1分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
   <a href="https://www.haohongfan.com/posts/2018-09-28-es-simple/" class="font-bold text-xl hover:text-eureka">ES简单使用</a>
 </div>
 <div class="content">
-  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;
+  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;must&#34;: [ { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } }, { &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt;
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
@@ -342,84 +414,6 @@
 </div>
   </div>
   
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
-</div>
-<div class="content">
-  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &amp;gt;= 1.5 ppc64, ppc64le version &amp;gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &amp;gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &amp;gt;= 1.6 s390x (IBM System z) version &amp;gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-05-04</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
-</div>
-<div class="content">
-  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&amp;quot;hello&amp;quot;} i.M() } Interface本质 inter
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-04-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
 </div>
 
 
@@ -457,13 +451,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/posts/page/11/">11</a>
+    <a class="page-link" href="/posts/page/12/">12</a>
   </li>
   <li class="page-item">
     <a href="/posts/page/9/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/11/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/12/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

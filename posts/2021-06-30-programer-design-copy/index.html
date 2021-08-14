@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>开发中的那些坑 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"开发中的那些坑",
+      "item":"https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"
+    },
+    "headline": "开发中的那些坑 | HHFCodeRv","datePublished": "2021-06-30T23:27:21+08:00",
+    "dateModified": "2021-06-30T23:27:21+08:00",
+    "wordCount":  2119 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不"
+}
+</script><meta property="og:title" content="开发中的那些坑 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" />
+
+
+
+
+<meta property="og:description" content="本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-06-30T23:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-06-30T23:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-map/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-04-01-mutex/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">开发中的那些坑</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-06-30</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>本篇文章罗列一些开发业务时遇到的那些坑。</p>
+<h2 id="微服务银弹">微服务银弹</h2>
+<p>当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。</p>
+<p>某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/wfw1.png" alt=""></p>
+<p>这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不论架构师水平如何，当我看到 2 个后端开发，拆出了 17 个服务时，我的建议是<strong>立即开除这个人</strong>。</p>
+<p>我们在一个公司有一定的技术话语权时，想落地我们学到的技术时，一定要根据实际情况来，不能想当然的去横向、纵向拆分服务。</p>
+<p>是否拆分微服务条件：</p>
+<ol>
+<li>公司业务是否到了一定规模</li>
+<li>人员数量是否到了一定数量</li>
+<li>服务治理能力是否完备，比如：配置中心，服务注册发现，日志系统等</li>
+<li>是否有了一套完整的监控方案</li>
+<li>持续集成，持续部署能力是否完备</li>
+<li>服务部署是虚拟机还是 kubernetes ? 是否有足够能力运维？</li>
+<li>&hellip;.</li>
+</ol>
+<p>总之，对于业务规模较小的公司，开发人员较少时，一定不要为了拆微服务而去拆，单体服务完全够用。</p>
+<h2 id="一个-class-走天下">一个 class 走天下</h2>
+<p>用这个 case 吐槽下某些 php 程序员。</p>
+<p>相信大部分同学都有一定的强迫症，比如：函数的参数个数，函数的行数，每行的最大长度等等。当然这些判断，借助 lint 工具都能完全解决。</p>
+<p>对于函数参数的控制，一般正确的做法：抽离程序逻辑，尽量控制函数逻辑。实在不行的可以借助 struct 或者 class 的封装特性，往下传递参数。</p>
+<p>不过有些 phper 却借助了 php 的特性，搞了一些骚操作：将所有的参数或者返回值全都放在一个全局的 Class 的 static 变量里面，这样就不需要函数间传递参数了。大概形式如下：</p>
+<pre><code>class CommonService
+{
+
+    //存储接口的入参
+    static public $inputParams = null;
+    static public $output = [];
+    static public $objMap = [];
+    
+    //....
+}
+</code></pre>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/static_class.png" alt=""></p>
+<p>这个写法有以下这些特点：</p>
+<ol>
+<li>这个 Common Service 基本贯穿了整个业务逻辑</li>
+<li>不同的位置都可能在更改或者读取某个字段</li>
+</ol>
+<p>造成的结果：</p>
+<ol>
+<li>不相关的业务逻辑强行耦合</li>
+<li>某些位置刚修改的字段，可能被再次更改</li>
+<li>预期之外的修改将整个逻辑污染</li>
+<li>业务逻辑变得晦涩难懂</li>
+</ol>
+<p>其实完全简单的封装就能解决的事情，搞出来的这种代码，让人实在忍不住吐槽。</p>
+<h2 id="mysql-里面全是-json">MySQL 里面全是 json</h2>
+<p>大部分互联网公司，MySQL 肯定是业务数据库的标配选择，毕竟运维成熟。</p>
+<p>我们设计数据库的时候，教科书是让我们至少遵守“第三范式”：</p>
+<p>不过真实业务开发中，设计 MySQL 的时候，有的时候为了查询简单，会将某些字段设计成 json, 这样就减少一张关联表的查询。这种设计其实还算是比较合理做法。</p>
+<p>但是更多的情况下，很多人把数据库字段设置成 json，美名是为了更好的扩展性。</p>
+<p>比如下面这种设计：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/json_goods.png" alt=""></p>
+<p>由于商品的属性字段是特别多的，不同商品的属性是不固定的。为了扩展性，将商品属性字段全都塞到一个 json 里面，而且 json 也有一套逻辑在里面：aflag 与 bflag 会互相覆盖。</p>
+<p>这么设计造成的结果：</p>
+<ol>
+<li>商品属性字段基本处于无法控制的地步</li>
+<li>哪些商品拥有哪些属性是不知道的</li>
+<li>一个商品拥有哪些属性，需要通过一系列复杂的解析，计算才能知道</li>
+<li>json 的字段是不确定的，golang/java 解析起来困难</li>
+</ol>
+<p>json 字段作为扩展性，这个扩展性是我觉得是值得商榷的，因为大部分场景下能做扩展的字段，基本都是业务逻辑没有想清楚。如果一个表的某个字段是 json 类型，而且 json 里的字段能新增、修改，删除，最终就会造成这个 json 最终变得不可控，早晚走上数据库数据治理的地步。</p>
+<h2 id="无脑吹-graphql">无脑吹 GraphQL</h2>
+<p>喜欢看博客或者公众号的同学，对 GraphQL 都不会陌生。看过 GraphqQL 的同学上来就被其特性吸引了。</p>
+<p>特性：</p>
+<ol>
+<li>请求你所要的数据不多不少</li>
+<li>获取多个资源只用一个请求</li>
+<li>描述所有的可能类型系统</li>
+<li>API 演进无需划分版本</li>
+</ol>
+<p>是不是很有吸引力？看到这些特性，我觉得大部分同学都会忍不住尝试下。</p>
+<p>我有幸具体落地过 GraphQL，这里就想吐槽一番。</p>
+<h3 id="开发流程">开发流程</h3>
+<p>GraphQL 是有默认的 Schema 的，这个 Schema 类似于 Protobuf。如果 Client、Server 对不齐这个 Schema 的话，Client 直接获取不到任何数据了。</p>
+<p>在使用 http RESTFUL 开发 api 接口时，差不多是这个流程：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/http_api3.png" alt=""></p>
+<p>但是使用了 GraphQL，需要 Client/Server 双方坐下来，将各个字段都仔细讨论清楚了。了解过 GraphQL 的同学都知道，GraphQL 能从一个类型访问到另外一个任意类型，为了这个实现这个目标，双方讨论字段的过程简直慢的不可想象。可能排期都过去一星期了，字段都没对清楚。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/graphql-api.png" alt=""></p>
+<p>固然字段对清楚对开发结果的反馈是正向的，但是这个 Client/Server 之间的沟通过程真的很慢。</p>
+<h3 id="网关">网关</h3>
+<p>GraphQL 最大的问题就是网关。</p>
+<p>客户端使用 Graphql 的最大问题是：客户端只能有一个 Schema。所以当你有多个 Graphql Server 时想对外提供服务时，就需要合并 Schema。目前市面流行的网关 Nginx, APISIX, Kong 都不支持将 Schema 合并。</p>
+<p>于是你只能将所有的业务都耦合到同一个 GraphQL 中，无形中将 GraphQL 做成了单体服务。</p>
+<p>曾经调研过这个问题，发现只有 JS 提供一个合并 schema 的功能，其他语言基本都没有这个实现。</p>
+<h3 id="复杂度">复杂度</h3>
+<p>GraphQL 另外一个问题就是对查询复杂度的控制。</p>
+<p>GraphQL 可用从一个类型任意查询到任意一个类型。假如没有任何控制的话，客户端一次请求能将所有的数据全都拉取出来。</p>
+<p>当时遇到过的一个问题：客户端拉取所有的列表，又将列表中每条记录的详情，通过一次请求全部请求，导致的结果：服务器直接就崩了。</p>
+<p>GraphQL 提供了复杂度和深度的控制功能，但是这个复杂度和深度是很难计算的。</p>
+<p>综上：不建议项目使用 GraphQL。</p>
+<p>本文先罗列这些开发中的坑，后续再补充。 更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/" class="block">我为什么从 C&#43;&#43; 转到了 Go</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-06-27-timer/" class="block">Go timer 是如何被调度的</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#微服务银弹">微服务银弹</a></li>
+    <li><a href="#一个-class-走天下">一个 class 走天下</a></li>
+    <li><a href="#mysql-里面全是-json">MySQL 里面全是 json</a></li>
+    <li><a href="#无脑吹-graphql">无脑吹 GraphQL</a>
+      <ul>
+        <li><a href="#开发流程">开发流程</a></li>
+        <li><a href="#网关">网关</a></li>
+        <li><a href="#复杂度">复杂度</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/">这可能是最容易理解的 Go Mutex 源码剖析</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

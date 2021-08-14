@@ -5,7 +5,7 @@
 
 <title>Go timer 是如何被调度的 | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -201,6 +201,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -521,7 +522,7 @@
     <div>
         
         <span class="block font-bold">上一页</span>
-        <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design/" class="block">开发中的那些坑</a>
+        <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="block">开发中的那些坑</a>
         
     </div>
     <div class="md:text-right mt-4 md:mt-0">
@@ -544,7 +545,9 @@
         async>
 </script>
 <script>
-    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
       document.getElementById('utterances').setAttribute('theme', 'github-dark')
     }
 </script>

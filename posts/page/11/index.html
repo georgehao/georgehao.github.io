@@ -5,7 +5,7 @@
 
 <title>HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "修改系统时间导致的坑",
+            "description": "有一天测试人员对我说, 我怎么测试10点开站会这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧. 好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来. 程序总是在这个函数中阻塞住. 为什么会",
+            "url": "https://www.haohongfan.com/index.php/2017/08/25/system_time/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
+            "name": "记一次线程不同步的坑",
+            "description": "这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-\u0026gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()\" 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有",
+            "url": "https://www.haohongfan.com/index.php/2017/08/25/thread_error/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
             "name": "Golang Label使用方法",
             "description": "写C/C++的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C++代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La",
             "url": "https://www.haohongfan.com/posts/2017-08-10-label/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  4 ,
             "name": "golang面向对象分析",
             "description": "说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一",
             "url": "https://www.haohongfan.com/posts/2017-07-24-golang_oop/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  5 ,
             "name": "golang中defer, panic, recover用法",
             "description": "昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出 一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到. class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比",
             "url": "https://www.haohongfan.com/posts/2017-07-20-golang_defer_panic_recover/"
-        },{
-            "@type":"ListItem",
-            "position":  4 ,
-            "name": "nginx代理wordpress无法访问的问题",
-            "description": "先说说我遇到的问题, 这简直就是坑中之王. 最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了. 无论我怎么在浏览器中输入",
-            "url": "https://www.haohongfan.com/posts/2017-07-19-wordpress_error/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "mongodb联表查询",
-            "description": "picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的",
-            "url": "https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-06-30T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
 
 
 
@@ -160,6 +160,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -216,6 +217,84 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/index.php/2017/08/25/system_time/" class="font-bold text-xl hover:text-eureka">修改系统时间导致的坑</a>
+</div>
+<div class="content">
+  有一天测试人员对我说, 我怎么测试10点开站会这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧. 好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来. 程序总是在这个函数中阻塞住. 为什么会
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-25</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>1分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/index.php/2017/08/25/thread_error/" class="font-bold text-xl hover:text-eureka">记一次线程不同步的坑</a>
+</div>
+<div class="content">
+  这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()&#34; 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-25</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>1分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -334,84 +413,6 @@
 </div>
   </div>
   
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-07-19-wordpress_error/" class="font-bold text-xl hover:text-eureka">nginx代理wordpress无法访问的问题</a>
-</div>
-<div class="content">
-  先说说我遇到的问题, 这简直就是坑中之王. 最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了. 无论我怎么在浏览器中输入
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-07-19</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/ops/" class="hover:text-eureka">ops</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/" class="font-bold text-xl hover:text-eureka">mongodb联表查询</a>
-</div>
-<div class="content">
-  picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-06-17</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
 </div>
 
 
@@ -442,11 +443,14 @@
   <li class="page-item active">
     <a class="page-link" href="/posts/page/11/">11</a>
   </li>
-  <li class="page-item disabled">
-    <a  class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/12/">12</a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/11/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/12/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/posts/page/12/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

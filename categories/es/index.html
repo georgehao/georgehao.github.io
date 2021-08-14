@@ -5,7 +5,7 @@
 
 <title>es | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -151,6 +151,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -216,7 +217,7 @@
   <a href="https://www.haohongfan.com/posts/2018-09-28-es-simple/" class="font-bold text-xl hover:text-eureka">ES简单使用</a>
 </div>
 <div class="content">
-  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;match&#39; =&amp;gt; [ &#39;title&#39; =&amp;gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &amp;quot;query&amp;quot; : { &amp;quot;bool&amp;quot; : { &amp;quot;must&amp;quot;: [ { &amp;quot;match&amp;quot; : { &amp;quot;testField&amp;quot; : &amp;quot;abc&amp;quot; } }, { &amp;quot;match&amp;quot; : { &amp;quot;testField2&amp;quot; : &amp;quot;xyz&amp;quot; } } ] } } }&#39; $data = [ &#39;body&#39; =&amp;gt; [ &#39;query&#39; =&amp;gt; [ &#39;bool&#39; =&amp;gt;
+  常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;must&#34;: [ { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } }, { &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt;
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">

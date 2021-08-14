@@ -5,7 +5,7 @@
 
 <title>c&#43;&#43; | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -175,6 +175,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -240,7 +241,7 @@
   <a href="https://www.haohongfan.com/posts/2017-08-25-cping/" class="font-bold text-xl hover:text-eureka">C&#43;&#43;实现ping</a>
 </div>
 <div class="content">
-  最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行. 先说下原理: 使用ICMP协议, 组织ICMP包 socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了 ##组织ICMP标示 p_icmp = (struct icmp *)buffer; p_icmp-&amp;gt;icmp_type = ICMP_ECHO; p_icmp-&amp;gt;icmp_code = 0; p_icmp-&amp;gt;icmp_cksum = 0; p_icmp-&amp;gt;icmp_seq = 12345; p_icmp-&amp;gt;icmp_id = getpid(); p_icmp-&amp;gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64); 这里组织我们需要的ICMP的一些标示 3.发送ICMP给ho
+  最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行. 先说下原理: 使用ICMP协议, 组织ICMP包 socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了 ##组织ICMP标示 p_icmp = (struct icmp *)buffer; p_icmp-&gt;icmp_type = ICMP_ECHO; p_icmp-&gt;icmp_code = 0; p_icmp-&gt;icmp_cksum = 0; p_icmp-&gt;icmp_seq = 12345; p_icmp-&gt;icmp_id = getpid(); p_icmp-&gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64); 这里组织我们需要的ICMP的一些标示 3.发送ICMP给ho
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
@@ -322,7 +323,7 @@
   <a href="https://www.haohongfan.com/posts/2017-08-25-id_library_path_ld_so_conf/" class="font-bold text-xl hover:text-eureka">有关LD_LIBRARY_PATH与ld.so.conf</a>
 </div>
 <div class="content">
-  我之前写过一篇关于LD_LIBRARY_PATH与gcc/g&#43;&#43; -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了&amp;mdash;ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时
+  我之前写过一篇关于LD_LIBRARY_PATH与gcc/g&#43;&#43; -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了—ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的 升级共享库时
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">

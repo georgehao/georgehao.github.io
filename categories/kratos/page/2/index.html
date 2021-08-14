@@ -5,7 +5,7 @@
 
 <title>kratos | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -157,6 +157,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -222,7 +223,7 @@
   <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
 </div>
 <div class="content">
-  本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&amp;quot;/kratos-demo&amp;quot;) { g.GET(&amp;quot;/start&amp;quot;, howToStart) g.GET(&amp;quot;/sayHi&amp;quot;, sayHi) g.GET(&amp;quot;/sayHello&amp;quot;, func(context *bm.Context) { svc.SayHello(context, &amp;amp;pb.HelloReq{ Name: &amp;quot;test&amp;quot;, }) context.JSON(&amp;quot;success&amp;quot;, nil) }) } v2Group := e.Group(&amp;quot;/kratos-demo/v2&amp;quot;) { v2Group.GET(&amp;quot;/sayHi&amp;quot;, sayHi) }
+  本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&#34;/kratos-demo&#34;) { g.GET(&#34;/start&#34;, howToStart) g.GET(&#34;/sayHi&#34;, sayHi) g.GET(&#34;/sayHello&#34;, func(context *bm.Context) { svc.SayHello(context, &amp;pb.HelloReq{ Name: &#34;test&#34;, }) context.JSON(&#34;success&#34;, nil) }) } v2Group := e.Group(&#34;/kratos-demo/v2&#34;) { v2Group.GET(&#34;/sayHi&#34;, sayHi) }
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
@@ -265,7 +266,7 @@
   <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
 </div>
 <div class="content">
-  这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;amp;&amp;amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,
+  这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">

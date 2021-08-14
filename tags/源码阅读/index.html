@@ -5,7 +5,7 @@
 
 <title>源码阅读 | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.0" />
+<meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
 <script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
 
@@ -151,6 +151,7 @@
             <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
             <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
             <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -216,7 +217,7 @@
   <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" class="font-bold text-xl hover:text-eureka">Logrus源码阅读(1)--基本用法</a>
 </div>
 <div class="content">
-  选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(&amp;ldquo;hello logrus&amp;rdquo;) logrus.WithField(logruns.Fields{&amp;ldquo;key1&amp;rdquo;:&amp;ldquo;v1&amp;rdquo;}).Info(&amp;ldquo;hello logrus&amp;rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p
+  选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(“hello logrus”) logrus.WithField(logruns.Fields{“key1”:“v1”}).Info(“hello logrus”) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">

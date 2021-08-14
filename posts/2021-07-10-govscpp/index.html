@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>我为什么从 C&#43;&#43; 转到了 Go | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C&#43;&#43;，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C&#43;&#43; 转到了 Go ? 为什么选择 C&#43;&#43; ？ 我本科毕业那会，Java 还没有那么卷，">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"我为什么从 C++ 转到了 Go",
+      "item":"https://www.haohongfan.com/posts/2021-07-10-govscpp/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-07-10-govscpp/"
+    },
+    "headline": "我为什么从 C\u002b\u002b 转到了 Go | HHFCodeRv","datePublished": "2021-07-10T23:27:21+08:00",
+    "dateModified": "2021-07-10T23:27:21+08:00",
+    "wordCount":  1410 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C\u002b\u002b，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C\u002b\u002b 转到了 Go ? 为什么选择 C\u002b\u002b ？ 我本科毕业那会，Java 还没有那么卷，"
+}
+</script><meta property="og:title" content="我为什么从 C&#43;&#43; 转到了 Go | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-07-10-govscpp/" />
+
+
+
+
+<meta property="og:description" content="为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C&#43;&#43;，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C&#43;&#43; 转到了 Go ? 为什么选择 C&#43;&#43; ？ 我本科毕业那会，Java 还没有那么卷，" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-07-10T23:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-07-10T23:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-map/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">我为什么从 C&#43;&#43; 转到了 Go</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-07-10</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>为什么突然发了一篇这样的文章呢？</p>
+<p>了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C++，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？</p>
+<p>很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。</p>
+<p>继续回到上面的话题：我为什么从 C++ 转到了 Go ?</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/govsc.png" alt=""></p>
+<h2 id="为什么选择-c-">为什么选择 C++ ？</h2>
+<p>我本科毕业那会，Java 还没有那么卷，SSH 还是主流，SpringBoot 还得往后再推几年才流行起来。C++ 那会还是毕业学生的首要选择：工资比 Java 稍高。</p>
+<p>嗯，因为这个原因，我也用大学仅有的 C++ 知识，拿到了一个当时看起来还不错的 offer。</p>
+<p>其实选择 C++ 还有个原因：我一直想去做游戏开发。不过遗憾的是当时不太懂如何找工作，拿到一个工资达到预期的 offer 就直接入职了。</p>
+<p>你可以会问：咋不跳槽去游戏行业呢？我也确实这么做了，但是在提离职的时候，经不住 TL 多次游说选择留下了，这可能是我最后悔的事情了。这个事情也给我现在一个重要的警示：当同事选择离职呢，没必要多次游说其留下，选择离开自然有选择离开的理由。</p>
+<h2 id="为什么放弃-c-呢">为什么放弃 C++ 呢？</h2>
+<p>嗯，主要原因就是找不到工作。</p>
+<p>最近在一个 Rust 群看到一个论点：Go 太卷了，主要因为门槛低。为什么没人去卷 rust，因为 rust 门槛高，卷需要很高的水平，如：操作系统你得烂熟于心，计算机基础，巴拉巴拉一大堆。</p>
+<p>其实这是不对的，一个语言卷不卷，不在于门槛有多高，而在于使用的人员基数有多大。我当时就说了一句：再往前推五年，谁去卷 Go 呀。</p>
+<p>C++ 同样的问题，越来越多的企业放弃使用 C++。</p>
+<p>目前留下使用 C++ 的公司基本都是传统行业（当然腾讯除外），这些行业能提供的工作岗位本身就不多。最严重的问题，很多传统行业解决的业务场景过于简单，导致很多技术栈都是跟互联网行业是脱节的，导致这些写 C++ 的同学根本就找不到互联网公司的工作。</p>
+<p>当然还有个很现实的问题：工资很低。</p>
+<p>说起来你可能不信，我写 C++ 那会连 redis 能干啥都不知道。面试前随便看了两眼就写简历上了，记得去面试汽车之家吧，面试官问我 redis 在我们业务中的使用场景，当场被拆穿。</p>
+<p>最近同样在一个群里看到这么个论点：我想学 epoll，我需要去学下 C++。其实大可不必，Go 底层已经把 epoll 封装好了，直接看 Go 源码就可以了。去看 C++ 的话，至少你是这个流程看下去：socket-&gt;select-&gt;poll-&gt;epoll-&gt;asio-&gt;libevent-&gt;libev，费力不讨好。而且这些年 C++11, C++17, C++2x 每个大版本都是不同的语言，C++ template 会看的你欲仙欲死，#define 看你云里雾里，何必呢。</p>
+<h2 id="我是如何转到-go-的">我是如何转到 Go 的？</h2>
+<p>其实接触到 Go 完全是巧合，大概是在 2014 年京东上搜了下 web 编程。其实我是想找前端的书的，搜出来的第一本是《go web 编程》。Go 是啥完全没听过，书皮真黄，就它吧。</p>
+<p>当时看 Go 语法是真的别扭，看了好几次，都记不住。印象最深的就是 channel 吧，真 TM 的怪，基本这本书就是看看停停，不过也没放弃，当然也去用 beego + bootstrap 写个 demo 炫耀了一番。</p>
+<p>一直在追的一个博客：coolshell.cn，大概 2015 年那会吧，在微博上还咨询过左耳朵耗子想去转 Go 的想法。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/coolshell2.png" alt=""></p>
+<p>当然那个时候 Go 还是小众语言，不过没想到的是这些年竟然被各大互联网公司接受。</p>
+<p>可能人生就是这么奇妙，可能你当初一个不起眼的操作，也可能是你未来的陌生手段。朝华易逝，唯有静心沉淀才能不负青春。</p>
+<p>欢迎关注公众号。更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/" class="block">interface 原理 - 类型转换</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="block">开发中的那些坑</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么选择-c-">为什么选择 C++ ？</a></li>
+    <li><a href="#为什么放弃-c-呢">为什么放弃 C++ 呢？</a></li>
+    <li><a href="#我是如何转到-go-的">我是如何转到 Go 的？</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/">开发中的那些坑</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/">最清晰易懂的 Go WaitGroup 源码剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/">这一次，彻底搞懂 Go Cond</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

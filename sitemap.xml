@@ -2,37 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.haohongfan.com/friends/friends/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://www.haohongfan.com/authors/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/categories/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/go/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/categories/go/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/golang/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/categories/golang/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/authors/hhf/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/</loc>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/posts/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/</loc>
-    <lastmod>2021-06-30T23:27:21+08:00</lastmod>
+    <lastmod>2021-08-10T23:27:21+08:00</lastmod>
   </url><url>
-    <loc>https://www.haohongfan.com/posts/2021-06-30-programer-design/</loc>
+    <loc>https://www.haohongfan.com/posts/2021-07-10-govscpp/</loc>
+    <lastmod>2021-07-10T23:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/</loc>
     <lastmod>2021-06-30T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/posts/2021-06-27-timer/</loc>
@@ -166,6 +175,9 @@
   </url><url>
     <loc>https://www.haohongfan.com/categories/php/</loc>
     <lastmod>2018-11-12T18:43:15+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/friends/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/mongodb/</loc>
     <lastmod>2018-09-30T20:47:53+08:00</lastmod>

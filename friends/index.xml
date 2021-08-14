@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Friends on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/friends/</link>
+    <description>Recent content in Friends on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://www.haohongfan.com/friends/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>好友推荐</title>
+      <link>https://www.haohongfan.com/friends/friends/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.haohongfan.com/friends/friends/</guid>
+      <description>三人行，必有我师。这里推荐我的一些大佬好友们。 GO 语言中文网 polarisxu 脑子进煎鱼了 码农桃花源 luozhiyun很酷 Xargin 奇伢云存储 远赴星辰 五分选手 Golang 梦工厂 Mohuishou Tangwz 的博客 kakus 的博客 吴亲强的深夜食堂 欧长坤的博客 爬虫与数据挖掘 董泽润的技术笔记</description>
+    </item>
+    
+  </channel>
+</rss>

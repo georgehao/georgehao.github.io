@@ -8,13 +8,31 @@
     <language>zh</language>
     <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
 </copyright>
-    <lastBuildDate>Wed, 30 Jun 2021 23:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/go/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 10 Aug 2021 23:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>interface 原理 - 类型转换</title>
+      <link>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/</link>
+      <pubDate>Tue, 10 Aug 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/</guid>
+      <description>hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配+汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主</description>
+    </item>
+    
+    <item>
+      <title>我为什么从 C&#43;&#43; 转到了 Go</title>
+      <link>https://www.haohongfan.com/posts/2021-07-10-govscpp/</link>
+      <pubDate>Sat, 10 Jul 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-07-10-govscpp/</guid>
+      <description>为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C++，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C++ 转到了 Go ? 为什么选择 C++ ？ 我本科毕业那会，Java 还没有那么卷，</description>
+    </item>
+    
     <item>
       <title>开发中的那些坑</title>
-      <link>https://www.haohongfan.com/posts/2021-06-30-programer-design/</link>
+      <link>https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/</link>
       <pubDate>Wed, 30 Jun 2021 23:27:21 +0800</pubDate>
       
-      <guid>https://www.haohongfan.com/posts/2021-06-30-programer-design/</guid>
+      <guid>https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/</guid>
       <description>本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不</description>
     </item>
     
