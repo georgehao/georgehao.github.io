@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>gin on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/categories/gin/</link>
+    <description>Recent content in gin on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Tue, 05 Oct 2021 23:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/gin/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gin 源码阅读(2) - http请求是如何流入gin的?</title>
+      <link>https://www.haohongfan.com/posts/2021-10-05-gin2/</link>
+      <pubDate>Tue, 05 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-05-gin2/</guid>
+      <description>本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？ 我们仍然以 net/http 的例子开始 func main() { http.HandleFunc(&amp;quot;/&amp;quot;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(&amp;quot;Hello World&amp;quot;)) }) if err := http.ListenAndServe(&amp;quot;:8000&amp;quot;, nil); err != nil { fmt.Println(&amp;quot;start http server fail:&amp;quot;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI &amp;ldquo;/&amp;rdquo; 被注册到了 DefaultServeMux 上。 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求</description>
+    </item>
+    
+    <item>
+      <title>gin 源码阅读(1) - gin 与 net/http 的关系</title>
+      <link>https://www.haohongfan.com/posts/2021-10-05-gin1/</link>
+      <pubDate>Tue, 05 Oct 2021 22:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-05-gin1/</guid>
+      <description>gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间</description>
+    </item>
+    
+  </channel>
+</rss>

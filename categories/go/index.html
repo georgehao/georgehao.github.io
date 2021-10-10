@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "interface 原理 - 类型转换",
-            "description": "hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配+汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主",
-            "url": "https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/"
+            "name": "Go 网络库 getty 的那些事",
+            "description": "个人从事互联网基础架构系统研发十年余，包括我自己在内的很多朋友都是轮子党。 2011 年我在某大厂干活时，很多使用 C 语言进行开发的同事都有一个自己的私人 SDK 库，尤其是网络通信库。个人刚融入这个环境时，觉得不能写一个基于 epoll/iocp/kqueue 接口封装一个异步网络通信库，会在同事面前矮人三分。现在想起来当时很多同事很大胆，把自己封装的通信库直接在测试生产环境上线使用，据说那时候整个公",
+            "url": "https://www.haohongfan.com/posts/2021-10-07-getty/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "我为什么从 C++ 转到了 Go",
-            "description": "为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C++，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C++ 转到了 Go ? 为什么选择 C++ ？ 我本科毕业那会，Java 还没有那么卷，",
-            "url": "https://www.haohongfan.com/posts/2021-07-10-govscpp/"
+            "name": "聊聊我对 GraphQL 的一些认知",
+            "description": "每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我",
+            "url": "https://www.haohongfan.com/posts/2021-10-06-graphql/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "开发中的那些坑",
-            "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不",
-            "url": "https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"
+            "name": "gin 源码阅读(3) - gin 路由的实现剖析",
+            "description": "hi, 大家好，我是 hhf。 往期回顾： gin 源码阅读(1) - gin 与 net/http 的关系 gin 源码阅读(2) - http请求是如何流入gin的? 上面两篇文章基本讲清楚了 Web Server 如何接收客户端请求，以及如何将请求流转到 gin 的逻辑。建议没有看过的同学先从第一篇阅读。 gin 原理剖析说到这里，就完全进入 gin 的逻辑里面了。gin 已经拿到 http 请求了，第一件重要的事情肯定就是重写路由了，所以本节内容主要是分",
+            "url": "https://www.haohongfan.com/posts/2021-10-05-gin3/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "Go timer 是如何被调度的",
-            "description": "Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时",
-            "url": "https://www.haohongfan.com/posts/2021-06-27-timer/"
+            "name": "gin 源码阅读(2) - http请求是如何流入gin的?",
+            "description": "本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？ 我们仍然以 net/http 的例子开始 func main() { http.HandleFunc(\u0026quot;/\u0026quot;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(\u0026quot;Hello World\u0026quot;)) }) if err := http.ListenAndServe(\u0026quot;:8000\u0026quot;, nil); err != nil { fmt.Println(\u0026quot;start http server fail:\u0026quot;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI \u0026ldquo;/\u0026rdquo; 被注册到了 DefaultServeMux 上。 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求",
+            "url": "https://www.haohongfan.com/posts/2021-10-05-gin2/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "Go sync.Pool 浅析",
-            "description": "hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个",
-            "url": "https://www.haohongfan.com/posts/2021-05-22-sync-pool/"
+            "name": "gin 源码阅读(1) - gin 与 net/http 的关系",
+            "description": "gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间",
+            "url": "https://www.haohongfan.com/posts/2021-10-05-gin1/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-07T23:27:21&#43;08:00" />
 
 
 
@@ -238,20 +238,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/" class="font-bold text-xl hover:text-eureka">interface 原理 - 类型转换</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-07-getty/" class="font-bold text-xl hover:text-eureka">Go 网络库 getty 的那些事</a>
 </div>
 <div class="content">
-  hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配&#43;汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主
+  个人从事互联网基础架构系统研发十年余，包括我自己在内的很多朋友都是轮子党。 2011 年我在某大厂干活时，很多使用 C 语言进行开发的同事都有一个自己的私人 SDK 库，尤其是网络通信库。个人刚融入这个环境时，觉得不能写一个基于 epoll/iocp/kqueue 接口封装一个异步网络通信库，会在同事面前矮人三分。现在想起来当时很多同事很大胆，把自己封装的通信库直接在测试生产环境上线使用，据说那时候整个公
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-08-10</span>
+        <span>2021-10-07</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
+        <span>17分钟阅读时长</span>
     </div>
     
     
@@ -259,10 +259,6 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -281,20 +277,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/" class="font-bold text-xl hover:text-eureka">我为什么从 C&#43;&#43; 转到了 Go</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/" class="font-bold text-xl hover:text-eureka">聊聊我对 GraphQL 的一些认知</a>
 </div>
 <div class="content">
-  为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C&#43;&#43;，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C&#43;&#43; 转到了 Go ? 为什么选择 C&#43;&#43; ？ 我本科毕业那会，Java 还没有那么卷，
+  每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-07-10</span>
+        <span>2021-10-06</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
+        <span>9分钟阅读时长</span>
     </div>
     
     
@@ -305,7 +301,11 @@
         
         
         <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        <a href="https://www.haohongfan.com/categories/graphql/" class="hover:text-eureka">graphql</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/bff/" class="hover:text-eureka">bff</a>
         
     </div>
     
@@ -324,59 +324,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="font-bold text-xl hover:text-eureka">开发中的那些坑</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/" class="font-bold text-xl hover:text-eureka">gin 源码阅读(3) - gin 路由的实现剖析</a>
 </div>
 <div class="content">
-  本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不
+  hi, 大家好，我是 hhf。 往期回顾： gin 源码阅读(1) - gin 与 net/http 的关系 gin 源码阅读(2) - http请求是如何流入gin的? 上面两篇文章基本讲清楚了 Web Server 如何接收客户端请求，以及如何将请求流转到 gin 的逻辑。建议没有看过的同学先从第一篇阅读。 gin 原理剖析说到这里，就完全进入 gin 的逻辑里面了。gin 已经拿到 http 请求了，第一件重要的事情肯定就是重写路由了，所以本节内容主要是分
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-06-30</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-06-27-timer/" class="font-bold text-xl hover:text-eureka">Go timer 是如何被调度的</a>
-</div>
-<div class="content">
-  Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-06-27</span>
+        <span>2021-10-05</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -397,12 +354,52 @@
     
 
     
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/" class="font-bold text-xl hover:text-eureka">gin 源码阅读(2) - http请求是如何流入gin的?</a>
+</div>
+<div class="content">
+  本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？ 我们仍然以 net/http 的例子开始 func main() { http.HandleFunc(&#34;/&#34;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(&#34;Hello World&#34;)) }) if err := http.ListenAndServe(&#34;:8000&#34;, nil); err != nil { fmt.Println(&#34;start http server fail:&#34;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI “/” 被注册到了 DefaultServeMux 上。 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
-        <i class="fas fa-th-list mr-1"></i>
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-05</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/gin/" class="hover:text-eureka">gin</a>
         
     </div>
+    
+
     
 </div>
 
@@ -417,16 +414,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" class="font-bold text-xl hover:text-eureka">Go sync.Pool 浅析</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/" class="font-bold text-xl hover:text-eureka">gin 源码阅读(1) - gin 与 net/http 的关系</a>
 </div>
 <div class="content">
-  hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个
+  gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-04-01</span>
+        <span>2021-10-05</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -443,16 +440,13 @@
         <span>, </span>
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/gin/" class="hover:text-eureka">gin</a>
+        
     </div>
     
 
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-th-list mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
-        
-    </div>
     
 </div>
 
@@ -481,10 +475,16 @@
     <a class="page-link" href="/categories/go/page/2/">2</a>
   </li>
   <li class="page-item">
+    <a class="page-link" href="/categories/go/page/3/">3</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" href="/categories/go/page/4/">4</a>
+  </li>
+  <li class="page-item">
     <a href="/categories/go/page/2/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/categories/go/page/2/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/go/page/4/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Bilibili Kratos 框架源码分析(3) -- fanout异步",
-            "description": "在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = \u0026amp;dao{ ... cache: fanout.New(\u0026quot;cache\u0026quot;), ... } cf = d.Close return }",
-            "url": "https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/"
+            "name": "这一次，彻底搞懂 Go Cond",
+            "description": "hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( \u0026quot;fmt\u0026quot; \u0026quot;time\u0026quot; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done \u0026lt;- 1 }() fmt.Println(\u0026quot;waiting\u0026quot;) \u0026lt;-done fmt.Println(\u0026quot;done\u0026quot;) } 同样可以使用 sync.Cond 来实现 package main import ( \u0026quot;fmt\u0026quot; \u0026quot;sync\u0026quot; \u0026quot;time\u0026quot; ) func main() { cond := sync.NewCond(\u0026amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag",
+            "url": "https://www.haohongfan.com/posts/2021-05-10-sync-cond/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
-            "description": "本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\u0026quot;/kratos-demo\u0026quot;) { g.GET(\u0026quot;/start\u0026quot;, howToStart) g.GET(\u0026quot;/sayHi\u0026quot;, sayHi) g.GET(\u0026quot;/sayHello\u0026quot;, func(context *bm.Context) { svc.SayHello(context, \u0026amp;pb.HelloReq{ Name: \u0026quot;test\u0026quot;, }) context.JSON(\u0026quot;success\u0026quot;, nil) }) } v2Group := e.Group(\u0026quot;/kratos-demo/v2\u0026quot;) { v2Group.GET(\u0026quot;/sayHi\u0026quot;, sayHi) }",
-            "url": "https://www.haohongfan.com/posts/2020-05-16-kratos-demo/"
+            "name": "这可能是最容易理解的 Go Mutex 源码剖析",
+            "description": "Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争",
+            "url": "https://www.haohongfan.com/posts/2021-04-01-mutex/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "Bilibili Kratos 框架源码分析(1) -- 启动流程",
-            "description": "这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on \u0026amp;\u0026amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,",
-            "url": "https://www.haohongfan.com/posts/2020-05-08-kratos-flow/"
+            "name": "一文完全掌握 Go math/rand",
+            "description": "Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i \u0026lt; rngLen; i++ { x = seedrand(x) if i \u0026gt;= 0 { var u int64 u = int64(x) \u0026lt;\u0026lt; 40 x = seedrand(x) u ^= int64(x) \u0026lt;\u0026lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设",
+            "url": "https://www.haohongfan.com/posts/2021-01-23-rand/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "一次错误使用 go-cache 导致出现的线上问题",
-            "description": "话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说",
-            "url": "https://www.haohongfan.com/posts/2020-03-11-go-cache/"
+            "name": "你真的懂 golang reslice 吗",
+            "description": "package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(\u0026quot;a[1:]\u0026quot;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体",
+            "url": "https://www.haohongfan.com/posts/2020-10-20-golang-slice/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "打造 Zap 开箱即用日志组件",
-            "description": "logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap",
-            "url": "https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/"
+            "name": "限流器系列(3)--自适应限流",
+            "description": "漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找",
+            "url": "https://www.haohongfan.com/posts/2020-07-05-bbr/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-05T23:47:21&#43;08:00" />
 
 
 
@@ -238,20 +238,170 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
+  <a href="https://www.haohongfan.com/posts/2021-05-10-sync-cond/" class="font-bold text-xl hover:text-eureka">这一次，彻底搞懂 Go Cond</a>
 </div>
 <div class="content">
-  在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = &amp;dao{ ... cache: fanout.New(&#34;cache&#34;), ... } cf = d.Close return }
+  hi，大家好，我是 haohongfan。 本篇文章会从源码角度去深入剖析下 sync.Cond。Go 日常开发中 sync.Cond 可能是我们用的较少的控制并发的手段，因为大部分场景下都被 Channel 代替了。还有就是 sync.Cond 使用确实也蛮复杂的。 比如下面这段代码： package main import ( &#34;fmt&#34; &#34;time&#34; ) func main() { done := make(chan int, 1) go func() { time.Sleep(5 * time.Second) done &lt;- 1 }() fmt.Println(&#34;waiting&#34;) &lt;-done fmt.Println(&#34;done&#34;) } 同样可以使用 sync.Cond 来实现 package main import ( &#34;fmt&#34; &#34;sync&#34; &#34;time&#34; ) func main() { cond := sync.NewCond(&amp;sync.Mutex{}) var flag bool go func() { time.Sleep(time.Second * 5) cond.L.Lock() flag
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2020-05-22</span>
+        <span>2021-04-01</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-04-01-mutex/" class="font-bold text-xl hover:text-eureka">这可能是最容易理解的 Go Mutex 源码剖析</a>
+</div>
+<div class="content">
+  Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>7分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-01-23-rand/" class="font-bold text-xl hover:text-eureka">一文完全掌握 Go math/rand</a>
+</div>
+<div class="content">
+  Go 获取随机数是开发中经常会用到的功能, 不过这个里面还是有一些坑存在的, 本文将完全剖析 Go math/rand, 让你轻松使用 Go Rand. 开篇一问: 你觉得 rand 会 panic 吗 ? 源码剖析 math/rand 源码其实很简单, 就两个比较重要的函数 func (rng *rngSource) Seed(seed int64) { rng.tap = 0 rng.feed = rngLen - rngTap //... x := int32(seed) for i := -20; i &lt; rngLen; i&#43;&#43; { x = seedrand(x) if i &gt;= 0 { var u int64 u = int64(x) &lt;&lt; 40 x = seedrand(x) u ^= int64(x) &lt;&lt; 20 x = seedrand(x) u ^= int64(x) u ^= rngCooked[i] rng.vec[i] = u } } } 这个函数就是在设置 seed, 其实就是对 rng.vec 各个位置设
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-01-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2020-10-20-golang-slice/" class="font-bold text-xl hover:text-eureka">你真的懂 golang reslice 吗</a>
+</div>
+<div class="content">
+  package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(&#34;a[1:]&#34;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2020-10-20</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
     </div>
     
     
@@ -259,10 +409,6 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
         
     </div>
     
@@ -281,59 +427,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
+  <a href="https://www.haohongfan.com/posts/2020-07-05-bbr/" class="font-bold text-xl hover:text-eureka">限流器系列(3)--自适应限流</a>
 </div>
 <div class="content">
-  本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&#34;/kratos-demo&#34;) { g.GET(&#34;/start&#34;, howToStart) g.GET(&#34;/sayHi&#34;, sayHi) g.GET(&#34;/sayHello&#34;, func(context *bm.Context) { svc.SayHello(context, &amp;pb.HelloReq{ Name: &#34;test&#34;, }) context.JSON(&#34;success&#34;, nil) }) } v2Group := e.Group(&#34;/kratos-demo/v2&#34;) { v2Group.GET(&#34;/sayHi&#34;, sayHi) }
+  漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2020-05-16</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-05-08-kratos-flow/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(1) -- 启动流程</a>
-</div>
-<div class="content">
-  这里先吐槽一下 kratos 官方 wiki 写的实在不咋地, 一些很基本的使用方法, 一些很好的功能都没有体现出现, 同时也建议多去 github issue 里去找找答案, 那里面比 wiki 详细很多. 这个系列的文章我会基于 v0.4.2 这个版本的源码进行. 现在正式进入这个系列源码的第一篇: Kratos 启动流程 安装 kratos 至于如何安装 kratos, 请参考 官方wiki, Kratos 官方推荐方式: GO111MODULE=on &amp;&amp; go get -u github.com/go-kratos/kratos/tool/kratos, 不过有可能你依然无法安装成功. 特别是 bilibili/kratos 迁移到 go-kratos/kratos 之后,
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2020-05-08</span>
+        <span>2020-08-23</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -349,84 +452,6 @@
         
         <span>, </span>
         <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/" class="font-bold text-xl hover:text-eureka">一次错误使用 go-cache 导致出现的线上问题</a>
-</div>
-<div class="content">
-  话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2020-03-11</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" class="font-bold text-xl hover:text-eureka">打造 Zap 开箱即用日志组件</a>
-</div>
-<div class="content">
-  logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2019-12-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -471,13 +496,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/8/">8</a>
+    <a class="page-link" href="/categories/golang/page/9/">9</a>
   </li>
   <li class="page-item">
     <a href="/categories/golang/page/5/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/categories/golang/page/8/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/golang/page/9/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

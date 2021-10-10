@@ -8,7 +8,16 @@
     <language>zh</language>
     <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
 </copyright>
-    <lastBuildDate>Wed, 19 Sep 2018 16:44:46 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/graphql/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 06 Oct 2021 21:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/categories/graphql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>聊聊我对 GraphQL 的一些认知</title>
+      <link>https://www.haohongfan.com/posts/2021-10-06-graphql/</link>
+      <pubDate>Wed, 06 Oct 2021 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-06-graphql/</guid>
+      <description>每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我</description>
+    </item>
+    
     <item>
       <title>Graphql最大复杂度和最大深度设置</title>
       <link>https://www.haohongfan.com/posts/2018-09-19-graphql-maxth-depth/</link>

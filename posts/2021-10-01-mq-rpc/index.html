@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>开发中的坑2：MQ 也能做 RPC 调用？ | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"开发中的坑2：MQ 也能做 RPC 调用？",
+      "item":"https://www.haohongfan.com/posts/2021-10-01-mq-rpc/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-10-01-mq-rpc/"
+    },
+    "headline": "开发中的坑2：MQ 也能做 RPC 调用？ | HHFCodeRv","datePublished": "2021-10-01T23:27:21+08:00",
+    "dateModified": "2021-10-01T23:27:21+08:00",
+    "wordCount":  1749 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud"
+}
+</script><meta property="og:title" content="开发中的坑2：MQ 也能做 RPC 调用？ | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" />
+
+
+
+
+<meta property="og:description" content="hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-10-01T23:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-10-01T23:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="goland" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-02-goland1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-07-10-govscpp/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">开发中的坑2：MQ 也能做 RPC 调用？</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>hi, 大家好，我是 haohongfan。</p>
+<p>最近浏览 <a href="https://www.toutiao.com/w/a1702697615869956/" title="帖子">帖子</a> 的时候看到一个有意思的吐槽。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/mq_rpc100.png" alt=""></p>
+<p>大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？</p>
+<p>当然不出意外的，评论区炸了！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/mq_rpc_haojiah.png" alt=""></p>
+<p>现在提出一些疑问：</p>
+<ul>
+<li>这个架构师的做法对吗 ？</li>
+<li>MQ 是否能做 RPC 调用 ？</li>
+</ul>
+<h2 id="rpc-框架的职责">RPC 框架的职责</h2>
+<p>回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。</p>
+<ul>
+<li>Java: SpringCloud，Dubbo 等</li>
+<li>Go: Dubbogo，go-micro，rpcx，go-zero 等</li>
+<li>其他：Thrift，gRPC 等</li>
+</ul>
+<p>当然还有其他的一些框架，这里就不再罗列。虽说 RPC 多如牛毛，但是大家干的事情基本都差不多，都是稳定，高效、准确的进行服务间远程调用。</p>
+<p>说起 RPC 应该大部分人下意识会联想到 gRPC，不过 gRPC 只提供的了服务间通信的能力，但却没有开源对应的服务治理的能力，需要进行二次开发。Thrift 也是同样的问题。</p>
+<p>下面以 Dubbogo 为例，大概介绍下 Dubbogo 实现的功能。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/dubbgozhili1.png" alt=""></p>
+<p>Dubbo-go 还有下面这些特点：</p>
+<ul>
+<li>传输支持 http2</li>
+<li>双向流模式 rpc</li>
+<li>应用级服务发现</li>
+<li>跟 Dubbo(Java) 版本对齐，互相之间能稳定通信，同时也打通与其他微服务框架的通信，如：SpringCloud、gRPC</li>
+</ul>
+<p>综上，Dubbo-go 为了保证数据准确、高效、稳定传输，做了各种各样的架构设计。随着 dubbo 3.0 的发布，在易用性、超大规模微服务实践、云原生基础设施适配等几大方向上进行了全面升级。</p>
+<h2 id="mq-代替-rpc-">MQ 代替 RPC ？</h2>
+<p>接着说 MQ 是否能替代 RPC。先看看 MQ 被写进八股文里面的几大特性：</p>
+<ul>
+<li>服务间解耦</li>
+<li>最终一致性</li>
+<li>流量削峰</li>
+<li>异步消费</li>
+</ul>
+<p>MQ 是微服务框架中必不可少的一环，上面的特性是我们日常开发中最常用的。这些特性确实能让系统的稳定性得到增强，同时也让系统的构建出现更多的可能性。</p>
+<p>但是是否能让 MQ 来代替 RPC，做服务间的调用？回答这个问题之前，我们再来看看 RPC 是如何工作的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/rpc_flow1.png" alt=""></p>
+<p>大概流程（资料节选 <a href="https://dubbo.apache.org/zh/blog/2019/01/07/%E6%B5%85%E8%B0%88-rpc/" title="dubbogo website">dubbogo website</a>)</p>
+<ul>
+<li>类似本地调用，Client 调用远程服务</li>
+<li>Client stub 收到调用，把调用方法、参数序列化</li>
+<li>Client 通过 socket 把消息发送到服务端</li>
+<li>Server stub 收到消息后，将消息对象反序列化</li>
+<li>Server stub 根据解码结果调用本地的服务，并将结果返回给 Server stub</li>
+<li>Server stub 将返回结果序列化，通过 sockets 将消息发送到客户端</li>
+<li>Client stub 接收到结果消息，对返回消息反序列化</li>
+<li>客户端得到最终结果</li>
+</ul>
+<p>简单概括下 RPC 调用就是 Client 通过 TCP 调用 Server 的一个函数，得到一个返回结果。</p>
+<p>再简单点，是不是可以拆分下面两个过程：</p>
+<ol>
+<li>Client 发起一个调用到 Server</li>
+<li>Server 返回一个结果到 Client</li>
+</ol>
+<p>那么是不是可以用 MQ 模拟这个过程。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/mq_rpc_flow3.png" alt=""></p>
+<p>当然这个流程并不是我瞎写的，这是 RabbitMQ 的官方教程 <a href="https://www.rabbitmq.com/tutorials/tutorial-six-python.html" title="Remote procedure call (RPC)">Remote procedure call (RPC)</a>，有兴趣的可以看文末的参考链接。</p>
+<p>RabbitMQ tutorial 这篇文章基本就是 MQ 代替 RPC 的理论支持，所以文章开篇帖子提到的 Java 架构师的方案也不算无的放矢，也不算是错的。</p>
+<h2 id="mq-代替-rpc-的真实情况">MQ 代替 RPC 的真实情况</h2>
+<p>正常情况有点规模互联网公司内部都是会有一套 RPC 框架的，要么是基于开源版本的二次开发版本，要么完全自研的，使用过或者维护公司框架的都会被各种问题折磨到死，比如：限流、熔断、重试、服务注册发现、网络问题，SDK 升级等。</p>
+<p>如果能用 MQ 代替 RPC 做服务间调用，那是不是只用维护一套 MQ 基础组件就可以了，既减少了人力的配置，又能将问题归纳。</p>
+<p>理想很丰满，真相往往却很残酷。</p>
+<p>如果你下意识去搜一下：用 MQ 代替 RPC 进行服务间通信，你会发现网上只有寥寥几个 Demo 而已，并没有太多真实实践。</p>
+<p><strong>没有太多实践</strong> 并不代表没有人在项目中实战过，比如那个 Java 架构师。曾经专门向朋友请教过这个设计，话说某大厂曾经在某个项目做了 MQ 代替 RPC 的实践，但是三个月不到这个项目就被毙了。所以你看不到这个设计方案的缺点：因为很多人不能把失败的案例放出来而已。</p>
+<p>简单说下这个方案的缺点吧：</p>
+<ul>
+<li>本来 <strong>一次</strong> TCP 通信就搞定的事情，用 MQ 后会被拆分成至少 <strong>二次</strong> TCP，耗时增加不少。</li>
+<li>目前 MQ 大部分消费端是 Pull 模型，有一定的耗时成本</li>
+<li>服务间调用完全依赖于 MQ 的稳定性。从目前使用 MQ 经验来看，MQ 稳定性的维护成本比 RPC 复杂太多了。如果做异步调用还能容忍出错、延时，做同步调用的话，这些都是不能忽略的问题</li>
+<li>如果用 MQ 代替 RPC，那些 RPC 框架做的服务治理的事情，MQ 都需要实现一遍，工作量并没有减少</li>
+<li>。。。</li>
+</ul>
+<p>现在说一下统一结论：</p>
+<p>用 MQ 代替 RPC 只是一种理论，但是高可用无法保障，而且对业务开发来说就更加黑盒了，出现问题就只能干瞪眼了，不建议业务开发实践。</p>
+<p>更多的坑，后续更新，欢迎关注公众号。更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/goland/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#goland</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-02-goland1/" class="block">Goland 这些实操技巧，你可能还不会！</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/" class="block">interface 原理 - 类型转换</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#rpc-框架的职责">RPC 框架的职责</a></li>
+    <li><a href="#mq-代替-rpc-">MQ 代替 RPC ？</a></li>
+    <li><a href="#mq-代替-rpc-的真实情况">MQ 代替 RPC 的真实情况</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-02-goland1/">Goland 这些实操技巧，你可能还不会！</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/">interface 原理 - 类型转换</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/">我为什么从 C&#43;&#43; 转到了 Go</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/">开发中的那些坑</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

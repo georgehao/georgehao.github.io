@@ -70,15 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "nginx代理wordpress无法访问的问题",
-            "description": "先说说我遇到的问题, 这简直就是坑中之王. 最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了. 无论我怎么在浏览器中输入",
-            "url": "https://www.haohongfan.com/posts/2017-07-19-wordpress_error/"
+            "name": "使用System V信号量同步引起的Interrupted system call坑",
+            "description": "使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程. 本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了. 先看Monitor代码: 然后gdb去调试的时候, 总是出现 我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样",
+            "url": "https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "mongodb联表查询",
-            "description": "picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的",
-            "url": "https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/"
+            "name": "修改系统时间导致的坑",
+            "description": "有一天测试人员对我说, 我怎么测试10点开站会这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧. 好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来. 程序总是在这个函数中阻塞住. 为什么会",
+            "url": "https://www.haohongfan.com/index.php/2017/08/25/system_time/"
+        },{
+            "@type":"ListItem",
+            "position":  3 ,
+            "name": "记一次线程不同步的坑",
+            "description": "这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-\u0026gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()\" 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有",
+            "url": "https://www.haohongfan.com/index.php/2017/08/25/thread_error/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "Golang Label使用方法",
+            "description": "写C/C++的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C++代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La",
+            "url": "https://www.haohongfan.com/posts/2017-08-10-label/"
+        },{
+            "@type":"ListItem",
+            "position":  5 ,
+            "name": "golang面向对象分析",
+            "description": "说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一",
+            "url": "https://www.haohongfan.com/posts/2017-07-24-golang_oop/"
         }
     ]
 }
@@ -113,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-07T23:27:21&#43;08:00" />
 
 
 
@@ -205,16 +223,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-07-19-wordpress_error/" class="font-bold text-xl hover:text-eureka">nginx代理wordpress无法访问的问题</a>
+  <a href="https://www.haohongfan.com/index.php/2017/08/25/ipc_interrupted_system_call/" class="font-bold text-xl hover:text-eureka">使用System V信号量同步引起的Interrupted system call坑</a>
 </div>
 <div class="content">
-  先说说我遇到的问题, 这简直就是坑中之王. 最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了. 无论我怎么在浏览器中输入
+  使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程. 本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了. 先看Monitor代码: 然后gdb去调试的时候, 总是出现 我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2017-07-19</span>
+        <span>2017-08-25</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -225,7 +243,7 @@
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/ops/" class="hover:text-eureka">ops</a>
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
         
     </div>
     
@@ -244,27 +262,144 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-06-17-mongodb_joint_query/" class="font-bold text-xl hover:text-eureka">mongodb联表查询</a>
+  <a href="https://www.haohongfan.com/index.php/2017/08/25/system_time/" class="font-bold text-xl hover:text-eureka">修改系统时间导致的坑</a>
 </div>
 <div class="content">
-  picture_books表 bookshelfs表 现在下面的需求: bookshelf表的绘本列表展示(分页) picture_book的status为1的需要为一组, 且按照时间排序 picture_book的status不为1需要分为一组, 且按照时间排序 Note: 数据库: mongodb 关系: bookshelf通过bookshelfabld_id和picture_book的
+  有一天测试人员对我说, 我怎么测试10点开站会这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧. 好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来. 程序总是在这个函数中阻塞住. 为什么会
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2017-06-17</span>
+        <span>2017-08-25</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
+        <span>1分钟阅读时长</span>
     </div>
     
     
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/index.php/2017/08/25/thread_error/" class="font-bold text-xl hover:text-eureka">记一次线程不同步的坑</a>
+</div>
+<div class="content">
+  这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()&#34; 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-25</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>1分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2017-08-10-label/" class="font-bold text-xl hover:text-eureka">Golang Label使用方法</a>
+</div>
+<div class="content">
+  写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-08-10</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2017-07-24-golang_oop/" class="font-bold text-xl hover:text-eureka">golang面向对象分析</a>
+</div>
+<div class="content">
+  说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2017-07-24</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>6分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -308,11 +443,14 @@
   <li class="page-item active">
     <a class="page-link" href="/posts/page/12/">12</a>
   </li>
-  <li class="page-item disabled">
-    <a  class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  <li class="page-item">
+    <a class="page-link" href="/posts/page/13/">13</a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/12/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/13/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/posts/page/13/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

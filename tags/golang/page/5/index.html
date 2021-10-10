@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Logrus源码阅读(2)--logrus生命周期",
-            "description": "Eureka is a elegant and powerful theme for Hugo.",
-            "url": "https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"
+            "name": "限流器系列(2) -- Token Bucket 令牌桶",
+            "description": "上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket \u0026ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器",
+            "url": "https://www.haohongfan.com/posts/2020-06-30-token-bucket/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "Golang是否真的没有指针运算?",
-            "description": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := \u0026amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(\u0026quot;p1: \u0026quot;, *p1) // 1 fmt.Printf(\u0026quot;p1 address:%p\\n\u0026quot;, p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题) #include\u0026lt;stdio.h\u0026gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026amp;a+1); printf(\u0026quot;%d,%d\u0026quot;,*(a+1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量",
-            "url": "https://www.haohongfan.com/posts/2019-07-22-golang-pointer/"
+            "name": "限流器系列(1) -- Leaky Bucket 漏斗桶",
+            "description": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check",
+            "url": "https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "Logrus源码阅读(1)--基本用法",
-            "description": "选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(\u0026ldquo;hello logrus\u0026rdquo;) logrus.WithField(logruns.Fields{\u0026ldquo;key1\u0026rdquo;:\u0026ldquo;v1\u0026rdquo;}).Info(\u0026ldquo;hello logrus\u0026rdquo;) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p",
-            "url": "https://www.haohongfan.com/posts/2019-06-11-logurs-1/"
+            "name": "Bilibili Kratos 框架源码分析(4) -- Kratos Log",
+            "description": "用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = \u0026quot;xxx-service\u0026quot; dir = \u0026quot;/data/log/xxx-service/\u0026quot; stdout = true v = 3 filter = [\u0026quot;fileld1\u0026quot;, \u0026quot;field2\u0026quot;] [log.module] \u0026quot;dao_user\u0026quot; = 2 \u0026quot;servic*\u0026quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var",
+            "url": "https://www.haohongfan.com/posts/2020-06-09-kratos-log/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "一次golang deadlock的讨论",
-            "description": "背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果 // 程序1 func main() { fmt.Println(\u0026quot;running, not deadlock\u0026quot;) server, err := net.Listen(\u0026quot;tcp\u0026quot;, \u0026quot;127.0.0.1:9001\u0026quot;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(\u0026quot;server\u0026quot;) } fmt.Printf(\u0026quot;Received connection from %s.\\n\u0026quot;, connection.RemoteAddr()) waitQueue \u0026lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue \u0026lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误 如下面这个例子 // 程序",
-            "url": "https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/"
+            "name": "Bilibili Kratos 框架源码分析(3) -- fanout异步",
+            "description": "在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = \u0026amp;dao{ ... cache: fanout.New(\u0026quot;cache\u0026quot;), ... } cf = d.Close return }",
+            "url": "https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "我所理解的Sync Pool",
-            "description": "看gin源码时发现了sync.Pool的使用 // gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度",
-            "url": "https://www.haohongfan.com/posts/2019-05-26-sync-pool/"
+            "name": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
+            "description": "本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\u0026quot;/kratos-demo\u0026quot;) { g.GET(\u0026quot;/start\u0026quot;, howToStart) g.GET(\u0026quot;/sayHi\u0026quot;, sayHi) g.GET(\u0026quot;/sayHello\u0026quot;, func(context *bm.Context) { svc.SayHello(context, \u0026amp;pb.HelloReq{ Name: \u0026quot;test\u0026quot;, }) context.JSON(\u0026quot;success\u0026quot;, nil) }) } v2Group := e.Group(\u0026quot;/kratos-demo/v2\u0026quot;) { v2Group.GET(\u0026quot;/sayHi\u0026quot;, sayHi) }",
+            "url": "https://www.haohongfan.com/posts/2020-05-16-kratos-demo/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-05T23:47:21&#43;08:00" />
 
 
 
@@ -238,20 +238,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/" class="font-bold text-xl hover:text-eureka">Logrus源码阅读(2)--logrus生命周期</a>
+  <a href="https://www.haohongfan.com/posts/2020-06-30-token-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(2) -- Token Bucket 令牌桶</a>
 </div>
 <div class="content">
-  
+  上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket – 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-10-05</span>
+        <span>2020-06-30</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>12分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
@@ -259,6 +259,10 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
         
     </div>
     
@@ -277,20 +281,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-07-22-golang-pointer/" class="font-bold text-xl hover:text-eureka">Golang是否真的没有指针运算?</a>
+  <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
 </div>
 <div class="content">
-  答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看) func main() { a1 := []int{1, 2, 3} p1 := &amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&#34;p1: &#34;, *p1) // 1 fmt.Printf(&#34;p1 address:%p\n&#34;, p1) // 0xc00009a000 p1 = p1 &#43; 1 } invalid operation: p1 &#43; 1 (mismatched types *int and int) C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题) #include&lt;stdio.h&gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;a&#43;1); printf(&#34;%d,%d&#34;,*(a&#43;1),*(ptr-1)); } 这题的结果是: 2和5 可惜高兴的太早了. golang虽说指针变量
+  限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-07-22</span>
+        <span>2020-06-27</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>6分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
@@ -298,6 +302,10 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
         
     </div>
     
@@ -316,20 +324,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-06-11-logurs-1/" class="font-bold text-xl hover:text-eureka">Logrus源码阅读(1)--基本用法</a>
+  <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
 </div>
 <div class="content">
-  选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下 整体结构图 整体来看总共提供两种方式调用: logrus.Info(“hello logrus”) logrus.WithField(logruns.Fields{“key1”:“v1”}).Info(“hello logrus”) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的p
+  用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &#34;xxx-service&#34; dir = &#34;/data/log/xxx-service/&#34; stdout = true v = 3 filter = [&#34;fileld1&#34;, &#34;field2&#34;] [log.module] &#34;dao_user&#34; = 2 &#34;servic*&#34; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-07-16</span>
+        <span>2020-06-09</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
@@ -337,6 +345,10 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
         
     </div>
     
@@ -355,16 +367,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-07-11-deadlock-detector/" class="font-bold text-xl hover:text-eureka">一次golang deadlock的讨论</a>
+  <a href="https://www.haohongfan.com/posts/2020-05-22-kratos-fanout/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(3) -- fanout异步</a>
 </div>
 <div class="content">
-  背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果 // 程序1 func main() { fmt.Println(&#34;running, not deadlock&#34;) server, err := net.Listen(&#34;tcp&#34;, &#34;127.0.0.1:9001&#34;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(&#34;server&#34;) } fmt.Printf(&#34;Received connection from %s.\n&#34;, connection.RemoteAddr()) waitQueue &lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue &lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误 如下面这个例子 // 程序
+  在写项目代码时如果遇到需要异步处理时, 如异步更新 redis, 异步比对数据等等, 我们的常规处理一般是 MQ. 但有的时候我们的操作其实很简单, 写 MQ 显得又太重了, 那么该如何在程序里实现一个异步功能? 本篇文章就介绍下 Kratos 官方 wiki 没有提到的功能 Fanout. 其实Fanout 在 生成的 kratos-demo 里面是有体现的, 只是没有使用 demo 而已 type dao struct { ... cache *fanout.Fanout ... } func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) { ... d = &amp;dao{ ... cache: fanout.New(&#34;cache&#34;), ... } cf = d.Close return }
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-07-11</span>
+        <span>2020-05-22</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -377,6 +389,10 @@
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        
     </div>
     
 
@@ -394,20 +410,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-05-26-sync-pool/" class="font-bold text-xl hover:text-eureka">我所理解的Sync Pool</a>
+  <a href="https://www.haohongfan.com/posts/2020-05-16-kratos-demo/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子</a>
 </div>
 <div class="content">
-  看gin源码时发现了sync.Pool的使用 // gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了 因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度
+  本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节 http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用 如何添加一个新的 api 接口? // internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&#34;/kratos-demo&#34;) { g.GET(&#34;/start&#34;, howToStart) g.GET(&#34;/sayHi&#34;, sayHi) g.GET(&#34;/sayHello&#34;, func(context *bm.Context) { svc.SayHello(context, &amp;pb.HelloReq{ Name: &#34;test&#34;, }) context.JSON(&#34;success&#34;, nil) }) } v2Group := e.Group(&#34;/kratos-demo/v2&#34;) { v2Group.GET(&#34;/sayHi&#34;, sayHi) }
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-06-08</span>
+        <span>2020-05-16</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
@@ -415,6 +431,10 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
         
     </div>
     
@@ -459,10 +479,13 @@
     <a class="page-link" href="/tags/golang/page/6/">6</a>
   </li>
   <li class="page-item">
+    <a class="page-link" href="/tags/golang/page/7/">7</a>
+  </li>
+  <li class="page-item">
     <a href="/tags/golang/page/6/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/tags/golang/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/tags/golang/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

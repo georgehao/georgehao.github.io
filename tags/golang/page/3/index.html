@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "你真的懂 golang reslice 吗",
-            "description": "package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(\u0026quot;a[1:]\u0026quot;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体",
-            "url": "https://www.haohongfan.com/posts/2020-10-20-golang-slice/"
+            "name": "开发中的那些坑",
+            "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不",
+            "url": "https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "限流器系列(3)--自适应限流",
-            "description": "漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找",
-            "url": "https://www.haohongfan.com/posts/2020-07-05-bbr/"
+            "name": "Go timer 是如何被调度的",
+            "description": "Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时",
+            "url": "https://www.haohongfan.com/posts/2021-06-27-timer/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "限流器系列(2) -- Token Bucket 令牌桶",
-            "description": "上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket \u0026ndash; 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器",
-            "url": "https://www.haohongfan.com/posts/2020-06-30-token-bucket/"
+            "name": "Go sync.Pool 浅析",
+            "description": "hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个",
+            "url": "https://www.haohongfan.com/posts/2021-05-22-sync-pool/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "限流器系列(1) -- Leaky Bucket 漏斗桶",
-            "description": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check",
-            "url": "https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/"
+            "name": "最清晰易懂的 Go WaitGroup 源码剖析",
+            "description": "hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为",
+            "url": "https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "Bilibili Kratos 框架源码分析(4) -- Kratos Log",
-            "description": "用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = \u0026quot;xxx-service\u0026quot; dir = \u0026quot;/data/log/xxx-service/\u0026quot; stdout = true v = 3 filter = [\u0026quot;fileld1\u0026quot;, \u0026quot;field2\u0026quot;] [log.module] \u0026quot;dao_user\u0026quot; = 2 \u0026quot;servic*\u0026quot; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var",
-            "url": "https://www.haohongfan.com/posts/2020-06-09-kratos-log/"
+            "name": "看过这篇剖析，你还不懂 Go sync.Map 吗",
+            "description": "hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完",
+            "url": "https://www.haohongfan.com/posts/2021-05-10-sync-map/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-05T23:47:21&#43;08:00" />
 
 
 
@@ -238,26 +238,30 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-10-20-golang-slice/" class="font-bold text-xl hover:text-eureka">你真的懂 golang reslice 吗</a>
+  <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="font-bold text-xl hover:text-eureka">开发中的那些坑</a>
 </div>
 <div class="content">
-  package main func a() []int { a1 := []int{3} a2 := a1[1:] return a2 } func main() { a() } 看到这个题, 你的第一反应是啥? (A) 编译失败 (B) panic: runtime error: index out of range [1] with length 1 (C) [] (D) 其他 第一感觉: 肯定能编译过, 但是运行时一定会panic的. 但事与愿违竟然能够正常运行, 结果是:[] 疑问 a1 := []int{3} a2 := a1[1:] fmt.Println(&#34;a[1:]&#34;, a2) a1 和 a2 共享同样的底层数组, len(a1) = 1, a1[1]绝对会panic, 但是a[1:]却能正常输出, 这是为何? 从表面入手 整体上看下整体
+  本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2020-10-20</span>
+        <span>2021-06-30</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
+        <span>5分钟阅读时长</span>
     </div>
     
     
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
@@ -277,16 +281,116 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-07-05-bbr/" class="font-bold text-xl hover:text-eureka">限流器系列(3)--自适应限流</a>
+  <a href="https://www.haohongfan.com/posts/2021-06-27-timer/" class="font-bold text-xl hover:text-eureka">Go timer 是如何被调度的</a>
 </div>
 <div class="content">
-  漏斗桶/令牌桶确实能够保护系统不被拖垮, 但不管漏斗桶还是令牌桶, 其防护思路都是设定一个指标, 当超过该指标后就阻止或减少流量的继续进入，当系统负载降低到某一水平后则恢复流量的进入。但其通常都是被动的，其实际效果取决于限流阈值设置是否合理，但往往设置合理不是一件容易的事情. 项目日常维护中, 经常能够看到某某同学在群里说:xx系统429了, 然后经过一番查找
+  Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2020-08-23</span>
+        <span>2021-06-27</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>6分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" class="font-bold text-xl hover:text-eureka">Go sync.Pool 浅析</a>
+</div>
+<div class="content">
+  hi, 大家好，我是 haohongfan。 sync.Pool 应该是 Go 里面明星级别的数据结构，有很多优秀的文章都在介绍这个结构，本篇文章简单剖析下 sync.Pool。不过说实话 sync.Pool 并不是我们日常开发中使用频率很高的的并发原语。 尽管用的频率很低，但是不可否认的是 sync.Pool 确实是 Go 的杀手锏，合理使用 sync.Pool 会让我们的程序性能飙升。本篇文章会从使用方式，源码剖析，运用场景等方面，让你对 sync.Pool 有一个
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/" class="font-bold text-xl hover:text-eureka">最清晰易懂的 Go WaitGroup 源码剖析</a>
+</div>
+<div class="content">
+  hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-04-01</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -297,15 +401,22 @@
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
         
         
         <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
 
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-th-list mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
+        
+    </div>
     
 </div>
 
@@ -320,16 +431,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-06-30-token-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(2) -- Token Bucket 令牌桶</a>
+  <a href="https://www.haohongfan.com/posts/2021-05-10-sync-map/" class="font-bold text-xl hover:text-eureka">看过这篇剖析，你还不懂 Go sync.Map 吗</a>
 </div>
 <div class="content">
-  上一篇说到 Leaky Bucket 能限制客户端的访问速率, 但是无法应对突发流量, 本质原因就是漏斗桶只是为了保证固定时间内通过的流量是一样的. 面对这种情况, 本篇文章继续介绍另外一种限流器: Token Bucket – 令牌桶 什么是 Token Bucket 漏斗桶的桶空间就那么大, 其只能保证桶里的请求是匀速流出, 并不关心流入的速度, 只要桶溢出了就服务拒绝, 这可能并不符合互联网行业的使用场景. 试想这样的场景, 尽管服务器
+  hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex &#43; Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2020-06-30</span>
+        <span>2021-04-01</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -340,101 +451,22 @@
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
         
         
         <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-06-27-leaky-bucket/" class="font-bold text-xl hover:text-eureka">限流器系列(1) -- Leaky Bucket 漏斗桶</a>
-</div>
-<div class="content">
-  限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式 计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶 什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2020-06-27</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
-        
     </div>
     
 
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2020-06-09-kratos-log/" class="font-bold text-xl hover:text-eureka">Bilibili Kratos 框架源码分析(4) -- Kratos Log</a>
-</div>
-<div class="content">
-  用法 flag env type remark log.v LOG_V int 日志级别：DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 log.stdout LOG_STDOUT bool 是否标准输出：true、false log.dir LOG_DIR string 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 log.module LOG_MODULE string 可单独配置每个文件的verbose级别：file=1,file2=2 log.filter LOG_FILTER string 过虑敏感信息 format: field1,field2. 被阉割的功能: log.agent 配置文件 [log] family = &#34;xxx-service&#34; dir = &#34;/data/log/xxx-service/&#34; stdout = true v = 3 filter = [&#34;fileld1&#34;, &#34;field2&#34;] [log.module] &#34;dao_user&#34; = 2 &#34;servic*&#34; = 1 对应的加载方法 // cmd/main.go func main() { paladin.Init() var
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2020-06-09</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
     
     <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
+        <i class="fas fa-th-list mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/kratos/" class="hover:text-eureka">kratos</a>
+        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
         
     </div>
-    
-
     
 </div>
 
@@ -472,13 +504,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/tags/golang/page/6/">6</a>
+    <a class="page-link" href="/tags/golang/page/7/">7</a>
   </li>
   <li class="page-item">
     <a href="/tags/golang/page/4/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/tags/golang/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/tags/golang/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>goland on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/goland/</link>
+    <description>Recent content in goland on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Sat, 02 Oct 2021 20:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/goland/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>这些 Goland 技巧，学会开发效率翻倍</title>
+      <link>https://www.haohongfan.com/posts/2021-10-02-goland2/</link>
+      <pubDate>Sat, 02 Oct 2021 20:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-02-goland2/</guid>
+      <description>hi, 大家好，我是 hhf。 《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。 自定义结构 tag Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。 Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。 举个例子：正常情况下，公司对接口返回值字段有统一的</description>
+    </item>
+    
+    <item>
+      <title>Goland 这些实操技巧，你可能还不会！</title>
+      <link>https://www.haohongfan.com/posts/2021-10-02-goland1/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-02-goland1/</guid>
+      <description>工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说</description>
+    </item>
+    
+    <item>
+      <title>开发中的坑2：MQ 也能做 RPC 调用？</title>
+      <link>https://www.haohongfan.com/posts/2021-10-01-mq-rpc/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-01-mq-rpc/</guid>
+      <description>hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud</description>
+    </item>
+    
+  </channel>
+</rss>

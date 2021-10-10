@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>如何欺骗 Go Mod | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"如何欺骗 Go Mod",
+      "item":"https://www.haohongfan.com/posts/2021-10-04-gomod/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-10-04-gomod/"
+    },
+    "headline": "如何欺骗 Go Mod | HHFCodeRv","datePublished": "2021-10-04T20:27:21+08:00",
+    "dateModified": "2021-10-04T20:27:21+08:00",
+    "wordCount":  1737 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome"
+}
+</script><meta property="og:title" content="如何欺骗 Go Mod | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-10-04-gomod/" />
+
+
+
+
+<meta property="og:description" content="hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-10-04T20:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-10-04T20:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-03-slice-memory/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-02-goland2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-02-goland1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-07-10-govscpp/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">如何欺骗 Go Mod</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>hi，大家好，我是 hhf。</p>
+<p>最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。</p>
+<p>我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）</p>
+<p>在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。</p>
+<h2 id="prometheus-的局限性">Prometheus 的局限性</h2>
+<p>说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。</p>
+<p>但是呢，Promethues 也有其自身局限性，其中影响最大的就是其数据的高可用方案和集群方案。监控也是业务系统的重中一环，不能因为监控系统宕机导致报警无法及时发出。</p>
+<p>Prometheus 官方也有提出联邦方案来解决集群问题，但是这个方案极其复杂而且很多问题还是解决不了，于是就造就了另外两个 CNCF 的沙箱项目：cortex 和 thanos。这两个项目都是为了解决 Promethues 的集群，高可用的。</p>
+<p>由于这两个项目要解决问题的目的是一致的，所以就会出现很多功能都是可以相互复用的，于是有趣的事情就发生了。</p>
+<h2 id="cortex">cortex</h2>
+<p>话说因为某些的需求，不得已需要更改下 thanos 的相关代码。我本地调试的时候将 cortex 依赖的 thanos 给 replace 了一下。</p>
+<pre><code>replace github.com/thanos-io/thanos =&gt; /Users/hhf/goproject/cortex/thanos
+</code></pre>
+<p>再等我编译的时候，就编译不过了</p>
+<pre><code># github.com/sercand/kuberesolver
+../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:108:82: undefined: resolver.BuildOption
+../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:163:32: undefined: resolver.ResolveNowOption
+</code></pre>
+<p>这就让人很无奈，别着急，我们看看这个 kuberesolver 是被谁依赖的。</p>
+<p><strong>先看下被 replace 之前:</strong></p>
+<pre><code>▶ go mod graph| grep kuberesolver
+github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20210112142934-23c8d7fa6120 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200206153930-760e36ae819a github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20201119133501-0619918236ec github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200914083218-61ffdd448099 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200625145055-4b1847531bc9 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/sercand/kuberesolver@v2.4.0+incompatible
+</code></pre>
+<p>可以看到正常版本下，kuberesolver@2.4.0 被 thanos 所依赖，kuberesolver@v2.1.0 被 weaveworks 所依赖。</p>
+<p><strong>replace 之后</strong></p>
+<pre><code>▶ go mod graph| grep kuberesolver
+github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible
+</code></pre>
+<p>是不是很神奇，kuberesolver@v2.4.0 这个版本竟然消失了。由于 kuberesolver 的 v2.1.0 和 v2.4.0 是不兼容的，所以导致 replace 之后就无法编译了。</p>
+<h2 id="gomod-replace-语义">Gomod replace 语义</h2>
+<p>其实这并不神奇，这个涉及到 Go mod 的 replace 语义，不过也是很容易让人忽略的特性。</p>
+<p>replace directives：(<a href="https://golang.org/ref/mod#go-mod-file-replace">https://golang.org/ref/mod#go-mod-file-replace</a>)</p>
+<pre><code>replace directives only apply in the main module’s go.mod file and are ignored in other modules. See Minimal version selection for details.
+</code></pre>
+<p>其实很简单，replace 只对主模块（也就是你的当前项目）是生效的。可以做如下的总结：</p>
+<ul>
+<li>主模块的 replace 对于被依赖的模块是不生效的</li>
+<li>被依赖的模块的 go.mod 的 replace 对主模块也是不生效的</li>
+</ul>
+<p>所以，当 replace 之后，cortex 依赖的 thanos 的 replace 是不生效的。我们理一下依赖树：</p>
+<ul>
+<li>主模块 cortex =&gt; require github.com/weaveworks/common v0.0.0-20210419092856-009d1eebd624</li>
+<li>weaveworks =&gt; requre github.com/sercand/kuberesolver v2.1.0+incompatible</li>
+<li>于是整体上 kuberesolver 就只有了 v2.1.0 了</li>
+</ul>
+<p><strong>这个逻辑是跟 gomod 的 replace 语义是吻合的，也就是 replace 之后编译不过是正确的。</strong></p>
+<h2 id="欺骗-gomod">欺骗 gomod</h2>
+<p>那就更加神奇了，为何 cortex 直接 require thanos 就能编译成功，按照 gomod replace 语义来说，这也是编译不过的才是正确的。</p>
+<p>因为根据文档我们知道，replace 仅仅作用于主模块，脱离了主模块是一律不生效的，这个是毋庸置疑的。</p>
+<p>我做了个实验放在了 <a href="https://github.com/georgehao/gomodtestmain">https://github.com/georgehao/gomodtestmain</a> ，有兴趣的可以试一下，这个能验证 gomod 是遵循 gomod replace 语义 和 MVS (最小版本选择）算法的。</p>
+<p>问题基本陷入了僵局，我们如何破局呢？</p>
+<p>继续使用 go mod graph 功能，来查看 cortex 依赖的 thanos 的依赖树。</p>
+<pre><code>github.com/thanos-io/thanos@v0.19.1-0.20210729154440-aa148f8fdb28 gopkg.in/yaml.v3@v3.0.0-20210107192922-496545a6307
+github.com/thanos-io/thanos@v0.13.1-0.20210401085038-d7dff0c84d17 github.com/Azure/azure-pipeline-go@v0.2.2
+github.com/thanos-io/thanos@v0.8.1-0.20200109203923-552ffa4c1a0d k8s.io/utils@v0.0.0-20191114200735-6ca3b61696b6
+github.com/thanos-io/thanos@v0.13.1-0.20210204123931-82545cdd16fe gopkg.in/yaml.v2@v2.3.0
+github.com/thanos-io/thanos@v0.13.1-0.20201030101306-47f9a225cc52 go.uber.org/goleak@v1.1.10
+github.com/thanos-io/thanos@v0.13.1-0.20200807203500-9b578afb4763 go.elastic.co/apm/module/apmot@v1.5.0
+....
+github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/gogo/protobuf@v1.3.1
+</code></pre>
+<p>由于这个依赖树太长（700多行），我就不贴了，基本上也能看出来，cortex 依赖了 thanos N 多个版本，其中在最后一个版本中的 go.mod 中我们发现了一个有意思的东西：</p>
+<pre><code>require (
+  github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
+）
+</code></pre>
+<p>也就是闹了半天，由于 thanos 某个很古老的版本的 gomod require <a href="mailto:kuberesolver@v2.4.0">kuberesolver@v2.4.0</a>，让 gomod 误以为 cortex 依赖的 thanos 依然是 require 了 <a href="mailto:kuberesolver@v2.4.0">kuberesolver@v2.4.0</a> 了。虽然 thanos 早就改成了 repace kuberesolver，但也就让 cortex 顺利编译过去了。</p>
+<p>这算不算 gomod 的 bug 呢？</p>
+<p>为什么 cortex 会依赖 thanos 这么多版本呢？这就要回到开篇说的 cortex 和 thanos 功能复用的问题了。</p>
+<p>目前 cortex 和 thanos 这个两个项目，基本上是这么依赖的：</p>
+<pre><code>cortex 1.9.0 -&gt; thanos v0.19.1-0.20210729154440-aa148f8fdb28
+thanos v0.19.1-0.20210729154440-aa148f8fdb28 -&gt; cortex v1.8.1-0.20210422151339-cf1c444e0905
+cortex v1.8.1-0.20210422151339-cf1c444e0905 -&gt; thanos v0.13.1-0.20210401085038-d7dff0c84d17
+....
+</code></pre>
+<p>cortex 与 thanos 之间的相互引用，就像俄罗斯套娃一样，简直就是 gomod 的噩梦。go mod replace 语义，竟然让这两个套娃给破解了。</p>
+<h2 id="如何解决">如何解决</h2>
+<p>对应如何cortex replace thanos 的问题，其实知道问题的根本所在，解决起来就很简单了，有两种方式吧：</p>
+<ol>
+<li>由于 gomod MVS 算法，我们直接在主项目 cortex 中指定 kuberesolver 的版本为 v2.4.1</li>
+<li>方案 1 仅对于向下兼容的项目比较适用，如果某项目没有这个责任心的话，这么做可能是会出问题的，所以比较直接的解决办法，直接修改 thanos 的 go.mod, 将 thanos 的所依赖的 kuberesolver 从 replace 挪到 require 中</li>
+</ol>
+<p>欢迎关注公众号。更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/" class="block">gin 源码阅读(1) - gin 与 net/http 的关系</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-03-slice-memory/" class="block">透过内存看 Slice 和 Array的异同</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#prometheus-的局限性">Prometheus 的局限性</a></li>
+    <li><a href="#cortex">cortex</a></li>
+    <li><a href="#gomod-replace-语义">Gomod replace 语义</a></li>
+    <li><a href="#欺骗-gomod">欺骗 gomod</a></li>
+    <li><a href="#如何解决">如何解决</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-03-slice-memory/">透过内存看 Slice 和 Array的异同</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-02-goland2/">这些 Goland 技巧，学会开发效率翻倍</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-02-goland1/">Goland 这些实操技巧，你可能还不会！</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/">开发中的坑2：MQ 也能做 RPC 调用？</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/">interface 原理 - 类型转换</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/">我为什么从 C&#43;&#43; 转到了 Go</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

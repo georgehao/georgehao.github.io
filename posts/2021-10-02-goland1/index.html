@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Goland 这些实操技巧，你可能还不会！ | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Goland 这些实操技巧，你可能还不会！",
+      "item":"https://www.haohongfan.com/posts/2021-10-02-goland1/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-10-02-goland1/"
+    },
+    "headline": "Goland 这些实操技巧，你可能还不会！ | HHFCodeRv","datePublished": "2021-10-01T23:27:21+08:00",
+    "dateModified": "2021-10-01T23:27:21+08:00",
+    "wordCount":  1192 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说"
+}
+</script><meta property="og:title" content="Goland 这些实操技巧，你可能还不会！ | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-10-02-goland1/" />
+
+
+
+
+<meta property="og:description" content="工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-10-01T23:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-10-01T23:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="golang" />
+
+<meta property="article:tag" content="goland" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-07-10-govscpp/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-06-27-timer/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-05-22-sync-pool/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Goland 这些实操技巧，你可能还不会！</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-01</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。</p>
+<p>Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。</p>
+<p>我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说，我唯一觉得不方便的是 VSCode 的 Debug 功能，配置起来麻烦，而且总有种很卡的感觉。</p>
+<p>本篇文章我会介绍一点 Goland 开发中比较常见的一些技巧，帮助你快速入门 Goland。</p>
+<h2 id="goland-debug-调试">Goland Debug 调试</h2>
+<p>这里首先吐槽下 delve，对于用惯 gdb 的人来说，delve 简直弱爆了。</p>
+<p>举个例子，gdb 有个非常强大的 x[1] 功能，能够去观察变量内存分布情况。delve 在 1.7.0 版本才提供这个功能，简单试用了一下，没有达到想象中的效果，不过也是可以使用的。这里就不在详细介绍，有兴趣的可以 delve help x 去查看。</p>
+<p>更多时候我喜欢使用 goland 调试代码，基本满足日常的开发需求。这里分享几种进入 debug 模式的方式。</p>
+<p>对于后端开发来说，一个趁手的接口调试工具是不可缺少的。在介绍如何 debug 接口之前，先推荐几款比较不错的接口调试工具。</p>
+<ul>
+<li>
+<p>REST Postman[2]</p>
+</li>
+<li>
+<p>GRPC Bloomrpc[3]</p>
+</li>
+<li>
+<p>GraphQL Insomnia[4]</p>
+</li>
+</ul>
+<p>如何调试接口这里就不再文字介绍了，具体步骤提供了动图。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fde9c75994cb47afa96210d1be43fdc6~tplv-k3u1fbpfcp-zoom-1.image" alt="图片"></p>
+<p>主要步骤：</p>
+<ul>
+<li>
+<p>打断点</p>
+</li>
+<li>
+<p>点击 debug 按钮启动程序</p>
+</li>
+<li>
+<p>Postman 调用接口</p>
+</li>
+<li>
+<p>单步调试</p>
+</li>
+</ul>
+<p>有些情况下，我们封装完底层基础函数后，接口调用该函数一直报错。如果从外面一层一层的 debug 进来，会特别麻烦，使用单测函数作为 debug 的入口也是特别方便的事情。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/998646ef8d494cdc9cfac9d83e7b0ae5~tplv-k3u1fbpfcp-zoom-1.image" alt="图片"></p>
+<h2 id="设置参数">设置参数</h2>
+<p>一般情况下，不管我们使用 Goland 启动程序还是 Debug，都会遇到让输入参数的情况的。这个是个蛮重要的功能，但是很多同学不会设置。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/601835ea309a4f08acbec5315e277104~tplv-k3u1fbpfcp-zoom-1.image" alt="图片"></p>
+<p>主要步骤：</p>
+<ul>
+<li>
+<p>点击右上角：Edit Configuration &hellip;</p>
+</li>
+<li>
+<p>在弹出的框里选择正确的 Working Directory</p>
+</li>
+<li>
+<p>在 Program arguments 里填写对应的参数即可</p>
+</li>
+</ul>
+<h2 id="go-工具链引入">go 工具链引入</h2>
+<p>使用 Vscode 的同学会注意到，当我们打开 Go 源码文件时，会提示我们安装一套完整的工具链，在这一点上 Vscode 比 Goland 优秀太多了。Goland 不但没有一键导入的功能，而且每个工程都需要引入一遍，着实太坑。</p>
+<p>Goland 可以引入 gofmt, goimport，当然还可以自定义其他相关的工具。不过根据我的使用来看，开着 gofmt 就可以了。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/29cebe227be9499ab7f4b9ee2c768505~tplv-k3u1fbpfcp-zoom-1.image" alt="图片"></p>
+<h2 id="推荐一些好用的插件">推荐一些好用的插件</h2>
+<ul>
+<li>
+<p>ideaVim</p>
+</li>
+<li>
+<p>Material Theme UI</p>
+</li>
+<li>
+<p>Monokai Pro theme</p>
+</li>
+</ul>
+<h2 id="goland-莫名其妙的-index-失效">Goland 莫名其妙的 Index 失效</h2>
+<p>Goland 在使用的过程中，可能会遇到莫名其妙的 Index 失效的情况。你可以通过下面的步骤来重新生成 Index。</p>
+<ol>
+<li>
+<p>go mod tidy</p>
+</li>
+<li>
+<p>go build .</p>
+</li>
+<li>
+<p>Goland -&gt; Preferences -&gt; Go -&gt; Go Modules -&gt; Enable Go Modules integration -&gt; 配置 goproxy</p>
+</li>
+<li>
+<p>右键点击项目根目录-&gt;Mark Directory as -&gt; Resource root</p>
+</li>
+<li>
+<p>重启 Goland</p>
+</li>
+</ol>
+<p>如果上面这些步骤执行完毕后，你的程序能够正常构建，但是 Goland 仍然提示 &ldquo;Unresolved reference &ldquo;， 那么恭喜你中奖了。</p>
+<p>Goland 有很低概率会遇到 Index 完全失效，而且无法恢复，目测这是 Goland 的 Bug，遇到的概率不太高。</p>
+<p>解决方案：</p>
+<p>其实没有啥解决方案。我通常会这么做：彻底删除 Goland，再重新安装。</p>
+<p>本篇文章中关于 Goland 的使用技巧，你是否感兴趣呢？欢迎留言评论，如果反响不错我会继续发出后续篇章（包括vscode）。</p>
+<p>[1] x: https://visualgdb.com/gdbreference/commands/x</p>
+<p>[2] Postman: https://www.postman.com/</p>
+<p>[3] Bloomrpc: https://github.com/uw-labs/bloomrpc</p>
+<p>[4] Insomnia: https://support.insomnia.rest/=</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/golang/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#golang</a>
+    
+    <a href="https://www.haohongfan.com/tags/goland/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#goland</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-02-goland2/" class="block">这些 Goland 技巧，学会开发效率翻倍</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" class="block">开发中的坑2：MQ 也能做 RPC 调用？</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#goland-debug-调试">Goland Debug 调试</a></li>
+    <li><a href="#设置参数">设置参数</a></li>
+    <li><a href="#go-工具链引入">go 工具链引入</a></li>
+    <li><a href="#推荐一些好用的插件">推荐一些好用的插件</a></li>
+    <li><a href="#goland-莫名其妙的-index-失效">Goland 莫名其妙的 Index 失效</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/">开发中的坑2：MQ 也能做 RPC 调用？</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/">interface 原理 - 类型转换</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/">我为什么从 C&#43;&#43; 转到了 Go</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/">开发中的那些坑</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-06-27-timer/">Go timer 是如何被调度的</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-05-22-sync-pool/">Go sync.Pool 浅析</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

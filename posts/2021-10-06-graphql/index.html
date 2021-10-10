@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>聊聊我对 GraphQL 的一些认知 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"聊聊我对 GraphQL 的一些认知",
+      "item":"https://www.haohongfan.com/posts/2021-10-06-graphql/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2021-10-06-graphql/"
+    },
+    "headline": "聊聊我对 GraphQL 的一些认知 | HHFCodeRv","datePublished": "2021-10-06T21:27:21+08:00",
+    "dateModified": "2021-10-06T21:27:21+08:00",
+    "wordCount":  4136 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我"
+}
+</script><meta property="og:title" content="聊聊我对 GraphQL 的一些认知 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2021-10-06-graphql/" />
+
+
+
+
+<meta property="og:description" content="每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-10-06T21:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2021-10-06T21:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="graphql" />
+
+<meta property="article:tag" content="bff" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin3/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-04-gomod/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-03-slice-memory/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-02-goland2/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">聊聊我对 GraphQL 的一些认知</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-06</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>9分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/graphql/" class="hover:text-eureka">graphql</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/bff/" class="hover:text-eureka">bff</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/2018-07-16-graphql.png" alt=""></p>
+<p>每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。</p>
+<p>因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。</p>
+<h2 id="graphql-优势">GraphQL 优势</h2>
+<p>不知道大家有没有遇到过这样的一些场景，某个服务有几十个接口，更有甚者上百个也是有可能的。APP 或者其他下游要封装一个功能，需要调用 10 个接口左右，可能这些接口还涉及到不同的团队。不管开发，联调，测试，还是对于调用方，整个链条功能太多了。随着这些功能经过多个版本的迭代升级后，新+旧版本的接口谁也不敢大规模改动了，只能在原来的基础上做代码拼接，这基本就是祖传代码的由来。大部分同学基本的代码素养是有的，但是也只能任由这些祖传代码慢慢腐烂，原因为很简单，谁也不敢保证改动之后功能是不是有遗漏的地方。</p>
+<p>有没有这样一个功能，将这些接口做一下聚合，然后将结果的集合返回给前端呢？在目前比较流行微服务架构体系下，有一个专门的中间层专门来处理这个事情，这个中间层叫 BFF（Backend For Frontend）。我曾经工作过的某公司想要将某业务的售卖相关功能给公司其他业务使用，但是接入方一看那么多接口，瞬间就决定不接了，逼不得已该业务平台紧急开发了 BFF 相关功能让其他业务方接入。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/bff.png" alt=""></p>
+<p>有些同学在稍微大点规模的公司做的工作就是合并各种接口，然后返回给调用方，这基本上就是 BFF 的主要工作内容了。除了类似 BFF 组建接入平台的方式，是否还有其他的方式能够只发出一个请求就能获取到一系列的接口返回值呢？</p>
+<p>我在京东 APP 上随便截图了一个商品</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/graphql_jd.png" alt=""></p>
+<p>类似这个页面，当用户打开这个页面的时候，按照目前比较流行的 REST 接口，需要 APP 至少发起下面这些请求：</p>
+<ul>
+<li>获取商品详情接口</li>
+<li>获取商品价格、优惠相关的接口</li>
+<li>获取评价接口</li>
+<li>获取种草秀接口</li>
+<li>获取问答接口</li>
+</ul>
+<p>这些接口一般来说都比较重，里面有很多当前页面并不需要的字段，那有没有一种可能：APP 端发一次请求就能获取这个页面需要的所有字段，同时 APP 还能根据自己的需求只请求自己需要的字段呢？</p>
+<p>答案是肯定的，那就是 GraphQL。</p>
+<pre><code class="language-graphql">query jdGoodsQuery {
+     goods {
+        detail {
+          id
+          pictures(first: 10) {
+            pic_id
+            thumb
+          }
+          spec {
+            name
+            size
+            weight
+          }
+        }
+        price {
+          price
+          origin_price
+          market_price
+        }
+        comment(first: 10) {
+          comment_id
+          topic_id
+          content
+          from_uid
+        }
+        self_show(first: 10) {
+          id
+          pic_id
+        }
+    }
+}
+</code></pre>
+<p>对于上面京东商品详情的截图，类似这样的一个 Query 就可以把这个页面需要的所有的字段都获取到。</p>
+<p>对于 REST 接口还有另外一个比较棘手的问题。当业务升级的时候，接口不可避免的需要升级，一个比较常见的问题，某个字段在新版本升级后不需要了，如何优雅的处理旧接口以及旧字段呢？</p>
+<p>可能有些同学说，可以强行推动下游去升级，限定期限进行升级，如果下游不升级概不负责，这种方式基本只能自己欺骗自己了，因为当你接口下线导致业务方报错，这个责任只能你自己负责了。特别的，当某些接口是直接面对消费者时，这个问题会变得更加棘手。</p>
+<p>2016 年那会就职过的一家做 AI 产品的公司，上市了一款智能读书的儿童产品，其基本功能就是绘本图书翻一页读一页，这也算是 HomeAI 落地比较成功的产品了，这个产品在天猫、京东的销量还可以。在 AI 风口的那会，最开始的定位的功能就是读书，随着市场的拓展，功能也逐渐变得复杂起来，当时最痛苦的事情莫过于短短 3 个月内，接口版本号从 v1 增加到 v12。由于当时产品的理念认为强制升级是不优美的，不符合产品设计美学，导致这款产品是没有强制升级功能的，于是导致的结果是 v1 到 v12 的接口总是有用户在使用的。你可能会说发公告、短信通知用户在某个期限内升级，如果不升级，出现产品无法使用情况概不负责，这也是行不通的，特别那些用户付费的产品，如果万一不能使用的话，那 12315 是会找上门的。</p>
+<p>就在我们被无法下线的 API 接口折磨的时候，经过调研之后发现 GraphQL 正好有一个功能，“API 演进无需划分版本”，这不是瞌睡来了就有枕头吗，于是在技术负责人带领下（GraphQL 改造项目还没上线，他去了 Microsoft），我们开始推进 GraphQL 的改造工作。</p>
+<p>说到这里基本上就把 GraphQL 的最容易吸引人的优点介绍完了。我们要知道没有任何技术是“银弹”，当某些人给你狂吹某个技术的优点，而没有说这项技术的缺点限制，或者简略的一笔带过的时候，你就需要小心了，说不定你就是那个小白鼠。</p>
+<p>下面就进入我经历的 GraphQL 项目遇到的问题，也许我的处理方式是不正确，以下观点仅供参考。</p>
+<h2 id="graphql-难题">GraphQL 难题</h2>
+<h3 id="社区活跃度问题">社区活跃度问题</h3>
+<p>GraphQL 是由 Facebook 开发，Facebook 也成立了 GraphQL 基金会，但是 Facebook 官方只提供了 JS 版本的开源实现，其他语言的实现都是 GraphQL 对应语言的非官方社区实现的，这就造成不同语言的理解和实现是有差异的。比如 Graphql schema 的合并工具，只有 JS 官方实现有对应的实现。</p>
+<p>GraphQL 属于那种大家都觉得很不错，但是经过近 10 年的发展，依然是不温不火。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/landscape_graphql.png" alt=""></p>
+<p>上面这个图是 GraphQL 官方的 <a href="https://landscape.graphql.org/" title="landscape">landscape</a>，你仔细看上面公司图标，一眼能看出来的大的公司只有 Github 了。Facebook 虽说是推出了 GraphQL 的规范以及 JS 的相关实现，但是他自己都没有放出有关 GraphQL 的实际接口，让人对这个技术的信任度都大打折扣。</p>
+<p>当你遇到 GraphQL 问题的时候，要么搜出来全是 JS 的相关实现，要么干脆就没有人回答，总之 GraphQL 相关社区看着文档很丰富，其实遇到问题时能搜到解决问题的有用的资料并不多。</p>
+<h3 id="缓存问题">缓存问题</h3>
+<p><a href="https://graphql.cn/learn/caching/" title="缓存">缓存</a>对于 REST 接口来说是很容解决的，但是在 GraphQL 中却变得非常复杂。由于 GraphQL 的特性，即便它操作的是同一个实体，每次查询可能都各不相同。</p>
+<p>举个例子，由于客户端可以自定义其需要的字段，如某次请求只需要某个人的名字，但是在另外一次查询中你可能也想知道他的消费积分。名字可能要查询 user.userProfile 库，而且消费积分可能要查询第三方系统。本次查询输入的是单个 user_id，下次查询输入的可能就是 userId_list 了，为了解决这些查询的缓存问题，你可能会设置很多 key 或者每个用户设置 key-value 放入缓存，这些都不是很优美的解决方案，归根到底还是因为 GraphQL 太多灵活，服务器的缓存如何设计都跟不上客户端的灵活的查询方式。</p>
+<p>对于这个问题 Facebook 也有 DataLoader 的解决方案，当然只是 JS 版本的方案，其他语言的社区可能根本都没有对应的实现。按照我当初的调研这个东西真的不好用，还不如自己做缓存来得快。</p>
+<p>GraphQL 缓存不只对服务端不友好，同时对客户端也是一个挑战，需要用户自己做客户端的缓存，因为 GraphQL Query 只有一个路由，而且都是 POST 方式。</p>
+<h3 id="网关问题">网关问题</h3>
+<p>GraphQL 是强类型的，所以必须需要一个 schema 的存在。按照当初的实践经验，客户端有且只能存在一份 schema 文件，于是另外一个比较棘手的问题就出现了。</p>
+<p>假如我们的服务是类似下图这个样子：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/grapqh_proxy.png" alt=""></p>
+<p>比如 server1 是商品服务，server2 是优惠服务，客户端如果要对接这两个服务的话，直接对接是不行的，因为客户端只能有一个 schema, 但是服务端却有两个 schema 文件。</p>
+<p>这种情况该如何处理呢？当初经过调研发现 JS 提供了 schema merge 的工具，而且仅仅是个工具。其他语言压根就没有这个玩意。</p>
+<p>这个的设计还会带来另外一个非常严重的问题，目前的 API 网关都是无法使用的。随着业务规模的扩大，走上微服务是迟早的事情，但是如果服务端全是基于 GraphQL 开发的，那么网关该如何处理呢？最近调研了下 APISIX 和 KONG 的最新版本，这两个业界有影响力的网关也仅仅是支持 GraphQL 协议的转发而已。</p>
+<p>在我看来，在如今微服务比较流行市场下，GraphQL 唯一比较契合的场景的就是将 BFF 的 REST 换成 GraphQL，该 BFF 即做网关也做业务。其实这样做，也不是很完美，即限定了客户端只能有这一个 BFF，同时也让 BFF 变得不纯粹起来。看到美团<a href="https://tech.meituan.com/2021/05/06/bff-graphql.html" title="有篇介绍 GraphQL 的实践的文章">有篇介绍 GraphQL 的实践的文章</a>，就是让 GraphQL 做的 BFF 的相关工作，不过他们没有将 GraphQL 暴露给客户端，而是在 GraphQL 之上又包裹了一层 HTTP 接口。</p>
+<h3 id="复杂度问题">复杂度问题</h3>
+<p>GraphQL 最大的好处就是客户端能按需查询，是便利了客户端，但是把问题的复杂度都移交给了服务器。服务器也不是想查就能查的，毕竟服务器也是资源限制的，不可能无限制的让客户端去索取。</p>
+<pre><code>query deep3 {
+  viewer {
+    albums {
+      songs{
+        author {
+          company {
+            address {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>由于 GraphQL 要追求从一个类型能查到 schema 的任意类型。比如这样的查询，能无限嵌套下去，每个 Type 对服务器来说都是对应的查询，服务器肯定承受不了的。</p>
+<p>如何限制呢？GraphQL 提出的有复杂度和深度的相关概念，但是这两个值该如何去计算，只能靠服务器开发人员的估计。于是这样的场景就经常出现，开发初期约定复杂度 1000，过了两天客户端同学找了过来要提高到 3000，全是无尽的扯皮，不管设置多少，由于客户端查询的多样性总有不够用的情形出现。而且这个复杂度、深度是全局的，不是每一个 Query 能单独配置，这样就会造成这两个值最后变得可有可无。</p>
+<h3 id="限流问题">限流问题</h3>
+<p>限流也是 GraphQL 的最难解决的难题之一，服务端不可能没有限流的，不然服务器稳定性就保障不了。对于 REST 来说接口的路由都是固定不变的，针对于不同的 URI 做限流是很容做到的。但是 GraphQL 限流的难点在哪里呢？</p>
+<pre><code>query maliciousQuery {
+  album(id: &quot;some-id&quot;) {
+    photos(first: 9999) {
+      album {
+        photos(first: 9999) {
+          album {
+            photos(first: 9999) {
+              album {
+                #... Repeat this 10000 times...
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>这个请求会导致什么问题呢？客户端会发起一个请求 maliciousQuery，这个请求会去查询 some-id 的 album，这个 album 获取这个相册里的最大 9999 张图片，每个图片又要查询到所属的相册，就这么无限制的嵌套下去。这样的查询，服务器根本就影响不来，上面说到的复杂度和深度其实有点用处，但是用处不大。</p>
+<p>曾经遇到这样的真实场景，GraphQL 项目已经部署线上，复杂度和深度也配置了，客户端同学在获取商品分页列表的同时也将对应商品详情以及商品详情的级联内容给取了出来，导致的结果服务器直接 OOM。原因跟上面这个例子很相似，就是嵌套的查询过多导致的。这个问题其实跟复杂度和深度是相关的，但是复杂度和深度真的是很难评估。</p>
+<p>所以 GraphQL 限流的难题就在于客户端只发起一次请求，但是在服务器端可能被放大无数倍。如何能够有效的评估某个值能让客户端的嵌套比较合理，根据实践经验来看，这个值不是官方提供的复杂度和深度能解决的。</p>
+<p>不过好消息 GraphQL 提供一种评估 <a href="https://medium.com/swlh/please-rate-limit-your-graphql-api-9832b5c64418" title="GraphQL 限流的方式">GraphQL 限流的方式</a>，另外一个中文版本的理论解析<a href="https://mp.weixin.qq.com/s/Vb3eIeGKrL5BDNqlrnVrnQ">解决 GraphQL 的限流难题</a>。理论是一回事，不过实施起来依然是困难重重。</p>
+<h2 id="结论">结论</h2>
+<p>本文主要介绍了我曾经经历过的 GraphQL 落地的一点感悟，距离如今也有一段时间了，GraphQL 留给我的印象就停留在这些无法解决的问题上。曾经有人咨询我想用 GraphQL 去重构某个服务，被我比较激动的给打消了这个念头。这篇文章可能也有写的不对的地方，欢迎同学们指出。</p>
+<p>写文章不易请大家帮忙点击 在看，点赞，分享。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png" alt=""></p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/graphql/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#graphql</a>
+    
+    <a href="https://www.haohongfan.com/tags/bff/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#bff</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-07-getty/" class="block">Go 网络库 getty 的那些事</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/" class="block">gin 源码阅读(3) - gin 路由的实现剖析</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#graphql-优势">GraphQL 优势</a></li>
+    <li><a href="#graphql-难题">GraphQL 难题</a>
+      <ul>
+        <li><a href="#社区活跃度问题">社区活跃度问题</a></li>
+        <li><a href="#缓存问题">缓存问题</a></li>
+        <li><a href="#网关问题">网关问题</a></li>
+        <li><a href="#复杂度问题">复杂度问题</a></li>
+        <li><a href="#限流问题">限流问题</a></li>
+      </ul>
+    </li>
+    <li><a href="#结论">结论</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/">gin 源码阅读(3) - gin 路由的实现剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/">gin 源码阅读(2) - http请求是如何流入gin的?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/">gin 源码阅读(1) - gin 与 net/http 的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-04-gomod/">如何欺骗 Go Mod</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-03-slice-memory/">透过内存看 Slice 和 Array的异同</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-02-goland2/">这些 Goland 技巧，学会开发效率翻倍</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

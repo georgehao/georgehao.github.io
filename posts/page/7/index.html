@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "[每日一译] Tags in Golang",
-            "description": "原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require",
-            "url": "https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/"
+            "name": "一次错误使用 go-cache 导致出现的线上问题",
+            "description": "话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说",
+            "url": "https://www.haohongfan.com/posts/2020-03-11-go-cache/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "gin源码阅读之四 -- gin的路由算法",
-            "description": "gin的是路由算法其实就是一个Radix Tree. 有关数据结构的可以自己去网上找相关资料查看. 注册路由预处理 我们在使用gin时通过下面的代码注册路由 普通注册 router.POST(\u0026quot;/somePost\u0026quot;, func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;some post\u0026quot;) }) 使用中间件 router.Use(Logger()) 使用Group v1 := router.Group(\u0026quot;v1\u0026quot;) { v1.POST(\u0026quot;login\u0026quot;, func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;v1 login\u0026quot;) }) } 这些操作, 最终都会在反应到gin的路由树上 具体实现 // routergroup.go:L72-77 func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes { absolutePath := group.calculateAbsolutePath(relativePath) // \u0026lt;--- handlers = group.combineHandlers(handlers) // \u0026lt;--- group.engine.addRoute(httpMethod, absolutePath, handlers) return group.returnObj() } 在调用POST, GET, HEAD等",
-            "url": "https://www.haohongfan.com/posts/2019-03-04-gin-04/"
+            "name": "如何用 Redigo 访问 Codis",
+            "description": "开篇依然是那三个问题: redigo 是否能够用于 codis ? 如果不经过任何加工, 直接用 redigo 去访问 codis, 会出现什么样的问题 ? codis 的 golang 客户端如何实现 ? 先贴出来, 我之前直接用 Redigo 接入 codis 的代码 // Redis global redis connection pool var Redis *redis.Pool var RedisInitErr = errors.New(\u0026quot;init redis error\u0026quot;) Redis = \u0026amp;redis.Pool{ MaxIdle: 10, Dial: func() (conn redis.Conn, e error) { addrs, err := getHosts() if err != nil { panic(\u0026quot;init redis panic\u0026quot;) } rand.Seed(time.Now().UnixNano()) rand.Shuffle(len(addrs), func(i, j int) { addrs[i], addrs[j] = addrs[j], addrs[i] }) var handler redis.Conn for _, v := range addrs { var err error handler, err = redis.Dial(\u0026quot;tcp\u0026quot;, v) if err != nil || handler == nil { continue } res, err := handler.Do(\u0026quot;PING\u0026quot;) if pong, err := redis.String(res, err); err != nil \u0026amp;\u0026amp; pong != \u0026quot;PONG\u0026quot;",
+            "url": "https://www.haohongfan.com/posts/2020-01-06-redigo-codis/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "gin源码阅读之三 -- gin牛逼的context",
-            "description": "Gin封装的最好的地方就是context和对response的处理. github的README的介绍, 基本就是对这两个东西的解释. 本篇文章主要解释context的使用方法, 以及其设计原理 为什么要将Request的处理封装到Context中 在阅读gin的源码时, 请求的处理是使用type HandlerFunc func(*Context)来处理的. 也就是 func(context *gin.Context) { context.String(http.StatusOK, \u0026quot;some post\u0026quot;) } 参数是",
-            "url": "https://www.haohongfan.com/posts/2019-01-21-gin-03/"
+            "name": "Redigo Pool 源码解析",
+            "description": "Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要",
+            "url": "https://www.haohongfan.com/posts/2019-12-31-redigo-pool/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "gin源码阅读之二 -- 揭开gin的神秘面纱",
-            "description": "上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,",
-            "url": "https://www.haohongfan.com/posts/2019-02-18-gin-02/"
+            "name": "打造 Zap 开箱即用日志组件",
+            "description": "logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap",
+            "url": "https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "gin源码阅读之一 -- net/http的大概流程",
-            "description": "最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import \u0026quot;github.com/gin-gonic/gin\u0026quot; func main() { r := gin.Default() r.GET(\u0026quot;/ping\u0026quot;, func(c *gin.Context) { c.JSON(200, gin.H{ \u0026quot;message\u0026quot;: \u0026quot;pong\u0026quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(\u0026quot;Listening",
-            "url": "https://www.haohongfan.com/posts/2019-02-17-gin-01/"
+            "name": "Logrus源码阅读(2)--logrus生命周期",
+            "description": "Eureka is a elegant and powerful theme for Hugo.",
+            "url": "https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-07T23:27:21&#43;08:00" />
 
 
 
@@ -223,16 +223,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-06-03-tags-of-golang/" class="font-bold text-xl hover:text-eureka">[每日一译] Tags in Golang</a>
+  <a href="https://www.haohongfan.com/posts/2020-03-11-go-cache/" class="font-bold text-xl hover:text-eureka">一次错误使用 go-cache 导致出现的线上问题</a>
 </div>
 <div class="content">
-  原文地址: Tags in Golang 我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束 Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和require
+  话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了. 排查过程 查看服务器的监控系统, CPU, 内存, 负载等指标正常 排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒 查看数据库, codis 监控, 各项指标正常 不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因 这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-06-03</span>
+        <span>2020-03-11</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -244,10 +244,6 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/" class="hover:text-eureka">每日一译</a>
         
     </div>
     
@@ -266,16 +262,16 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-03-04-gin-04/" class="font-bold text-xl hover:text-eureka">gin源码阅读之四 -- gin的路由算法</a>
+  <a href="https://www.haohongfan.com/posts/2020-01-06-redigo-codis/" class="font-bold text-xl hover:text-eureka">如何用 Redigo 访问 Codis</a>
 </div>
 <div class="content">
-  gin的是路由算法其实就是一个Radix Tree. 有关数据结构的可以自己去网上找相关资料查看. 注册路由预处理 我们在使用gin时通过下面的代码注册路由 普通注册 router.POST(&#34;/somePost&#34;, func(context *gin.Context) { context.String(http.StatusOK, &#34;some post&#34;) }) 使用中间件 router.Use(Logger()) 使用Group v1 := router.Group(&#34;v1&#34;) { v1.POST(&#34;login&#34;, func(context *gin.Context) { context.String(http.StatusOK, &#34;v1 login&#34;) }) } 这些操作, 最终都会在反应到gin的路由树上 具体实现 // routergroup.go:L72-77 func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes { absolutePath := group.calculateAbsolutePath(relativePath) // &lt;--- handlers = group.combineHandlers(handlers) // &lt;--- group.engine.addRoute(httpMethod, absolutePath, handlers) return group.returnObj() } 在调用POST, GET, HEAD等
+  开篇依然是那三个问题: redigo 是否能够用于 codis ? 如果不经过任何加工, 直接用 redigo 去访问 codis, 会出现什么样的问题 ? codis 的 golang 客户端如何实现 ? 先贴出来, 我之前直接用 Redigo 接入 codis 的代码 // Redis global redis connection pool var Redis *redis.Pool var RedisInitErr = errors.New(&#34;init redis error&#34;) Redis = &amp;redis.Pool{ MaxIdle: 10, Dial: func() (conn redis.Conn, e error) { addrs, err := getHosts() if err != nil { panic(&#34;init redis panic&#34;) } rand.Seed(time.Now().UnixNano()) rand.Shuffle(len(addrs), func(i, j int) { addrs[i], addrs[j] = addrs[j], addrs[i] }) var handler redis.Conn for _, v := range addrs { var err error handler, err = redis.Dial(&#34;tcp&#34;, v) if err != nil || handler == nil { continue } res, err := handler.Do(&#34;PING&#34;) if pong, err := redis.String(res, err); err != nil &amp;&amp; pong != &#34;PONG&#34;
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-03-04</span>
+        <span>2020-01-06</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -283,13 +279,6 @@
     </div>
     
     
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
 
     
 </div>
@@ -305,98 +294,91 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-01-21-gin-03/" class="font-bold text-xl hover:text-eureka">gin源码阅读之三 -- gin牛逼的context</a>
+  <a href="https://www.haohongfan.com/posts/2019-12-31-redigo-pool/" class="font-bold text-xl hover:text-eureka">Redigo Pool 源码解析</a>
 </div>
 <div class="content">
-  Gin封装的最好的地方就是context和对response的处理. github的README的介绍, 基本就是对这两个东西的解释. 本篇文章主要解释context的使用方法, 以及其设计原理 为什么要将Request的处理封装到Context中 在阅读gin的源码时, 请求的处理是使用type HandlerFunc func(*Context)来处理的. 也就是 func(context *gin.Context) { context.String(http.StatusOK, &#34;some post&#34;) } 参数是
+  Redigo Pool 最重要的结构 type Pool struct { // 真正获取跟redis-server连接的函数, 必填参数 Dial func() (Conn, error) // 这是个可选参数, 用于在从 pool 获取连接时, 检查这个连接是否正常使用. 所以这个参数一般是必填的 TestOnBorrow func(c Conn, t time.Time) error // 最多有多少个空闲连接保留, 一般必填 MaxIdle int // 最多有多少活跃的连接数, 一般必填 MaxActive int // 空闲连接最长空闲时间, 一般必填 IdleTimeout time.Duration // Pool 的活跃的连接数达到 MaxActive, 如果 Wait 为 true, // 那么 Get() 将要
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2019-02-21</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-02-18-gin-02/" class="font-bold text-xl hover:text-eureka">gin源码阅读之二 -- 揭开gin的神秘面纱</a>
-</div>
-<div class="content">
-  上一篇简单介绍了gin, 以及net/http是如何数据流转的, 本篇将详细介绍gin 数据如何在gin中流转 package main import &#34;github.com/gin-gonic/gin&#34; func main() { r := gin.Default() r.GET(&#34;/ping&#34;, func(c *gin.Context) { c.JSON(200, gin.H{ &#34;message&#34;: &#34;pong&#34;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 这段代码的大概流程: r := gin.Default()初始化了相关的参数 /ping将路由及处理handler注册到路由树中 启动服务 r.Run()其实调用的是err = http.ListenAndServe(address, engine), 结合上一篇文章可以看出来,
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2019-02-18</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2019-02-17-gin-01/" class="font-bold text-xl hover:text-eureka">gin源码阅读之一 -- net/http的大概流程</a>
-</div>
-<div class="content">
-  最近公司大部分项目开始往golang换, api的框架选定使用gin, 于是将gin的源码看了一遍, 会用几篇文章将gin的流程及流程做一个梳理, 下面进入正题. gin框架预览 上图大概是gin里面比较重要的模块. 从gin的官方第一个demo入手. package main import &#34;github.com/gin-gonic/gin&#34; func main() { r := gin.Default() r.GET(&#34;/ping&#34;, func(c *gin.Context) { c.JSON(200, gin.H{ &#34;message&#34;: &#34;pong&#34;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } r.Run()的源码: func (engine *Engine) Run(addr ...string) (err error) { defer func() { debugPrintError(err) }() address := resolveAddress(addr) debugPrint(&#34;Listening
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2019-02-17</span>
+        <span>2019-12-31</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
         <span>5分钟阅读时长</span>
+    </div>
+    
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-12-15-zap-common-logger/" class="font-bold text-xl hover:text-eureka">打造 Zap 开箱即用日志组件</a>
+</div>
+<div class="content">
+  logrus 是 golang 一款非常优秀的日志框架, 其优点非常明显: 优雅的代码框架设计, 可以作为我们设计组件的参考. 具体请参见我前面文章(链接文末给出) 使用简单 组件化的开发思路 灵活的输出方式 但是, 性能终究是忍痛舍弃 logrus 的“阿喀琉斯之踵”, 前面的文章深入研究了 logrus 性能低的原因 目前 golang 日志库的大众选择主要集中在: logrus, zap, zerolog. zap 和 zerolog 的性能都是优秀的, 但是从用法习惯上我更倾向于 zap. 简单介绍 Zap
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-12-15</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2019-10-05-logrus-life-cycle/" class="font-bold text-xl hover:text-eureka">Logrus源码阅读(2)--logrus生命周期</a>
+</div>
+<div class="content">
+  
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2019-10-05</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>12分钟阅读时长</span>
     </div>
     
     
@@ -454,13 +436,13 @@
     <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
   </li>
   <li class="page-item">
-    <a class="page-link" href="/posts/page/12/">12</a>
+    <a class="page-link" href="/posts/page/13/">13</a>
   </li>
   <li class="page-item">
     <a href="/posts/page/8/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/12/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/13/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

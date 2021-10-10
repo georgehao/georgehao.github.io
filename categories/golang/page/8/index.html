@@ -85,21 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Golang Label使用方法",
-            "description": "写C/C++的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C++代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La",
-            "url": "https://www.haohongfan.com/posts/2017-08-10-label/"
+            "name": "go 跨平台编译",
+            "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
+            "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "golang面向对象分析",
-            "description": "说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一",
-            "url": "https://www.haohongfan.com/posts/2017-07-24-golang_oop/"
+            "name": "Golang interface入门",
+            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
+            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "golang中defer, panic, recover用法",
-            "description": "昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出 一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到. class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比",
-            "url": "https://www.haohongfan.com/posts/2017-07-20-golang_defer_panic_recover/"
+            "name": "Golang指针vs值",
+            "description": "Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(\u0026quot;%p\\n\u0026quot;, \u0026amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(\u0026quot;%p\u0026quot;, \u0026amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解",
+            "url": "https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"
+        },{
+            "@type":"ListItem",
+            "position":  4 ,
+            "name": "Golang命名规范",
+            "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https://studygolang.com/articles/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包",
+            "url": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
+        },{
+            "@type":"ListItem",
+            "position":  5 ,
+            "name": "Golang Label使用方法",
+            "description": "写C/C++的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C++代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La",
+            "url": "https://www.haohongfan.com/posts/2017-08-10-label/"
         }
     ]
 }
@@ -134,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-08-10T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2021-10-05T23:47:21&#43;08:00" />
 
 
 
@@ -226,6 +238,162 @@
   
   <div class="w-full ">
     <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
+</div>
+<div class="content">
+  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-05-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
+</div>
+<div class="content">
+  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&#34;hello&#34;} i.M() } Interface本质 inter
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-04-15</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
+</div>
+<div class="content">
+  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&#34;%p\n&#34;, &amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&#34;%p&#34;, &amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-03-24</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
+</div>
+<div class="content">
+  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-01-23</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
   <a href="https://www.haohongfan.com/posts/2017-08-10-label/" class="font-bold text-xl hover:text-eureka">Golang Label使用方法</a>
 </div>
 <div class="content">
@@ -240,84 +408,6 @@
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
         <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-07-24-golang_oop/" class="font-bold text-xl hover:text-eureka">golang面向对象分析</a>
-</div>
-<div class="content">
-  说道面向对象(OOP)编程, 就不得不提到下面几个概念: 抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多: reddit google group 那么问题来了 Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-07-24</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>6分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-07-20-golang_defer_panic_recover/" class="font-bold text-xl hover:text-eureka">golang中defer, panic, recover用法</a>
-</div>
-<div class="content">
-  昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出 一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C&#43;&#43;的话这样的代码, 你会经常看到. class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-07-20</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>7分钟阅读时长</span>
     </div>
     
     
@@ -368,11 +458,14 @@
   <li class="page-item active">
     <a class="page-link" href="/categories/golang/page/8/">8</a>
   </li>
-  <li class="page-item disabled">
-    <a  class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  <li class="page-item">
+    <a class="page-link" href="/categories/golang/page/9/">9</a>
   </li>
   <li class="page-item">
-    <a href="/categories/golang/page/8/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/golang/page/9/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+  </li>
+  <li class="page-item">
+    <a href="/categories/golang/page/9/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

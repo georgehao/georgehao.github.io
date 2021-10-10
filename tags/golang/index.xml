@@ -8,13 +8,85 @@
     <language>zh</language>
     <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
 </copyright>
-    <lastBuildDate>Tue, 10 Aug 2021 23:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 05 Oct 2021 23:47:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gin 源码阅读(3) - gin 路由的实现剖析</title>
+      <link>https://www.haohongfan.com/posts/2021-10-05-gin3/</link>
+      <pubDate>Tue, 05 Oct 2021 23:47:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-05-gin3/</guid>
+      <description>hi, 大家好，我是 hhf。 往期回顾： gin 源码阅读(1) - gin 与 net/http 的关系 gin 源码阅读(2) - http请求是如何流入gin的? 上面两篇文章基本讲清楚了 Web Server 如何接收客户端请求，以及如何将请求流转到 gin 的逻辑。建议没有看过的同学先从第一篇阅读。 gin 原理剖析说到这里，就完全进入 gin 的逻辑里面了。gin 已经拿到 http 请求了，第一件重要的事情肯定就是重写路由了，所以本节内容主要是分</description>
+    </item>
+    
+    <item>
+      <title>gin 源码阅读(2) - http请求是如何流入gin的?</title>
+      <link>https://www.haohongfan.com/posts/2021-10-05-gin2/</link>
+      <pubDate>Tue, 05 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-05-gin2/</guid>
+      <description>本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？ 我们仍然以 net/http 的例子开始 func main() { http.HandleFunc(&amp;quot;/&amp;quot;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(&amp;quot;Hello World&amp;quot;)) }) if err := http.ListenAndServe(&amp;quot;:8000&amp;quot;, nil); err != nil { fmt.Println(&amp;quot;start http server fail:&amp;quot;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI &amp;ldquo;/&amp;rdquo; 被注册到了 DefaultServeMux 上。 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求</description>
+    </item>
+    
+    <item>
+      <title>gin 源码阅读(1) - gin 与 net/http 的关系</title>
+      <link>https://www.haohongfan.com/posts/2021-10-05-gin1/</link>
+      <pubDate>Tue, 05 Oct 2021 22:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-05-gin1/</guid>
+      <description>gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间</description>
+    </item>
+    
+    <item>
+      <title>如何欺骗 Go Mod</title>
+      <link>https://www.haohongfan.com/posts/2021-10-04-gomod/</link>
+      <pubDate>Mon, 04 Oct 2021 20:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-04-gomod/</guid>
+      <description>hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome</description>
+    </item>
+    
+    <item>
+      <title>透过内存看 Slice 和 Array的异同</title>
+      <link>https://www.haohongfan.com/posts/2021-10-03-slice-memory/</link>
+      <pubDate>Sun, 03 Oct 2021 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-03-slice-memory/</guid>
+      <description>hi, 大家好，我是 hhf。 有这么一个 Go 面试题：请说出 slice 和 array 的区别？ 这简直就是送分题。现在思考一下，你咋样回答才能让面试官满意呢？ 我这里就不贴这道题的答案了。但是我想内存方面简单分析下 slice 和 array 的区别。 Array func main() { as := [4]int{10, 5, 8, 7} fmt.Println(&amp;quot;as[0]：&amp;quot;, as[0]) fmt.Println(&amp;quot;as[1]：&amp;quot;, as[1]) fmt.P</description>
+    </item>
+    
+    <item>
+      <title>这些 Goland 技巧，学会开发效率翻倍</title>
+      <link>https://www.haohongfan.com/posts/2021-10-02-goland2/</link>
+      <pubDate>Sat, 02 Oct 2021 20:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-02-goland2/</guid>
+      <description>hi, 大家好，我是 hhf。 《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。 自定义结构 tag Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。 Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。 举个例子：正常情况下，公司对接口返回值字段有统一的</description>
+    </item>
+    
+    <item>
+      <title>Goland 这些实操技巧，你可能还不会！</title>
+      <link>https://www.haohongfan.com/posts/2021-10-02-goland1/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-02-goland1/</guid>
+      <description>工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说</description>
+    </item>
+    
+    <item>
+      <title>开发中的坑2：MQ 也能做 RPC 调用？</title>
+      <link>https://www.haohongfan.com/posts/2021-10-01-mq-rpc/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-10-01-mq-rpc/</guid>
+      <description>hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud</description>
+    </item>
+    
     <item>
       <title>interface 原理 - 类型转换</title>
-      <link>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/</link>
+      <link>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/</link>
       <pubDate>Tue, 10 Aug 2021 23:27:21 +0800</pubDate>
       
-      <guid>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy/</guid>
+      <guid>https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/</guid>
       <description>hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配+汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主</description>
     </item>
     
