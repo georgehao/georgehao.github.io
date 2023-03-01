@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &quot;github.com/go-sql-driver/mysql&quot; 的话，就会报：panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug",
+      "item":"https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/"
+    },
+    "headline": "当 go-sql-driver\/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv","datePublished": "2022-12-08T21:27:21+08:00",
+    "dateModified": "2022-12-08T21:27:21+08:00",
+    "wordCount":  1365 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com\/go-sql-driver\/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ \u0026quot;github.com\/go-sql-driver\/mysql\u0026quot; 的话，就会报：panic: sql: unknown driver \u0026quot;mysql\u0026quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver\/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备"
+}
+</script><meta property="og:title" content="当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" />
+
+
+
+
+<meta property="og:description" content="hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &quot;github.com/go-sql-driver/mysql&quot; 的话，就会报：panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2022-12-08T21:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2022-12-08T21:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+<meta property="article:tag" content="mysql" />
+
+<meta property="article:tag" content="o-sql-driver/mysql" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-07-getty/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-06-graphql/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin3/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin2/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin1/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-04-gomod/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2022-12-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/mysql/" class="hover:text-eureka">mysql</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/go-sql-driver/mysql/" class="hover:text-eureka">go-sql-driver/mysql</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>hi，大家好，我是 haohongfan。</p>
+<p>对于 Go CURD-Boy 来说，相信 <code>github.com/go-sql-driver/mysql</code> 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 <code>_ &quot;github.com/go-sql-driver/mysql&quot;</code> 的话，就会报：<code>panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)</code>。基本上 Go 的 CURD 都离不开这个特别重要的库。</p>
+<p>不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。</p>
+<h2 id="demo-准备">Demo 准备</h2>
+<h3 id="数据库准备">数据库准备</h3>
+<pre><code class="language-sql">CREATE TABLE `Test1` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+</code></pre>
+<p>丛这个 sql 语句中可以看出来， create_time 是 <code>timestamp</code> 类型，这里要特别留意 timestamp 这个类型。</p>
+<p>现在插入一条数据，然后查看刚插入的数据的值。</p>
+<pre><code class="language-sql">insert into Test1 values (1, '2022-01-01 00:00:00')
+</code></pre>
+<p>查看下 msyql 当前的时区：</p>
+<pre><code class="language-sql"> show VARIABLES like '%time_zone%';
+</code></pre>
+<p>结果是：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Variable_name</th>
+<th style="text-align:left">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">system_time_zone</td>
+<td style="text-align:left">CST</td>
+</tr>
+<tr>
+<td style="text-align:left">time_zone</td>
+<td style="text-align:left">+08:00</td>
+</tr>
+</tbody>
+</table>
+<p>接下来使用 mysql unix_timestamp 查看 create_time 的时间戳</p>
+<pre><code class="language-sql">SELECT unix_timestamp(create_time) from Test1 where id = 1;
+</code></pre>
+<p>结果是：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">unix_timestamp(create_time)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1640966400</td>
+</tr>
+</tbody>
+</table>
+<h3 id="使用-go-sql-driver-读取-create_time-的值">使用 go-sql-driver 读取 create_time 的值</h3>
+<pre><code class="language-go">package main
+
+import (
+	&quot;database/sql&quot;
+	&quot;fmt&quot;
+	_ &quot;github.com/go-sql-driver/mysql&quot;
+	&quot;time&quot;
+)
+
+func main() {
+  var user = &quot;user&quot;
+  var pwd = &quot;password&quot;
+  var dbName = &quot;dbname&quot;
+  dsn := fmt.Sprintf(&quot;%s:%s@tcp(localhost:3306)/%s?timeout=100s&amp;parseTime=true&amp;interpolateParams=true&quot;, user, pwd, dbName)
+  db, err := sql.Open(&quot;mysql&quot;, dsn)
+  if err != nil {
+    panic(err)
+  }
+  defer db.Close()
+
+  rows, err := db.Query(&quot;select create_time from Test1 limit 1&quot;)
+  if err != nil {
+    panic(err)
+  }
+  for rows.Next() {
+    t := time.Time{}
+    rows.Scan(&amp;t)
+    fmt.Println(t)
+    fmt.Println(t.Unix())
+  }
+}
+</code></pre>
+<p>我们运行个程序会输出下面的结果:</p>
+<pre><code>2022-01-01 00:00:00 +0000 UTC
+1640995200
+</code></pre>
+<p>你发现问题所在了吗, 可能顺着看下来不太直观，我用一张图把结果粘在一块就看清楚了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/20221208221921.png" alt=""></p>
+<p>看图中红色箭头指向的两个结果，用 go-sql-driver 读取的结果和在 mysql 中用 unix_timestamp 获取的结果明显是不一样的。</p>
+<p>通过截图可以看出来，现在 create_time 在数据库的 <code>2022-01-01 00:00:00</code> 是东八区的时间，也就是北京时间，这个时间对应的时间戳就是 1640966400. 但是 go 程序读出来的却不是, go-sql-driver 读取到 1640995200 是什么呢？其实细心的小伙伴已经看出来了，这是 0 时区的 2022-01-01 00:00:00。</p>
+<p>再直接点，mysql 的 create_time 是 <code>2022-01-01 00:00:00 +008</code>，而读取到的是 <code>2022-01-01 00:00:00 +000</code>，他俩压根就不是一个值。</p>
+<p>基本能看出来 bug 是如何发生的了。下面接着剖析下 go-sql-driver 源码，看看是哪里导致的结果的错误。</p>
+<h2 id="go-sq-driver-源码">go-sq-driver 源码</h2>
+<p>源码我就不贴详细的源码了，只贴关键的路径，有兴趣的小伙伴可以顺着这个路径去看。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-callpath.jpg" alt=""></p>
+<p>我们详细关注调用路径中红色的两个方块的内存中的值。
+<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-source.jpg" alt=""></p>
+<pre><code class="language-go">// https://github.com/go-sql-driver/mysql/blob/master/packets.go#L788-L798
+
+func (rows *textRows) readRow(dest []driver.Value) error {
+	
+	// ... 
+
+	// Parse time field
+	switch rows.rs.columns[i].fieldType {
+	case fieldTypeTimestamp,
+		fieldTypeDateTime,
+		fieldTypeDate,
+		fieldTypeNewDate:
+		if dest[i], err = parseDateTime(dest[i].([]byte), mc.cfg.Loc); err != nil {
+			return err
+		}
+	}
+}
+</code></pre>
+<pre><code class="language-go">func parseDateTime(b []byte, loc *time.Location) (time.Time, error) {
+	const base = &quot;0000-00-00 00:00:00.000000&quot;
+	switch len(b) {
+	case 10, 19, 21, 22, 23, 24, 25, 26: // up to &quot;YYYY-MM-DD HH:MM:SS.MMMMMM&quot;
+
+		year, err := parseByteYear(b)
+
+		month := time.Month(m)
+
+		day, err := parseByte2Digits(b[8], b[9])
+
+		hour, err := parseByte2Digits(b[11], b[12])
+
+		min, err := parseByte2Digits(b[14], b[15])
+
+		sec, err := parseByte2Digits(b[17], b[18])
+
+		// https://github.com/go-sql-driver/mysql/blob/master/utils.go#L166-L168
+		if len(b) == 19 {
+			return time.Date(year, month, day, hour, min, sec, 0, loc), nil
+		}
+	}
+}
+</code></pre>
+<p>看到这里基本上就能明白，go-sql-driver 把数据库读出来的 create_time timestamp 值当做一个字符串，然后按照 mysql timestamp 的标准格式 &ldquo;0000-00-00 00:00:00.000000&rdquo; 去解析，分别得到 year, month, day, hour, min, sec。最后依赖传入 time.Location 值，调用 go 系统库 time.Date() 再去生成对应的值。</p>
+<p>这里表面看起来没有问题，其实这里严重依赖了传入的 time.Location。这个 time.Location 是如何得到的呢？</p>
+<p>通过阅读源码，可以明显的看出来，是通过解析传入的 DSN 的 Loc 获取。</p>
+<p><a href="https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L467-L474">https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L467-L474</a>
+<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-loc.jpg" alt=""></p>
+<p>那如果我们传入的 dsn 串不带 loc 时，Loc 就是 默认的 UTC 时区。
+<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-default-loc.jpg" alt=""></p>
+<h3 id="读取数值不一致的原因分析">读取数值不一致的原因分析</h3>
+<p>再回头看开头的程序，我们初始化 go-sql-driver 的 dsn 是 <code>user:password@tcp(localhost:3306)/dbname?timeout=100s&amp;parseTime=true&amp;interpolateParams=true</code>. 该 dsn 里面并不包含 loc 信息，所以 go-sql-driver 用使用了默认的 UTC 时区。 然后解析从 mysql 中获取的 timestamp 字段了，也就用默认的 UTC 时区去生成 Date，结果也就错了。</p>
+<p>其实问题的主要原因就是：go-sql-driver 并没有按照数据库的时区去解析 timestamp 字段，而且依赖了开发者生成的 dsn 传入的 loc。当开发者传入的 loc 和 数据库的 time_zone 不匹配的时候，所有的 timestamp 字段都会解析错误。</p>
+<p>有些人可能有疑问，如果 go-sql-driver 为什么不直接使用 mysql 的时区去解析 timestamp 呢，我觉得是一个bug。</p>
+<h2 id="结论">结论</h2>
+<p>所以说，现阶段使用 go-sql-driver 的时候一定要特别注意，生成的 dsn 字符串一定要和数据的时区保持一致，不然的话就会导致 timestamp 字段解析错误。</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+    <a href="https://www.haohongfan.com/tags/mysql/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#mysql</a>
+    
+    <a href="https://www.haohongfan.com/tags/o-sql-driver/mysql/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#o-sql-driver/mysql</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2021-10-07-getty/" class="block">Go 网络库 getty 的那些事</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#demo-准备">Demo 准备</a>
+      <ul>
+        <li><a href="#数据库准备">数据库准备</a></li>
+        <li><a href="#使用-go-sql-driver-读取-create_time-的值">使用 go-sql-driver 读取 create_time 的值</a></li>
+      </ul>
+    </li>
+    <li><a href="#go-sq-driver-源码">go-sq-driver 源码</a>
+      <ul>
+        <li><a href="#读取数值不一致的原因分析">读取数值不一致的原因分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#结论">结论</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-07-getty/">Go 网络库 getty 的那些事</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/">聊聊我对 GraphQL 的一些认知</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/">gin 源码阅读(3) - gin 路由的实现剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/">gin 源码阅读(2) - http请求是如何流入gin的?</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/">gin 源码阅读(1) - gin 与 net/http 的关系</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-04-gomod/">如何欺骗 Go Mod</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

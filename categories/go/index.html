@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug",
+            "description": "hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ \u0026quot;github.com/go-sql-driver/mysql\u0026quot; 的话，就会报：panic: sql: unknown driver \u0026quot;mysql\u0026quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备",
+            "url": "https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "Go 网络库 getty 的那些事",
             "description": "个人从事互联网基础架构系统研发十年余，包括我自己在内的很多朋友都是轮子党。 2011 年我在某大厂干活时，很多使用 C 语言进行开发的同事都有一个自己的私人 SDK 库，尤其是网络通信库。个人刚融入这个环境时，觉得不能写一个基于 epoll/iocp/kqueue 接口封装一个异步网络通信库，会在同事面前矮人三分。现在想起来当时很多同事很大胆，把自己封装的通信库直接在测试生产环境上线使用，据说那时候整个公",
             "url": "https://www.haohongfan.com/posts/2021-10-07-getty/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "聊聊我对 GraphQL 的一些认知",
             "description": "每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。 因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我",
             "url": "https://www.haohongfan.com/posts/2021-10-06-graphql/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "gin 源码阅读(3) - gin 路由的实现剖析",
             "description": "hi, 大家好，我是 hhf。 往期回顾： gin 源码阅读(1) - gin 与 net/http 的关系 gin 源码阅读(2) - http请求是如何流入gin的? 上面两篇文章基本讲清楚了 Web Server 如何接收客户端请求，以及如何将请求流转到 gin 的逻辑。建议没有看过的同学先从第一篇阅读。 gin 原理剖析说到这里，就完全进入 gin 的逻辑里面了。gin 已经拿到 http 请求了，第一件重要的事情肯定就是重写路由了，所以本节内容主要是分",
             "url": "https://www.haohongfan.com/posts/2021-10-05-gin3/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "gin 源码阅读(2) - http请求是如何流入gin的?",
             "description": "本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？ 我们仍然以 net/http 的例子开始 func main() { http.HandleFunc(\u0026quot;/\u0026quot;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(\u0026quot;Hello World\u0026quot;)) }) if err := http.ListenAndServe(\u0026quot;:8000\u0026quot;, nil); err != nil { fmt.Println(\u0026quot;start http server fail:\u0026quot;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI \u0026ldquo;/\u0026rdquo; 被注册到了 DefaultServeMux 上。 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求",
             "url": "https://www.haohongfan.com/posts/2021-10-05-gin2/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "gin 源码阅读(1) - gin 与 net/http 的关系",
-            "description": "gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间",
-            "url": "https://www.haohongfan.com/posts/2021-10-05-gin1/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-10-07T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2022-12-08T21:27:21&#43;08:00" />
 
 
 
@@ -232,6 +232,53 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" class="font-bold text-xl hover:text-eureka">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
+</div>
+<div class="content">
+  hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &#34;github.com/go-sql-driver/mysql&#34; 的话，就会报：panic: sql: unknown driver &#34;mysql&#34; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2022-12-08</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>3分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/mysql/" class="hover:text-eureka">mysql</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/go-sql-driver/mysql/" class="hover:text-eureka">go-sql-driver/mysql</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -409,53 +456,6 @@
 </div>
   </div>
   
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/" class="font-bold text-xl hover:text-eureka">gin 源码阅读(1) - gin 与 net/http 的关系</a>
-</div>
-<div class="content">
-  gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-10-05</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/gin/" class="hover:text-eureka">gin</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
 </div>
 
 
@@ -481,10 +481,13 @@
     <a class="page-link" href="/categories/go/page/4/">4</a>
   </li>
   <li class="page-item">
+    <a class="page-link" href="/categories/go/page/5/">5</a>
+  </li>
+  <li class="page-item">
     <a href="/categories/go/page/2/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/categories/go/page/4/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/categories/go/page/5/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 

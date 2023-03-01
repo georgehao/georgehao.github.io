@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
+            "name": "gin 源码阅读(1) - gin 与 net/http 的关系",
+            "description": "gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间",
+            "url": "https://www.haohongfan.com/posts/2021-10-05-gin1/"
+        },{
+            "@type":"ListItem",
+            "position":  2 ,
             "name": "如何欺骗 Go Mod",
             "description": "hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome",
             "url": "https://www.haohongfan.com/posts/2021-10-04-gomod/"
         },{
             "@type":"ListItem",
-            "position":  2 ,
+            "position":  3 ,
             "name": "透过内存看 Slice 和 Array的异同",
             "description": "hi, 大家好，我是 hhf。 有这么一个 Go 面试题：请说出 slice 和 array 的区别？ 这简直就是送分题。现在思考一下，你咋样回答才能让面试官满意呢？ 我这里就不贴这道题的答案了。但是我想内存方面简单分析下 slice 和 array 的区别。 Array func main() { as := [4]int{10, 5, 8, 7} fmt.Println(\u0026quot;as[0]：\u0026quot;, as[0]) fmt.Println(\u0026quot;as[1]：\u0026quot;, as[1]) fmt.P",
             "url": "https://www.haohongfan.com/posts/2021-10-03-slice-memory/"
         },{
             "@type":"ListItem",
-            "position":  3 ,
+            "position":  4 ,
             "name": "这些 Goland 技巧，学会开发效率翻倍",
             "description": "hi, 大家好，我是 hhf。 《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。 自定义结构 tag Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。 Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。 举个例子：正常情况下，公司对接口返回值字段有统一的",
             "url": "https://www.haohongfan.com/posts/2021-10-02-goland2/"
         },{
             "@type":"ListItem",
-            "position":  4 ,
+            "position":  5 ,
             "name": "Goland 这些实操技巧，你可能还不会！",
             "description": "工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说",
             "url": "https://www.haohongfan.com/posts/2021-10-02-goland1/"
-        },{
-            "@type":"ListItem",
-            "position":  5 ,
-            "name": "开发中的坑2：MQ 也能做 RPC 调用？",
-            "description": "hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud",
-            "url": "https://www.haohongfan.com/posts/2021-10-01-mq-rpc/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2021-10-07T23:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2022-12-08T21:27:21&#43;08:00" />
 
 
 
@@ -217,6 +217,53 @@
 </article>
 <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/" class="font-bold text-xl hover:text-eureka">gin 源码阅读(1) - gin 与 net/http 的关系</a>
+</div>
+<div class="content">
+  gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。 gin 概览 想弄清楚 gin, 需要弄明白以下几个问题: request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-05</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/gin/" class="hover:text-eureka">gin</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
@@ -366,49 +413,6 @@
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
         <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" class="font-bold text-xl hover:text-eureka">开发中的坑2：MQ 也能做 RPC 调用？</a>
-</div>
-<div class="content">
-  hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-10-01</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
     </div>
     
     

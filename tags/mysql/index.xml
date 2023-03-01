@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mysql on HHFCodeRv</title>
+    <link>https://www.haohongfan.com/tags/mysql/</link>
+    <description>Recent content in mysql on HHFCodeRv</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
+</copyright>
+    <lastBuildDate>Thu, 08 Dec 2022 21:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/tags/mysql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</title>
+      <link>https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/</link>
+      <pubDate>Thu, 08 Dec 2022 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/</guid>
+      <description>hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &amp;quot;github.com/go-sql-driver/mysql&amp;quot; 的话，就会报：panic: sql: unknown driver &amp;quot;mysql&amp;quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -6,30 +6,39 @@
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/authors/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/categories/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/go/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/categories/go/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
-  </url><url>
-    <loc>https://www.haohongfan.com/posts/2021-10-07-getty/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/authors/hhf/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/tags/mysql/</loc>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/categories/mysql/</loc>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/posts/</loc>
-    <lastmod>2021-10-07T23:27:21+08:00</lastmod>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/</loc>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/</loc>
+    <lastmod>2022-12-08T21:27:21+08:00</lastmod>
+  </url><url>
+    <loc>https://www.haohongfan.com/posts/2021-10-07-getty/</loc>
     <lastmod>2021-10-07T23:27:21+08:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/tags/bff/</loc>
@@ -327,6 +336,10 @@
     <lastmod>2017-06-17T14:36:31+00:00</lastmod>
   </url><url>
     <loc>https://www.haohongfan.com/docs/</loc>
+  </url><url>
+    <loc>https://www.haohongfan.com/categories/go-sql-driver/mysql/</loc>
+  </url><url>
+    <loc>https://www.haohongfan.com/tags/o-sql-driver/mysql/</loc>
   </url><url>
     <loc>https://www.haohongfan.com/archive/</loc>
   </url>
