@@ -85,33 +85,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "开发中的坑2：MQ 也能做 RPC 调用？",
-            "description": "hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud",
-            "url": "https://www.haohongfan.com/posts/2021-10-01-mq-rpc/"
+            "name": "如何欺骗 Go Mod",
+            "description": "hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome",
+            "url": "https://www.haohongfan.com/posts/2021-10-04-gomod/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "interface 原理 - 类型转换",
-            "description": "hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配+汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主",
-            "url": "https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/"
+            "name": "透过内存看 Slice 和 Array的异同",
+            "description": "hi, 大家好，我是 hhf。 有这么一个 Go 面试题：请说出 slice 和 array 的区别？ 这简直就是送分题。现在思考一下，你咋样回答才能让面试官满意呢？ 我这里就不贴这道题的答案了。但是我想内存方面简单分析下 slice 和 array 的区别。 Array func main() { as := [4]int{10, 5, 8, 7} fmt.Println(\u0026quot;as[0]：\u0026quot;, as[0]) fmt.Println(\u0026quot;as[1]：\u0026quot;, as[1]) fmt.P",
+            "url": "https://www.haohongfan.com/posts/2021-10-03-slice-memory/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "我为什么从 C++ 转到了 Go",
-            "description": "为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C++，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C++ 转到了 Go ? 为什么选择 C++ ？ 我本科毕业那会，Java 还没有那么卷，",
-            "url": "https://www.haohongfan.com/posts/2021-07-10-govscpp/"
+            "name": "这些 Goland 技巧，学会开发效率翻倍",
+            "description": "hi, 大家好，我是 hhf。 《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。 自定义结构 tag Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。 Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。 举个例子：正常情况下，公司对接口返回值字段有统一的",
+            "url": "https://www.haohongfan.com/posts/2021-10-02-goland2/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "开发中的那些坑",
-            "description": "本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不",
-            "url": "https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/"
+            "name": "Goland 这些实操技巧，你可能还不会！",
+            "description": "工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说",
+            "url": "https://www.haohongfan.com/posts/2021-10-02-goland1/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "Go timer 是如何被调度的",
-            "description": "Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时",
-            "url": "https://www.haohongfan.com/posts/2021-06-27-timer/"
+            "name": "开发中的坑2：MQ 也能做 RPC 调用？",
+            "description": "hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud",
+            "url": "https://www.haohongfan.com/posts/2021-10-01-mq-rpc/"
         }
     ]
 }
@@ -146,7 +146,7 @@
 
 
 
-<meta property="og:updated_time" content="2022-12-08T21:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2023-04-18T21:27:21&#43;08:00" />
 
 
 
@@ -238,102 +238,145 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" class="font-bold text-xl hover:text-eureka">开发中的坑2：MQ 也能做 RPC 调用？</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-04-gomod/" class="font-bold text-xl hover:text-eureka">如何欺骗 Go Mod</a>
 </div>
 <div class="content">
-  hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud
+  hi，大家好，我是 hhf。 最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。 我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了） 在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。 Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prome
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-10-03-slice-memory/" class="font-bold text-xl hover:text-eureka">透过内存看 Slice 和 Array的异同</a>
+</div>
+<div class="content">
+  hi, 大家好，我是 hhf。 有这么一个 Go 面试题：请说出 slice 和 array 的区别？ 这简直就是送分题。现在思考一下，你咋样回答才能让面试官满意呢？ 我这里就不贴这道题的答案了。但是我想内存方面简单分析下 slice 和 array 的区别。 Array func main() { as := [4]int{10, 5, 8, 7} fmt.Println(&#34;as[0]：&#34;, as[0]) fmt.Println(&#34;as[1]：&#34;, as[1]) fmt.P
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-03</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-10-02-goland2/" class="font-bold text-xl hover:text-eureka">这些 Goland 技巧，学会开发效率翻倍</a>
+</div>
+<div class="content">
+  hi, 大家好，我是 hhf。 《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。 自定义结构 tag Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。 Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。 举个例子：正常情况下，公司对接口返回值字段有统一的
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-10-02</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2021-10-02-goland1/" class="font-bold text-xl hover:text-eureka">Goland 这些实操技巧，你可能还不会！</a>
+</div>
+<div class="content">
+  工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。 Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。 我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
         <span>2021-10-01</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-08-10-interface-change-copy-2/" class="font-bold text-xl hover:text-eureka">interface 原理 - 类型转换</a>
-</div>
-<div class="content">
-  hi, 大家好，我是 haohognfan。 可能你看过的 interface 剖析的文章比较多了，这些文章基本都是从汇编角度分析类型转换或者动态转发。不过随着 Go 版本升级，对应的 Go 汇编也发生了巨大的变化，如果单从汇编角度去分析 interface 变的非常有难度，本篇文章我会从内度分配&#43;汇编角度切入 interface，去了解 interface 的原理。 限于篇幅 interface 有关动态转发和反射的内容，请关注后续的文章。本篇文章主
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-08-10</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-07-10-govscpp/" class="font-bold text-xl hover:text-eureka">我为什么从 C&#43;&#43; 转到了 Go</a>
-</div>
-<div class="content">
-  为什么突然发了一篇这样的文章呢？ 了解我的人都知道，我很鄙视语言歧视链，因为我不只写 Go，我同样也在写 PHP，而且还写过三年的 C&#43;&#43;，同样也搞过 Python。但是我为什么以这个主题写一篇文章呢？ 很简单，Go 源码分析文章暂时写不下去了，因为 Go 汇编我看不懂。。。 继续回到上面的话题：我为什么从 C&#43;&#43; 转到了 Go ? 为什么选择 C&#43;&#43; ？ 我本科毕业那会，Java 还没有那么卷，
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-07-10</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -367,20 +410,20 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-06-30-programer-design-copy/" class="font-bold text-xl hover:text-eureka">开发中的那些坑</a>
+  <a href="https://www.haohongfan.com/posts/2021-10-01-mq-rpc/" class="font-bold text-xl hover:text-eureka">开发中的坑2：MQ 也能做 RPC 调用？</a>
 </div>
 <div class="content">
-  本篇文章罗列一些开发业务时遇到的那些坑。 微服务银弹 当前的市面上各种微服务，DDD的课收割了一波又一波的韭菜，有同学听完了课就要迫不及待的尝试一下。学习新知识的动力当然值得肯定，但是具体落地需要根据公司实际场景来。 某前同事找我咨询架构相关的事情，跟他一番交流让我彻底无语了。 这是他们公司 JAVA 架构师落地的方案（2个开发，其中一个还是架构师，真是闹）。姑且不
+  hi, 大家好，我是 haohongfan。 最近浏览 帖子 的时候看到一个有意思的吐槽。 大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？ 当然不出意外的，评论区炸了！ 现在提出一些疑问： 这个架构师的做法对吗 ？ MQ 是否能做 RPC 调用 ？ RPC 框架的职责 回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。 Java: SpringCloud
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2021-06-30</span>
+        <span>2021-10-01</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
+        <span>4分钟阅读时长</span>
     </div>
     
     
@@ -396,56 +439,6 @@
     </div>
     
 
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2021-06-27-timer/" class="font-bold text-xl hover:text-eureka">Go timer 是如何被调度的</a>
-</div>
-<div class="content">
-  Go timer 是如何被调度的？ hi，大家好，我是 haohongfan。 本篇文章剖析下 Go 定时器的相关内容。定时器不管是业务开发，还是基础架构开发，都是绕不过去的存在，由此可见定时器的重要程度。 我们不管用 NewTimer, timer.After，还是 timer.AfterFun 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。 全局的 timer 堆也经历过三个阶段的重要升级。 Go 1.9 版本之前，所有的计时
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2021-06-27</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>6分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-th-list mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/series/go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/" class="hover:text-eureka">Go源码分析与实战</a>
-        
-    </div>
     
 </div>
 

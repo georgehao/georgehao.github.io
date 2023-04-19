@@ -8,7 +8,7 @@
     <language>zh</language>
     <copyright>&amp;copy; 2021 &lt;a href=&#34;https://www.haohongfan.com/&#34;&gt;haohongfan&lt;/a&gt; &lt;a href=&#34;&#34;&gt;京ICP备17041575号&lt;/a&gt;
 </copyright>
-    <lastBuildDate>Thu, 08 Dec 2022 21:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 18 Apr 2023 21:27:21 +0800</lastBuildDate><atom:link href="https://www.haohongfan.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>好友推荐</title>
       <link>https://www.haohongfan.com/friends/friends/</link>
@@ -16,6 +16,42 @@
       
       <guid>https://www.haohongfan.com/friends/friends/</guid>
       <description>三人行，必有我师。这里推荐我的一些大佬好友们。 GO 语言中文网 polarisxu 脑子进煎鱼了 码农桃花源 luozhiyun很酷 Xargin 奇伢云存储 远赴星辰 五分选手 Golang 梦工厂 Mohuishou Tangwz 的博客 kakus 的博客 吴亲强的深夜食堂 欧长坤的博客 爬虫与数据挖掘 董泽润的技术笔记</description>
+    </item>
+    
+    <item>
+      <title>Go runtime.KeepAlive</title>
+      <link>https://www.haohongfan.com/posts/2023-04-19-go-runtime-keepalive/</link>
+      <pubDate>Tue, 18 Apr 2023 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2023-04-19-go-runtime-keepalive/</guid>
+      <description>在 Go 编程中，你是否注意过临时变量是什么时候被回收的？比如下面这段程序, 变量 a 会在什么时间被 GC 回收掉的？ func f2() { // do something } func f1() int { var a int = 10 a += f2() b := a // do something return b } A. f1() 函数结束后的 GC 周期内 B. 当 a 复制给 b 后的 GC 周期内 很多同学稍微不注意，会觉得是 A 是正确的。其实正确答案应该是 B，因为 a 复制给 b 后，a 已经没有被引用了，如果 GC 发生时 a 变量是白色对象，就会被清除掉</description>
+    </item>
+    
+    <item>
+      <title>Go1.18 Go workspace 初体验</title>
+      <link>https://www.haohongfan.com/posts/2023-04-19-go-workspace/</link>
+      <pubDate>Mon, 17 Apr 2023 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2023-04-19-go-workspace/</guid>
+      <description>hi，大家好，我是好久没有更新的 haohongfan。 Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。 更新 go 1.18 版本，推荐使用 goup，做多版本管理很方便。 Go work 使用方式 1. 创建一个工作空间 mkdir workspace cd workspace 2. 初始化一个项目 mkdir hello_work cd hello go mod init example.com/hello_work output：go: creating new go.mod:</description>
+    </item>
+    
+    <item>
+      <title>聊聊我对多云多活方案的看法</title>
+      <link>https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/</link>
+      <pubDate>Sun, 16 Apr 2023 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/</guid>
+      <description>互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。 在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。 虽说每个云服务商都号称自己</description>
+    </item>
+    
+    <item>
+      <title>性能优化 | Go Ballast 让内存控制更加丝滑</title>
+      <link>https://www.haohongfan.com/posts/2023-04-19-go-ballest/</link>
+      <pubDate>Sat, 15 Apr 2023 21:27:21 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2023-04-19-go-ballest/</guid>
+      <description>关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。 设置 GOGC 设置 debug.SetGCPercent() 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。 我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收</description>
     </item>
     
     <item>

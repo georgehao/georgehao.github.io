@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>聊聊我对多云多活方案的看法 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。 在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。 虽说每个云服务商都号称自己">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"聊聊我对多云多活方案的看法",
+      "item":"https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/"
+    },
+    "headline": "聊聊我对多云多活方案的看法 | HHFCodeRv","datePublished": "2023-04-16T21:27:21+08:00",
+    "dateModified": "2023-04-16T21:27:21+08:00",
+    "wordCount":  2411 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。 在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。 虽说每个云服务商都号称自己"
+}
+</script><meta property="og:title" content="聊聊我对多云多活方案的看法 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/" />
+
+
+
+
+<meta property="og:description" content="互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。 在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。 虽说每个云服务商都号称自己" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2023-04-16T21:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2023-04-16T21:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-07-getty/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-06-graphql/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin3/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin2/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">聊聊我对多云多活方案的看法</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2023-04-16</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>5分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。</p>
+<p>在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/danyun.png" alt=""></p>
+<p>虽说每个云服务商都号称自己的稳定性能达到 N 个 9，但是如果一旦该云服务商出现比较严重的问题时，我们只能祈祷该服务商能赶紧恢复，事后云服务商发优惠券补偿。但是对我们业务的客户却造成了很大的伤害，甚者还会造成数据的永久丢失。</p>
+<p>当公司的业务达到了一定的规模，一般情况都会再选一个云服务商形成“多云多活”来保证系统的稳定性、高可用。有幸参与过某公司的双云方案的落地，这里聊聊这种多云多活的方案的一些思考。</p>
+<h2 id="多活为什么重要">多活为什么重要？</h2>
+<p>这里就举两个实际的例子。</p>
+<ul>
+<li>2021年7月13日，B 站部分服务器机房发生故障，整个故障持续超过一小时。</li>
+<li>2021年10月9日，富途证券的 IDC 机房网络故障事件导致某些客户资产清零、无法交易。</li>
+</ul>
+<p>这两起故障都是比较基础服务出现的故障导致高可用受损，这个基础服务的故障一般恢复起来都是比较麻烦，为了实现高可用，将多活容灾推到了解决方案的层面。特别当 B 站故障后，各路文章出来解读多活，如何实施多活（很多的文章当个乐子看即可）。像这种比较基础的服务故障，往往恢复时间都是不确定的，多活确实是解决问题的有效手段，能大大提高我们系统的容灾能力。</p>
+<h2 id="服务容灾有哪些方案">服务容灾有哪些方案</h2>
+<h3 id="主备">主备</h3>
+<p>在比较小点公司内，提起比较多的方案应该是主备方案。这种方案的特点是有一套主、备集群，正常情况下都只有主集群在工作，当主集群出现故障的时候，备用集群启用。</p>
+<p>这种方案其实不太靠谱，因为备用集群正常情况下是不启用的，所以其代码，配置，数据都有可能是没有经过验证的，万一真的发生问题时，慌忙启动的备用集群大多数情况也是不可用的。</p>
+<h3 id="多活">多活</h3>
+<p>多活就是所有的集群都是正常提供服务的。正常情况下会按照流量划分，将流量归属到不同的集群，当某集群出现问题时，将流量切换到其他集群正常提供服务。</p>
+<p>多活是高可用架构设计的保障，根据多活等级的要求不同，多活还有同城双活，异地双活，两地三中心，三地五中心等。对多活的要求越高，投入的资源也就会越高。这里就不再详细讲述这些名字背后的技术细节了。</p>
+<h2 id="多云多活的技术细节">多云多活的技术细节</h2>
+<p>多云多活指的是公司选择两家云服务商，将服务部署两个云上，正常情况两个云同时对外提供服务，当其中一个云出现问题时，将流量全都切换到另外一个云。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/shuangyun2.png" alt=""></p>
+<p>这个图基本是大多数公司部署多云多活的技术方案，下面聊聊这个方案的相关技术细节和缺点。</p>
+<p>这个架构的大概流程：</p>
+<ul>
+<li>客户端通过接入层访问系统相关服务</li>
+<li>接入层根据流量分发规则，将流量向下分发到业务层</li>
+<li>业务层经过相关的业务逻辑处理，将相关数据写入到相关的存储中</li>
+</ul>
+<h2 id="流量分发切换">流量分发/切换</h2>
+<p>分布在不同的两个云的集群的系统承载能力是需要经过评估的，流量接入层按照系统承载能力的差异，将流量按照不同的比例进行分发。不过一般情况下，两个云的系统会尽量保证系统的承载能力是一致的，所以流量是平分到两个集群中。</p>
+<p>当某个云发生故障的时候，在流量接入层会将流量全部切换到另外一个云上，保证另外一个云的故障不会用户造成影响。由此可见流量接入的层的重要性，不过这一层组件比较成熟，在我经历的项目中，这一层确实没有发生过故障。</p>
+<h2 id="业务层双活">业务层双活</h2>
+<p>业务层对于双云双活来说，其实比较简单的，就是将同样的代码分别部署到两个云即可。</p>
+<p>但是要注意的是，这一层是有 IDC 之分的，要保证的是 云1  的服务不能访问到 云2 去，对于开发人员来说也不用太担心，只要配置不出错，一般业务框架会保证这个事情。</p>
+<p>再扯一点其他的，业务层正常情况下会根据业务需求快速迭代，这就给业务系统带来了不稳定性。如果 CI/CD 做的好的话，能够让业务做到快速回滚，但是这也会给核心业务造成一定的影响。为了解决这个问题，需要将核心业务进行隔离，让新上线的业务在非核心集群进行验证，等待稳定后再部署到核心集群。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/yungeli.png" alt=""></p>
+<h2 id="存储层">存储层</h2>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/yunstore.png" alt=""></p>
+<p>先提出一个问题：存储层这样设计是否有问题？</p>
+<p>这个设计还是蛮普遍的，比如 <a href="https://mp.weixin.qq.com/s/suFzz168Z4HmeP2lQd3tgw">《斗鱼基于etcd和ZooKeeper的注册中心实践案例》</a>这篇文章中，对于存储基本也是这样设计的。</p>
+<p>redis、mysql 还是选择经典的一主多从的设计方式。</p>
+<ul>
+<li>选择一个 “云” 将 mysql/redis 的主节点和部分从节点部署到这个云上</li>
+<li>将 mysql/redis 其他的从节点部署到另外一个云上</li>
+<li>redis/mysql 之间利用主从同步机制进行数据同步</li>
+<li>云1 和 云2 之间由一条专线连接</li>
+</ul>
+<h3 id="优点">优点</h3>
+<p>架构简单，可以利用 redis、mysql 自身的机制进行数据同步，让数据的访问在各自的云进行。</p>
+<h3 id="缺点">缺点</h3>
+<p>其实缺点一眼就看出来了，这整个“双云双活”的设计的缺点太依赖于主节点所在的云的稳定性和专线的稳定性。</p>
+<p>在我经历的项目，云的稳定性还是可以的，最容易出现问题的其实这条专线，比如：专线被打满。当专线出现问题时，研发只能傻乐，等待运维恢复专线，如何保证这个专线的稳定性称为这个架构最重要的事情。</p>
+<p>当然另外一个问题也是很难解决：主节点所在的云或者专线发生故障的时候，整个项目其实也就瘫痪了大半。</p>
+<p>因为当主节点所在的云出现故障时，在流量接入层可以将流量切换到另外一个集群，但是我们的主业务肯定不是”只读“的，肯定还有写业务存在, 于是出现故障的时候，只能看到一堆堆的写失败报警，有些业务接口肯定也在报错，只能等待故障恢复后，人工补偿这些写失败的数据。</p>
+<p>所以为了解决这个系统设计的缺陷，就是要将 redis/mysql 做成多主多从，主与主集群之间做数据同步。这个方案说起来容易，但是实践起来就太困难了。</p>
+<p>这里只使用 mysql/redis 作为示例来解释双云双活，其实我们的系统还有另外一些分布式一致性系统如：ectd，读者可以考虑一下如何部署到双云上面。</p>
+<h2 id="结论">结论</h2>
+<p>综上可以看出来，目前这个“多云多活”的瓶颈就在于存储层，让整个集群处于“伪多活”的状态。这个方案确实能解决一些问题，但是高可用并没有想象中的那么出色，更多时候这样项目一般都沦落成某些人晋升的 KPI。</p>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2023-04-19-go-workspace/" class="block">Go1.18 Go workspace 初体验</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" class="block">性能优化 | Go Ballast 让内存控制更加丝滑</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#多活为什么重要">多活为什么重要？</a></li>
+    <li><a href="#服务容灾有哪些方案">服务容灾有哪些方案</a>
+      <ul>
+        <li><a href="#主备">主备</a></li>
+        <li><a href="#多活">多活</a></li>
+      </ul>
+    </li>
+    <li><a href="#多云多活的技术细节">多云多活的技术细节</a></li>
+    <li><a href="#流量分发切换">流量分发/切换</a></li>
+    <li><a href="#业务层双活">业务层双活</a></li>
+    <li><a href="#存储层">存储层</a>
+      <ul>
+        <li><a href="#优点">优点</a></li>
+        <li><a href="#缺点">缺点</a></li>
+      </ul>
+    </li>
+    <li><a href="#结论">结论</a></li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/">性能优化 | Go Ballast 让内存控制更加丝滑</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-07-getty/">Go 网络库 getty 的那些事</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/">聊聊我对 GraphQL 的一些认知</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/">gin 源码阅读(3) - gin 路由的实现剖析</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/">gin 源码阅读(2) - http请求是如何流入gin的?</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

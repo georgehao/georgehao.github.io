@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width">
 
 
-<title>当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv</title>
+<title>性能优化 | Go Ballast 让内存控制更加丝滑 | HHFCodeRv</title>
 
 <meta name="generator" content="Hugo Eureka 0.8.2" />
 <link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
@@ -58,7 +58,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
 
 <meta name="description"
-  content="hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &quot;github.com/go-sql-driver/mysql&quot; 的话，就会报：panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备">
+  content="关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。 设置 GOGC 设置 debug.SetGCPercent() 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。 我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -70,8 +70,8 @@
       "item":"https://www.haohongfan.com/posts/"},{
       "@type": "ListItem",
       "position": 2 ,
-      "name":"当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug",
-      "item":"https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/"}]
+      "name":"性能优化 | Go Ballast 让内存控制更加丝滑",
+      "item":"https://www.haohongfan.com/posts/2023-04-19-go-ballest/"}]
 }
 </script>
 
@@ -83,11 +83,11 @@
     "@type": "Article",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/"
+        "@id": "https://www.haohongfan.com/posts/2023-04-19-go-ballest/"
     },
-    "headline": "当 go-sql-driver\/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv","datePublished": "2022-12-08T21:27:21+08:00",
-    "dateModified": "2022-12-08T21:27:21+08:00",
-    "wordCount":  1365 ,
+    "headline": "性能优化 | Go Ballast 让内存控制更加丝滑 | HHFCodeRv","datePublished": "2023-04-15T21:27:21+08:00",
+    "dateModified": "2023-04-15T21:27:21+08:00",
+    "wordCount":  1621 ,
     "author": {
         "@type": "Person",
         "name": "hhf"
@@ -100,21 +100,21 @@
             "url": "https://www.haohongfan.com/images/icon.png"
         }
         },
-    "description": "hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com\/go-sql-driver\/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ \u0026quot;github.com\/go-sql-driver\/mysql\u0026quot; 的话，就会报：panic: sql: unknown driver \u0026quot;mysql\u0026quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver\/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备"
+    "description": "关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。 设置 GOGC 设置 debug.SetGCPercent() 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。 我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收"
 }
-</script><meta property="og:title" content="当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug | HHFCodeRv" />
+</script><meta property="og:title" content="性能优化 | Go Ballast 让内存控制更加丝滑 | HHFCodeRv" />
 <meta property="og:type" content="article" />
 
 
 <meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
 
 
-<meta property="og:url" content="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" />
+<meta property="og:url" content="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" />
 
 
 
 
-<meta property="og:description" content="hi，大家好，我是 haohongfan。 对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &quot;github.com/go-sql-driver/mysql&quot; 的话，就会报：panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。 不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。 Demo 准备 数据库准备" />
+<meta property="og:description" content="关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。 设置 GOGC 设置 debug.SetGCPercent() 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。 我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收" />
 
 
 
@@ -131,10 +131,10 @@
 
 
 
-<meta property="article:published_time" content="2022-12-08T21:27:21&#43;08:00" />
+<meta property="article:published_time" content="2023-04-15T21:27:21&#43;08:00" />
 
 
-<meta property="article:modified_time" content="2022-12-08T21:27:21&#43;08:00" />
+<meta property="article:modified_time" content="2023-04-15T21:27:21&#43;08:00" />
 
 
 
@@ -143,13 +143,11 @@
 
 <meta property="article:tag" content="Go" />
 
-<meta property="article:tag" content="mysql" />
-
-<meta property="article:tag" content="o-sql-driver/mysql" />
 
 
 
 
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" />
 
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-07-getty/" />
 
@@ -160,8 +158,6 @@
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin2/" />
 
 <meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin1/" />
-
-<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-04-gomod/" />
 
 
 
@@ -241,15 +237,15 @@
 <div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
     <div
         class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
-        <h1 class="font-bold text-3xl text-primary-text">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</h1>
+        <h1 class="font-bold text-3xl text-primary-text">性能优化 | Go Ballast 让内存控制更加丝滑</h1>
         <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2022-12-08</span>
+        <span>2023-04-15</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
+        <span>4分钟阅读时长</span>
     </div>
     
     
@@ -257,14 +253,6 @@
         <i class="fas fa-folder mr-1"></i>
         
         <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/mysql/" class="hover:text-eureka">mysql</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/go-sql-driver/mysql/" class="hover:text-eureka">go-sql-driver/mysql</a>
         
     </div>
     
@@ -276,172 +264,79 @@
         
 
         <div class="content">
-            <p>hi，大家好，我是 haohongfan。</p>
-<p>对于 Go CURD-Boy 来说，相信 <code>github.com/go-sql-driver/mysql</code> 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 <code>_ &quot;github.com/go-sql-driver/mysql&quot;</code> 的话，就会报：<code>panic: sql: unknown driver &quot;mysql&quot; (forgotten import?)</code>。基本上 Go 的 CURD 都离不开这个特别重要的库。</p>
-<p>不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。</p>
-<h2 id="demo-准备">Demo 准备</h2>
-<h3 id="数据库准备">数据库准备</h3>
-<pre><code class="language-sql">CREATE TABLE `Test1` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            <p>关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。</p>
+<ul>
+<li>设置 GOGC</li>
+<li>设置 debug.SetGCPercent()</li>
+</ul>
+<p>这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。</p>
+<p>我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的<strong>回收</strong>仅仅是标记内存可以返回给操作系统，并不是立即回收，这就是你看到 Go 应用 RSS 一直居高不下的原因。在整个垃圾回收过程中会暂停整个 Go 程序（STW），Go 垃圾回收的耗时还是主要取决于<strong>标记</strong>花费的时间的长短，清除过程是非常快的。</p>
+<h2 id="设置-gogc-的弊端">设置 GOGC 的弊端</h2>
+<h3 id="1-gogc-设置比率的方式不精确">1. GOGC 设置比率的方式不精确</h3>
+<p>设置 GOGC 基本上我们比较常用的 Go GC 调优的方式，大部分情况下其实我们并不需要调整 GOGC 就可以，一方面是不涉及内存密集型的程序本身对内存敏感程度太低，另外就是 GOGC 这种设置比率的方式不精确，我们很难精确的控制我们想要的触发的垃圾回收的阈值。</p>
+<h3 id="2-gogc-设置过小">2. GOGC 设置过小</h3>
+<p>GOGC 设置的非常小，会频繁触发 GC 导致太多无效的 CPU 浪费，反应到程序的表现就会特别明显。举个例子，对于 API 接口来说，导致的结果的就是接口周期性的耗时变化。这个时候你抓取 CPU profile 来看，大部分的耗时都集中在 GC 的相关处理上。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/gc_more.png" alt=""></p>
+<p>如上图，这是一次 prometheus 的查询操作，我们看到大部分的 CPU 都消耗在 GC 的操作上。这也是生产环境遇到的，由于 GOGC 设置的过小，导致过多的消耗都耗费在 GC 上。</p>
+<h3 id="3-对某些程序本身占用内存就低容易触发-gc">3. 对某些程序本身占用内存就低，容易触发 GC</h3>
+<p>对 API 接口耗时比较敏感的业务，由于这种接口一般情况下内存占用都比较低，因为 API 接口变量的生命周期都比较短，这个时候 GOGC 置默认值的时候，也可能也会遇到接口的周期性的耗时波动。这是为什么呢？</p>
+<p>因为这种接口本身占用内存比较低，每次 GC 之后本身占的内存比较低，如果按照上次 GC 后的 heap 的一倍的 GC 步调来设置 GOGC 的话，这个阈值其实是很容易就能够触发，于是就很容出现接口因为 GC 的触发导致额外的消耗。</p>
+<h3 id="4-gogc-设置很大有的时候又容易触发-oom">4. GOGC 设置很大，有的时候又容易触发 OOM</h3>
+<p>那如何调整呢？是不是把 GOGC 设置的越大越好呢？这样确实能够降低 GC 的触发频率，但是这个值需要设置特别大才有效果，GOGC 一般需要设置 2000 左右。这样带来的问题，GOGC 设置的过大，如果这些接口突然接受到一大波流量，由于长时间无法触发 GC 可能导致 OOM。</p>
+<p>由此，GOGC 对于这样的场景并不是很友好，那有没有能够精确控制内存，让其在 10G 的倍数时准确控制 GC 呢？</p>
+<h2 id="go-内存-ballast">GO 内存 ballast</h2>
+<p>这就需要 Go ballast 出场了。什么是 Go ballast，其实很简单就是初始化一个生命周期贯穿整个 Go 应用生命周期的超大 slice。</p>
+<pre><code class="language-go">func main() {
+  ballast := make([]byte, 10*1024*1024*1024) // 10G 
+  
+  // do something
+  
+  runtime.KeepAlive(ballast)
+}
 </code></pre>
-<p>丛这个 sql 语句中可以看出来， create_time 是 <code>timestamp</code> 类型，这里要特别留意 timestamp 这个类型。</p>
-<p>现在插入一条数据，然后查看刚插入的数据的值。</p>
-<pre><code class="language-sql">insert into Test1 values (1, '2022-01-01 00:00:00')
-</code></pre>
-<p>查看下 msyql 当前的时区：</p>
-<pre><code class="language-sql"> show VARIABLES like '%time_zone%';
-</code></pre>
-<p>结果是：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:left">Variable_name</th>
-<th style="text-align:left">Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">system_time_zone</td>
-<td style="text-align:left">CST</td>
-</tr>
-<tr>
-<td style="text-align:left">time_zone</td>
-<td style="text-align:left">+08:00</td>
-</tr>
-</tbody>
-</table>
-<p>接下来使用 mysql unix_timestamp 查看 create_time 的时间戳</p>
-<pre><code class="language-sql">SELECT unix_timestamp(create_time) from Test1 where id = 1;
-</code></pre>
-<p>结果是：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">unix_timestamp(create_time)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">1640966400</td>
-</tr>
-</tbody>
-</table>
-<h3 id="使用-go-sql-driver-读取-create_time-的值">使用 go-sql-driver 读取 create_time 的值</h3>
+<p>上面的代码就初始化了一个 ballast，利用 runtime.KeepAlive 来保证 ballast 不会被 GC 给回收掉。</p>
+<p>利用这个特性，就能保证 GC 在 10G 的一倍时才能被触发，这样就能够比较精准控制 GO GC 的触发时机。</p>
+<p><strong>这里你可能有一个疑问，这里初始化一个 10G 的数组，不就占用了 10 G 的物理内存呢？</strong> 答案其实是不会的。</p>
 <pre><code class="language-go">package main
 
 import (
-	&quot;database/sql&quot;
-	&quot;fmt&quot;
-	_ &quot;github.com/go-sql-driver/mysql&quot;
-	&quot;time&quot;
+    &quot;runtime&quot;
+    &quot;math&quot;
+    &quot;time&quot;
 )
 
 func main() {
-  var user = &quot;user&quot;
-  var pwd = &quot;password&quot;
-  var dbName = &quot;dbname&quot;
-  dsn := fmt.Sprintf(&quot;%s:%s@tcp(localhost:3306)/%s?timeout=100s&amp;parseTime=true&amp;interpolateParams=true&quot;, user, pwd, dbName)
-  db, err := sql.Open(&quot;mysql&quot;, dsn)
-  if err != nil {
-    panic(err)
-  }
-  defer db.Close()
+    ballast := make([]byte, 10*1024*1024*1024)
 
-  rows, err := db.Query(&quot;select create_time from Test1 limit 1&quot;)
-  if err != nil {
-    panic(err)
-  }
-  for rows.Next() {
-    t := time.Time{}
-    rows.Scan(&amp;t)
-    fmt.Println(t)
-    fmt.Println(t.Unix())
-  }
+    &lt;-time.After(time.Duration(math.MaxInt64))
+    runtime.KeepAlive(ballast)
 }
 </code></pre>
-<p>我们运行个程序会输出下面的结果:</p>
-<pre><code>2022-01-01 00:00:00 +0000 UTC
-1640995200
+<pre><code>$ ps -eo pmem,comm,pid,maj_flt,min_flt,rss,vsz --sort -rss | numfmt --header --to=iec --field 5 | numfmt --header --from-unit=1024 --to=iec --field 6 | column -t | egrep &quot;[t]est|[P]I&quot;
+
+%MEM  COMMAND   PID    MAJFL      MINFL  RSS    VSZ
+0.1   test      12859  0          1.6K   344M   11530184
 </code></pre>
-<p>你发现问题所在了吗, 可能顺着看下来不太直观，我用一张图把结果粘在一块就看清楚了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/20221208221921.png" alt=""></p>
-<p>看图中红色箭头指向的两个结果，用 go-sql-driver 读取的结果和在 mysql 中用 unix_timestamp 获取的结果明显是不一样的。</p>
-<p>通过截图可以看出来，现在 create_time 在数据库的 <code>2022-01-01 00:00:00</code> 是东八区的时间，也就是北京时间，这个时间对应的时间戳就是 1640966400. 但是 go 程序读出来的却不是, go-sql-driver 读取到 1640995200 是什么呢？其实细心的小伙伴已经看出来了，这是 0 时区的 2022-01-01 00:00:00。</p>
-<p>再直接点，mysql 的 create_time 是 <code>2022-01-01 00:00:00 +008</code>，而读取到的是 <code>2022-01-01 00:00:00 +000</code>，他俩压根就不是一个值。</p>
-<p>基本能看出来 bug 是如何发生的了。下面接着剖析下 go-sql-driver 源码，看看是哪里导致的结果的错误。</p>
-<h2 id="go-sq-driver-源码">go-sq-driver 源码</h2>
-<p>源码我就不贴详细的源码了，只贴关键的路径，有兴趣的小伙伴可以顺着这个路径去看。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-callpath.jpg" alt=""></p>
-<p>我们详细关注调用路径中红色的两个方块的内存中的值。
-<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-source.jpg" alt=""></p>
-<pre><code class="language-go">// https://github.com/go-sql-driver/mysql/blob/master/packets.go#L788-L798
-
-func (rows *textRows) readRow(dest []driver.Value) error {
-	
-	// ... 
-
-	// Parse time field
-	switch rows.rs.columns[i].fieldType {
-	case fieldTypeTimestamp,
-		fieldTypeDateTime,
-		fieldTypeDate,
-		fieldTypeNewDate:
-		if dest[i], err = parseDateTime(dest[i].([]byte), mc.cfg.Loc); err != nil {
-			return err
-		}
-	}
-}
-</code></pre>
-<pre><code class="language-go">func parseDateTime(b []byte, loc *time.Location) (time.Time, error) {
-	const base = &quot;0000-00-00 00:00:00.000000&quot;
-	switch len(b) {
-	case 10, 19, 21, 22, 23, 24, 25, 26: // up to &quot;YYYY-MM-DD HH:MM:SS.MMMMMM&quot;
-
-		year, err := parseByteYear(b)
-
-		month := time.Month(m)
-
-		day, err := parseByte2Digits(b[8], b[9])
-
-		hour, err := parseByte2Digits(b[11], b[12])
-
-		min, err := parseByte2Digits(b[14], b[15])
-
-		sec, err := parseByte2Digits(b[17], b[18])
-
-		// https://github.com/go-sql-driver/mysql/blob/master/utils.go#L166-L168
-		if len(b) == 19 {
-			return time.Date(year, month, day, hour, min, sec, 0, loc), nil
-		}
-	}
-}
-</code></pre>
-<p>看到这里基本上就能明白，go-sql-driver 把数据库读出来的 create_time timestamp 值当做一个字符串，然后按照 mysql timestamp 的标准格式 &ldquo;0000-00-00 00:00:00.000000&rdquo; 去解析，分别得到 year, month, day, hour, min, sec。最后依赖传入 time.Location 值，调用 go 系统库 time.Date() 再去生成对应的值。</p>
-<p>这里表面看起来没有问题，其实这里严重依赖了传入的 time.Location。这个 time.Location 是如何得到的呢？</p>
-<p>通过阅读源码，可以明显的看出来，是通过解析传入的 DSN 的 Loc 获取。</p>
-<p><a href="https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L467-L474">https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L467-L474</a>
-<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-loc.jpg" alt=""></p>
-<p>那如果我们传入的 dsn 串不带 loc 时，Loc 就是 默认的 UTC 时区。
-<img src="https://cdn.jsdelivr.net/gh/georgehao/img/go-sql-driver-default-loc.jpg" alt=""></p>
-<h3 id="读取数值不一致的原因分析">读取数值不一致的原因分析</h3>
-<p>再回头看开头的程序，我们初始化 go-sql-driver 的 dsn 是 <code>user:password@tcp(localhost:3306)/dbname?timeout=100s&amp;parseTime=true&amp;interpolateParams=true</code>. 该 dsn 里面并不包含 loc 信息，所以 go-sql-driver 用使用了默认的 UTC 时区。 然后解析从 mysql 中获取的 timestamp 字段了，也就用默认的 UTC 时区去生成 Date，结果也就错了。</p>
-<p>其实问题的主要原因就是：go-sql-driver 并没有按照数据库的时区去解析 timestamp 字段，而且依赖了开发者生成的 dsn 传入的 loc。当开发者传入的 loc 和 数据库的 time_zone 不匹配的时候，所有的 timestamp 字段都会解析错误。</p>
-<p>有些人可能有疑问，如果 go-sql-driver 为什么不直接使用 mysql 的时区去解析 timestamp 呢，我觉得是一个bug。</p>
+<p>这个结果是在 CentOS Linux release 7.9 验证的，我们看到占用的 RSS 真实的物理内存只有 344M，但是 VSZ 虚拟内存确实有 10G 的占用。</p>
+<p>延伸一点，当怀疑我们的接口的耗时是由于 GC 的频繁触发引起的，我们需要怎么确定呢？首先你会想到周期性的抓取 pprof 的来分析，这种方案其实也可以，但是太麻烦了。其实可以根据 GC 的触发时间绘制这个曲线图，GC 的触发时间可以利用 runtime.Memstats 的 LastGC 来获取。</p>
+<h2 id="生产环境验证">生产环境验证</h2>
+<ul>
+<li>绿线 调整前 GOGC = 30</li>
+<li>黄线 调整后 GOGC 默认值，ballast = 100G</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/ballast_gc_time_10m.png" alt=""></p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/ballast_mem.png" alt=""></p>
+<p>这张图相同的流量压力下，ballast 的表现明显偏好</p>
+<p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/ballast_cpu.png" alt=""></p>
 <h2 id="结论">结论</h2>
-<p>所以说，现阶段使用 go-sql-driver 的时候一定要特别注意，生成的 dsn 字符串一定要和数据的时区保持一致，不然的话就会导致 timestamp 字段解析错误。</p>
+<p>本篇文章只是简单的阐述了 Go ballast 的使用，不过 Go ballast 是官方比较认可的方案，具体可以参见 <a href="https://github.com/golang/go/issues/23044" title="issue 23044">issue 23044</a>。很多开源程序，如 <a href="https://github.com/pingcap/tidb/pull/29121/files" title="tidb">tidb</a>，<a href="https://github.com/cortexproject/cortex/blob/master/cmd/cortex/main.go#L148" title="cortex">cortex</a> 都实现了 go ballast，如果你的程序饱受 GOGC 的问题影响或者周期性的耗时不稳定，不妨尝试下 go ballast。</p>
+<p>当然强烈推荐你看下<a href="https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap/" title="twitch.tv 这篇文章">twitch.tv 这篇文章</a>，相信让你会对 GOGC 以及 ballast 的运用理解的更加透彻。</p>
 
         </div>
         
         <div class="my-4">
     
     <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
-    
-    <a href="https://www.haohongfan.com/tags/mysql/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#mysql</a>
-    
-    <a href="https://www.haohongfan.com/tags/o-sql-driver/mysql/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#o-sql-driver/mysql</a>
     
 </div>
         
@@ -483,13 +378,13 @@ func (rows *textRows) readRow(dest []driver.Value) error {
     <div>
         
         <span class="block font-bold">上一页</span>
-        <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" class="block">性能优化 | Go Ballast 让内存控制更加丝滑</a>
+        <a href="https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/" class="block">聊聊我对多云多活方案的看法</a>
         
     </div>
     <div class="md:text-right mt-4 md:mt-0">
         
         <span class="block font-bold">下一页</span>
-        <a href="https://www.haohongfan.com/posts/2021-10-07-getty/" class="block">Go 网络库 getty 的那些事</a>
+        <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" class="block">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
         
     </div>
 </div>
@@ -524,17 +419,16 @@ func (rows *textRows) readRow(dest []driver.Value) error {
 <div class="sticky-toc hidden lg:block px-6 pb-6 ">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#demo-准备">Demo 准备</a>
+    <li><a href="#设置-gogc-的弊端">设置 GOGC 的弊端</a>
       <ul>
-        <li><a href="#数据库准备">数据库准备</a></li>
-        <li><a href="#使用-go-sql-driver-读取-create_time-的值">使用 go-sql-driver 读取 create_time 的值</a></li>
+        <li><a href="#1-gogc-设置比率的方式不精确">1. GOGC 设置比率的方式不精确</a></li>
+        <li><a href="#2-gogc-设置过小">2. GOGC 设置过小</a></li>
+        <li><a href="#3-对某些程序本身占用内存就低容易触发-gc">3. 对某些程序本身占用内存就低，容易触发 GC</a></li>
+        <li><a href="#4-gogc-设置很大有的时候又容易触发-oom">4. GOGC 设置很大，有的时候又容易触发 OOM</a></li>
       </ul>
     </li>
-    <li><a href="#go-sq-driver-源码">go-sq-driver 源码</a>
-      <ul>
-        <li><a href="#读取数值不一致的原因分析">读取数值不一致的原因分析</a></li>
-      </ul>
-    </li>
+    <li><a href="#go-内存-ballast">GO 内存 ballast</a></li>
+    <li><a href="#生产环境验证">生产环境验证</a></li>
     <li><a href="#结论">结论</a></li>
   </ul>
 </nav>
@@ -555,6 +449,9 @@ func (rows *textRows) readRow(dest []driver.Value) error {
         <h2 class="text-lg font-semibold mb-4">相关</h2>
         <div class="content">
             
+            <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
+            <br />
+            
             <a href="https://www.haohongfan.com/posts/2021-10-07-getty/">Go 网络库 getty 的那些事</a>
             <br />
             
@@ -568,9 +465,6 @@ func (rows *textRows) readRow(dest []driver.Value) error {
             <br />
             
             <a href="https://www.haohongfan.com/posts/2021-10-05-gin1/">gin 源码阅读(1) - gin 与 net/http 的关系</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-10-04-gomod/">如何欺骗 Go Mod</a>
             <br />
             
         </div>

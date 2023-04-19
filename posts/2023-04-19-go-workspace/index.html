@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang='zh' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>Go1.18 Go workspace 初体验 | HHFCodeRv</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.2" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="hi，大家好，我是好久没有更新的 haohongfan。 Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。 更新 go 1.18 版本，推荐使用 goup，做多版本管理很方便。 Go work 使用方式 1. 创建一个工作空间 mkdir workspace cd workspace 2. 初始化一个项目 mkdir hello_work cd hello go mod init example.com/hello_work output：go: creating new go.mod:">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://www.haohongfan.com/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"Go1.18 Go workspace 初体验",
+      "item":"https://www.haohongfan.com/posts/2023-04-19-go-workspace/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.haohongfan.com/posts/2023-04-19-go-workspace/"
+    },
+    "headline": "Go1.18 Go workspace 初体验 | HHFCodeRv","datePublished": "2023-04-17T21:27:21+08:00",
+    "dateModified": "2023-04-17T21:27:21+08:00",
+    "wordCount":  757 ,
+    "author": {
+        "@type": "Person",
+        "name": "hhf"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "C. Wang",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.haohongfan.com/images/icon.png"
+        }
+        },
+    "description": "hi，大家好，我是好久没有更新的 haohongfan。 Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。 更新 go 1.18 版本，推荐使用 goup，做多版本管理很方便。 Go work 使用方式 1. 创建一个工作空间 mkdir workspace cd workspace 2. 初始化一个项目 mkdir hello_work cd hello go mod init example.com\/hello_work output：go: creating new go.mod:"
+}
+</script><meta property="og:title" content="Go1.18 Go workspace 初体验 | HHFCodeRv" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://www.haohongfan.com/images/icon.png">
+
+
+<meta property="og:url" content="https://www.haohongfan.com/posts/2023-04-19-go-workspace/" />
+
+
+
+
+<meta property="og:description" content="hi，大家好，我是好久没有更新的 haohongfan。 Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。 更新 go 1.18 版本，推荐使用 goup，做多版本管理很方便。 Go work 使用方式 1. 创建一个工作空间 mkdir workspace cd workspace 2. 初始化一个项目 mkdir hello_work cd hello go mod init example.com/hello_work output：go: creating new go.mod:" />
+
+
+
+
+<meta property="og:locale" content="zh" />
+
+
+
+
+<meta property="og:site_name" content="HHFCodeRv" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2023-04-17T21:27:21&#43;08:00" />
+
+
+<meta property="article:modified_time" content="2023-04-17T21:27:21&#43;08:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+<meta property="article:tag" content="Go" />
+
+
+
+
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-07-getty/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-06-graphql/" />
+
+<meta property="og:see_also" content="https://www.haohongfan.com/posts/2021-10-05-gin3/" />
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">自动</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">Go1.18 Go workspace 初体验</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2023-04-17</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
+        
+    </div>
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <p>hi，大家好，我是好久没有更新的 haohongfan。</p>
+<p>Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。</p>
+<p>更新 go 1.18 版本，推荐使用 <a href="github.com/owenthereal/goup" title="goup">goup</a>，做多版本管理很方便。</p>
+<h2 id="go-work-使用方式">Go work 使用方式</h2>
+<h3 id="1-创建一个工作空间">1. 创建一个工作空间</h3>
+<pre><code>mkdir workspace
+cd  workspace
+</code></pre>
+<h3 id="2-初始化一个项目">2. 初始化一个项目</h3>
+<pre><code>mkdir hello_work
+cd hello
+go mod init example.com/hello_work
+</code></pre>
+<p>output：go: creating new go.mod: module example.com/hello_work</p>
+<p>接着执行：<code>go get github.com/georgehao/gomodtestc</code></p>
+<p>在 workspace/hello_work 文件夹下，创建 hello_work.go</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;fmt&quot;
+
+    &quot;github.com/georgehao/gomodtestc&quot;
+)
+
+func main() {
+    fmt.Println(gomodtestc.PrintStr(&quot;Hello&quot;, 100))
+}
+</code></pre>
+<p>output:</p>
+<pre><code>go run example.com/hello
+
+project C Hello_100
+</code></pre>
+<h3 id="3-本地更改依赖包做测试">3. 本地更改依赖包做测试</h3>
+<p>因为需求的变更，依赖的 gomodtestc 的功能更改了，但是不确定更改的是否正常，我们需要用 hello_work 项目来测试。</p>
+<p>比如：<code>git clone git@github.com:georgehao/gomodtestc.git</code>, gomodtestc 的更改如下，</p>
+<pre><code class="language-go">package gomodtestc
+
+import &quot;fmt&quot;
+
+func PrintStr(str string, num int) string {
+	return fmt.Sprintf(&quot;project C %s_%d&quot;, str, num)
+}
+
+// TestWork 新增功能。。。
+func TestWork()  string {
+	return &quot;hello workespace&quot;
+}
+</code></pre>
+<p>如何使用 hello_work 项目来测试呢？</p>
+<p>在没有 go1.18 之前，只能使用 replace，如下：</p>
+<pre><code>module example.com/hello
+
+go 1.17
+
+require github.com/georgehao/gomodtestc v1.0.1
+
+replace (
+	github.com/georgehao/gomodtestc =&gt;  &quot;/Users/haohongfan1/project/workspace/gomodtestc&quot;
+)
+</code></pre>
+<p>这样做程序能正常测试，但是带来一个问题，我们要修改 go.mod，一不留神这个 replace 过的 go.mod 就上传到 gitlab 去了。实在很烦。</p>
+<p>福音来了，go workspaces 真的好爽。(<strong>读者朋友们，如果上面跟着做了replace操作，go.mod记得要恢复原状</strong>)</p>
+<pre><code>cd workspace
+go work init ./hello_work
+</code></pre>
+<p>会在 workspace 下生成一个 go.work文件</p>
+<pre><code>go 1.18
+
+use ./hello_work
+</code></pre>
+<p>这个时候，我们把 gomodtestc 项目移动到 workspace 目录下，然后执行：</p>
+<pre><code>go work use ./gomodtestc
+</code></pre>
+<p>go.work的更改如下：</p>
+<pre><code>go 1.18
+
+use (
+	./gomodtestc
+	./hello_work
+)
+</code></pre>
+<p>然后执行：go run example.com/hello
+output:</p>
+<pre><code>project C Hello_100
+hello workespace
+</code></pre>
+<p>使用 go work，我们不需要对 hello_work 项目的 go.mod 做任何操作就能正常测试项目的修改。真的非常方便。</p>
+<h2 id="go-work-使用场景及注意点">Go work 使用场景及注意点</h2>
+<h3 id="使用场景">使用场景</h3>
+<ul>
+<li>本地调试。</li>
+</ul>
+<p>比如，公司内部开发时，一般都会沉淀出一个 common 的组件项目，这个组件项目可能会有很多人修改，这个项目修改后本地测试，使用 go work 会很方便快捷。</p>
+<h3 id="注意点">注意点</h3>
+<ul>
+<li>测试的项目和被测试项目必须位于同一个文件夹下。如本文中的 hello_work 与 gomodtestc 必须都在 workspace 文件夹下</li>
+<li>go.work 不需要提交</li>
+</ul>
+<p>关于 go work 可以看官方文档</p>
+<ul>
+<li><a href="https://go.dev/doc/tutorial/workspaces" title="go blog">go blog</a></li>
+<li><a href="https://go.dev/ref/mod#workspaces" title="go ref">go ref</a></li>
+</ul>
+
+        </div>
+        
+        <div class="my-4">
+    
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    
+</div>
+        
+        
+        
+
+
+        
+        
+        <div class="py-2">
+    
+    <div class="flex flex-col md:flex-row items-center my-8">
+        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
+            
+            
+            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
+            
+        </a>
+        <div class="w-full md:w-auto mt-4 md:mt-0">
+            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
+            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+            
+            
+            
+            
+            
+            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
+                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+            </a>
+            
+        </div>
+    </div>
+    
+</div>
+        
+        
+        
+<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+    <div>
+        
+        <span class="block font-bold">上一页</span>
+        <a href="https://www.haohongfan.com/posts/2023-04-19-go-runtime-keepalive/" class="block">Go runtime.KeepAlive</a>
+        
+    </div>
+    <div class="md:text-right mt-4 md:mt-0">
+        
+        <span class="block font-bold">下一页</span>
+        <a href="https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/" class="block">聊聊我对多云多活方案的看法</a>
+        
+    </div>
+</div>
+
+        
+
+
+
+  <script id="utterances" src="https://utteranc.es/client.js"
+            issue-term=pathname
+            repo=georgehao/oblog
+              theme=preferred-color-scheme
+        crossorigin="anonymous"
+        async>
+</script>
+<script>
+    if (storageColorScheme == "Light") {
+      document.getElementById('utterances').setAttribute('theme', 'github-light')
+    } else if (storageColorScheme == "Dark") {
+      document.getElementById('utterances').setAttribute('theme', 'github-dark')
+    }
+</script>
+
+    </div>
+    
+    <div class="col-span-2">
+        
+        
+        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
+    <span class="text-lg font-semibold">本页内容</span>
+</div>
+<div class="sticky-toc hidden lg:block px-6 pb-6 ">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#go-work-使用方式">Go work 使用方式</a>
+      <ul>
+        <li><a href="#1-创建一个工作空间">1. 创建一个工作空间</a></li>
+        <li><a href="#2-初始化一个项目">2. 初始化一个项目</a></li>
+        <li><a href="#3-本地更改依赖包做测试">3. 本地更改依赖包做测试</a></li>
+      </ul>
+    </li>
+    <li><a href="#go-work-使用场景及注意点">Go work 使用场景及注意点</a>
+      <ul>
+        <li><a href="#使用场景">使用场景</a></li>
+        <li><a href="#注意点">注意点</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        enableStickyToc();
+    });
+</script>
+        
+    </div>
+    
+
+    
+    
+    <div
+        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
+        <h2 class="text-lg font-semibold mb-4">相关</h2>
+        <div class="content">
+            
+            <a href="https://www.haohongfan.com/posts/2023-04-19-mulit-cloud/">聊聊我对多云多活方案的看法</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/">性能优化 | Go Ballast 让内存控制更加丝滑</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-07-getty/">Go 网络库 getty 的那些事</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/">聊聊我对 GraphQL 的一些认知</a>
+            <br />
+            
+            <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/">gin 源码阅读(3) - gin 路由的实现剖析</a>
+            <br />
+            
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>

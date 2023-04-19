@@ -70,33 +70,33 @@
     "itemListElement":[{
             "@type":"ListItem",
             "position":  1 ,
-            "name": "Golang命名规范",
-            "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https://studygolang.com/articles/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包",
-            "url": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
+            "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+            "description": "工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans",
+            "url": "https://www.haohongfan.com/posts/2018-06-13-compose-transporter/"
         },{
             "@type":"ListItem",
             "position":  2 ,
-            "name": "使用阿里云OSS + CDN遇到的问题及解决方式",
-            "description": "一. OSS 配置 CDN加速 CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上 优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击",
-            "url": "https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/"
+            "name": "go 跨平台编译",
+            "description": "Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version \u0026gt;= 1.5 ppc64, ppc64le version \u0026gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version \u0026gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version \u0026gt;= 1.6 s390x (IBM System z) version \u0026gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不",
+            "url": "https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/"
         },{
             "@type":"ListItem",
             "position":  3 ,
-            "name": "爬虫小试-抓取JD图片",
-            "description": "因为项目需要, 要抓取京东一些图片, 来进行分析使用.如https://item.jd.com/bigimage.aspx?id=11921955 我们想抓取的就是这个图片右侧的8张图片. 进过分析这个系列html源码, 发现8张图片的地址在js数组中. curl https://item.jd.com/bigimage.aspx?id=11921955 如果利用常规的requests + BeautifulSoup的话, 感觉只获取这个js数组就是一个挺麻烦的",
-            "url": "https://www.haohongfan.com/posts/2017-10-03-spider-jd/"
+            "name": "Golang interface入门",
+            "description": "定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{\u0026quot;hello\u0026quot;} i.M() } Interface本质 inter",
+            "url": "https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/"
         },{
             "@type":"ListItem",
             "position":  4 ,
-            "name": "C++实现ping",
-            "description": "最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行. 先说下原理: 使用ICMP协议, 组织ICMP包 socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了 ##组织ICMP标示 p_icmp = (struct icmp *)buffer; p_icmp-\u0026gt;icmp_type = ICMP_ECHO; p_icmp-\u0026gt;icmp_code = 0; p_icmp-\u0026gt;icmp_cksum = 0; p_icmp-\u0026gt;icmp_seq = 12345; p_icmp-\u0026gt;icmp_id = getpid(); p_icmp-\u0026gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64); 这里组织我们需要的ICMP的一些标示 3.发送ICMP给ho",
-            "url": "https://www.haohongfan.com/posts/2017-08-25-cping/"
+            "name": "Golang指针vs值",
+            "description": "Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(\u0026quot;%p\\n\u0026quot;, \u0026amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(\u0026quot;%p\u0026quot;, \u0026amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解",
+            "url": "https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"
         },{
             "@type":"ListItem",
             "position":  5 ,
-            "name": "LD_LIBRARY_PATH与-L的关系以及延伸",
-            "description": "最近跟同学讨论c++在编译时g++ -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。 我遇到的问题： g++ multiple.cpp -L/usr/local/lib -lboost_program_options编译完后，ldd ./a.out发现libboost_program_options.",
-            "url": "https://www.haohongfan.com/posts/2017-08-25-ld_library_path/"
+            "name": "Golang命名规范",
+            "description": "文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得\u0026lt;a href=\u0026quot;https://studygolang.com/articles/8542\u0026quot;\u0026gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包",
+            "url": "https://www.haohongfan.com/posts/2018-01-23-golang_named/"
         }
     ]
 }
@@ -131,7 +131,7 @@
 
 
 
-<meta property="og:updated_time" content="2022-12-08T21:27:21&#43;08:00" />
+<meta property="og:updated_time" content="2023-04-18T21:27:21&#43;08:00" />
 
 
 
@@ -223,16 +223,98 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
+  <a href="https://www.haohongfan.com/posts/2018-06-13-compose-transporter/" class="font-bold text-xl hover:text-eureka">Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</a>
 </div>
 <div class="content">
-  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
+  工具选型 主要查看这篇文章 mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题 mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com` elasticsearch-river-mongodb不支持elasticsearch5.0以版本. 最终选择Trans
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2018-01-23</span>
+        <span>2018-06-13</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>4分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/mongodb/" class="hover:text-eureka">mongodb</a>
+        
+        
+        <span>, </span>
+        <a href="https://www.haohongfan.com/categories/elasticsearch/" class="hover:text-eureka">elasticsearch</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
+</div>
+<div class="content">
+  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-05-04</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>2分钟阅读时长</span>
+    </div>
+    
+    
+    <div class="mr-6 my-2">
+        <i class="fas fa-folder mr-1"></i>
+        
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
+        
+    </div>
+    
+
+    
+</div>
+
+  </div>
+
+  
+</div>
+  </div>
+  
+  <div class="py-6">
+    <div class="flex flex-col-reverse lg:flex-row justify-between">
+  
+  <div class="w-full ">
+    <div class="mb-4">
+  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
+</div>
+<div class="content">
+  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&#34;hello&#34;} i.M() } Interface本质 inter
+</div>
+
+<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2018-04-15</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
@@ -262,27 +344,27 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-11-15-aliyun-oss-cdn/" class="font-bold text-xl hover:text-eureka">使用阿里云OSS &#43; CDN遇到的问题及解决方式</a>
+  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
 </div>
 <div class="content">
-  一. OSS 配置 CDN加速 CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上 优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击
+  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&#34;%p\n&#34;, &amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&#34;%p&#34;, &amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2017-11-15</span>
+        <span>2018-03-24</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
+        <span>3分钟阅读时长</span>
     </div>
     
     
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/ops/" class="hover:text-eureka">ops</a>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -301,109 +383,27 @@
   
   <div class="w-full ">
     <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-10-03-spider-jd/" class="font-bold text-xl hover:text-eureka">爬虫小试-抓取JD图片</a>
+  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
 </div>
 <div class="content">
-  因为项目需要, 要抓取京东一些图片, 来进行分析使用.如https://item.jd.com/bigimage.aspx?id=11921955 我们想抓取的就是这个图片右侧的8张图片. 进过分析这个系列html源码, 发现8张图片的地址在js数组中. curl https://item.jd.com/bigimage.aspx?id=11921955 如果利用常规的requests &#43; BeautifulSoup的话, 感觉只获取这个js数组就是一个挺麻烦的
+  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
 </div>
 
 <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
     <div class="mr-6 my-2">
         <i class="fas fa-calendar mr-1"></i>
-        <span>2017-10-03</span>
+        <span>2018-01-23</span>
     </div>
     <div class="mr-6 my-2">
         <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
+        <span>3分钟阅读时长</span>
     </div>
     
     
     <div class="mr-6 my-2">
         <i class="fas fa-folder mr-1"></i>
         
-        <a href="https://www.haohongfan.com/categories/python/" class="hover:text-eureka">python</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-08-25-cping/" class="font-bold text-xl hover:text-eureka">C&#43;&#43;实现ping</a>
-</div>
-<div class="content">
-  最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行. 先说下原理: 使用ICMP协议, 组织ICMP包 socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了 ##组织ICMP标示 p_icmp = (struct icmp *)buffer; p_icmp-&gt;icmp_type = ICMP_ECHO; p_icmp-&gt;icmp_code = 0; p_icmp-&gt;icmp_cksum = 0; p_icmp-&gt;icmp_seq = 12345; p_icmp-&gt;icmp_id = getpid(); p_icmp-&gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64); 这里组织我们需要的ICMP的一些标示 3.发送ICMP给ho
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-08-25</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>1分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
-        
-    </div>
-    
-
-    
-</div>
-
-  </div>
-
-  
-</div>
-  </div>
-  
-  <div class="py-6">
-    <div class="flex flex-col-reverse lg:flex-row justify-between">
-  
-  <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-08-25-ld_library_path/" class="font-bold text-xl hover:text-eureka">LD_LIBRARY_PATH与-L的关系以及延伸</a>
-</div>
-<div class="content">
-  最近跟同学讨论c&#43;&#43;在编译时g&#43;&#43; -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。 我遇到的问题： g&#43;&#43; multiple.cpp -L/usr/local/lib -lboost_program_options编译完后，ldd ./a.out发现libboost_program_options.
-</div>
-
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-08-25</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/c&#43;&#43;/" class="hover:text-eureka">c&#43;&#43;</a>
-        
-        
-        <span>, </span>
-        <a href="https://www.haohongfan.com/categories/cmake/" class="hover:text-eureka">cmake</a>
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
         
     </div>
     
@@ -450,14 +450,17 @@
   <li class="page-item">
     <a class="page-link" href="/posts/page/12/">12</a>
   </li>
+  <li class="page-item disabled">
+    <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
+  </li>
   <li class="page-item">
-    <a class="page-link" href="/posts/page/13/">13</a>
+    <a class="page-link" href="/posts/page/14/">14</a>
   </li>
   <li class="page-item">
     <a href="/posts/page/12/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
   </li>
   <li class="page-item">
-    <a href="/posts/page/13/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <a href="/posts/page/14/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
   </li>
 </ul>
 
