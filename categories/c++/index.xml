@@ -60,7 +60,7 @@
       <pubDate>Fri, 25 Aug 2017 11:52:58 +0000</pubDate>
       
       <guid>https://www.haohongfan.com/index.php/2017/08/25/thread_error/</guid>
-      <description>这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&amp;gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()&#34; 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有</description>
+      <description>这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&amp;gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有什</description>
     </item>
     
   </channel>

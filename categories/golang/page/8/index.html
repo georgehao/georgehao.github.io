@@ -1,41 +1,58 @@
 <!DOCTYPE html>
-<html lang='zh' ><meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
+<html
+  lang="zh"
+  dir="ltr"
+  
+><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 
 <title>golang | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.2" />
-<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
-<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+<meta name="generator" content="Hugo Eureka 0.9.3" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.9cec6350e37e534b0338fa9a085bf06855de3b0f2dcf857e792e5e97b07ea905d4d5513db554cbc26a9c3da622bae92d.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.fa9a6bf6d7a50bb635b4cca7d2ba5cf3dfb095ae3798773f1328f7950028b48c17d06276594e1b5f244a25a6c969a705.js"></script>
 
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload"
-  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&amp;family=Noto&#43;Serif&#43;SC:wght@400;600;700&amp;display=swap"
   as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/styles/base16/solarized-light.min.css"
    media="print"
   onload="this.media='all';this.onload=null" crossorigin>
-<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/highlight.min.js"
    crossorigin></script>
-
-  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/languages/dart.min.js"
      crossorigin></script>
-
-<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
-   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+<link rel="stylesheet" href="https://www.haohongfan.com/css/highlightjs.min.2958991528e43eb6fc9b8c4f2b8e052f79c4010718e1d1e888a777620e9ee63021c2c57ec7417a3108019bb8c41943e6.css" media="print" onload="this.media='all';this.onload=null">
 
 
+<script defer type="text/javascript" src="https://www.haohongfan.com/js/fontawesome.min.7ecdf591e18d9b7d9a9acfee01f5545be9b15d3fb9a6235fc83f0f7b48df77c7d3fd123037395d75224bf17af86143c1.js"></script>
 
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
-   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"
+   integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ"  media="print"
   onload="this.media='all';this.onload=null" crossorigin>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
-  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
-   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js" 
+  integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js"
+   integrity="sha384-&#43;XBljXPPiv&#43;OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"  crossorigin></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     renderMathInElement(document.body, {
@@ -50,12 +67,12 @@
 </script>
 
 
-<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
-  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.14.0/dist/mermaid.min.js" 
+  integrity="sha384-atOyb0FxAgN9LyAc6PEf9BjgwLISyansgdH8/VXQH8p2o5vfrRgmGIJ2Sg22L0A0"  crossorigin></script>
 
 
-<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_3.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_3.png">
 
 <meta name="description"
   content="Eureka is a elegant and powerful theme for Hugo.">
@@ -155,27 +172,30 @@
 
 <link rel="alternate" type="application/rss+xml" href="https://www.haohongfan.com/categories/golang/index.xml" title="HHFCodeRv" />
 
-<body class="flex flex-col min-h-screen">
-  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
-    <div class="w-full max-w-screen-xl mx-auto"><script>
+
+  <body class="flex min-h-screen flex-col">
+    <header
+      class="min-h-16 pl-scrollbar bg-secondary-bg fixed z-50 flex w-full items-center shadow-sm"
+    >
+      <div class="mx-auto w-full max-w-screen-xl"><script>
     let storageColorScheme = localStorage.getItem("lightDarkMode")
     if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
         document.getElementsByTagName('html')[0].classList.add('dark')
     }
 </script>
 <nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
-    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <a href="/" class="me-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
     <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div id="target"
-        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
-        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
-            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">文章</a>
-            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
-            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
-            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        class="hidden block md:flex md:grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -185,7 +205,7 @@
                 </div>
                 <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
                 </div>
-                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                <div class="absolute flex flex-col start-0 md:start-auto end-auto md:end-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
                     id='lightDarkOptions'>
                     <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
                     <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
@@ -222,48 +242,60 @@
     });
 </script>
 </div>
-  </header>
-  <main class="flex-grow pt-16">
-    <div class="pl-scrollbar">
-      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
-<article class="mx-6 my-8">
-    <h1 class="font-bold text-3xl text-primary-text">golang</h1>
-    
+    </header>
+    <main class="grow pt-16">
+        <div class="pl-scrollbar">
+          <div class="mx-auto w-full max-w-screen-xl lg:px-4 xl:px-8">
+  <article class="prose mx-6 my-8">
+  <h1>golang</h1>
+  
 </article>
-<div class="bg-secondary-bg rounded px-6">
+
+  <div class="bg-secondary-bg rounded px-6">
     <div class="overflow-hidden divide-y">
   
   <div class="py-6">
     <div class="flex flex-col-reverse lg:flex-row justify-between">
   
   <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="font-bold text-xl hover:text-eureka">go 跨平台编译</a>
-</div>
-<div class="content">
-  Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
+    <div class="prose">
+  <a href="https://www.haohongfan.com/posts/2018-05-04-go-cross-complie/" class="no-underline">
+    <h3 class="mt-0">go 跨平台编译</h3>
+  </a>
+  
+    Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不
+  
+
+  
+    <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2018-05-04</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>2分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka"
+          >golang</a
+        >
+      
+    </div>
+  
+
+  
 </div>
 
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-05-04</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>2分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
+  
 </div>
 
   </div>
@@ -276,33 +308,44 @@
     <div class="flex flex-col-reverse lg:flex-row justify-between">
   
   <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="font-bold text-xl hover:text-eureka">Golang interface入门</a>
-</div>
-<div class="content">
-  定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&#34;hello&#34;} i.M() } Interface本质 inter
+    <div class="prose">
+  <a href="https://www.haohongfan.com/posts/2018-04-15-golang-interface-simple/" class="no-underline">
+    <h3 class="mt-0">Golang interface入门</h3>
+  </a>
+  
+    定义 Interface是定义一组方法的集合 如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明. 所有的类型都实现了empty interfa1ce type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&#34;hello&#34;} i.M() } Interface本质 inter
+  
+
+  
+    <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2018-04-15</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>3分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka"
+          >golang</a
+        >
+      
+    </div>
+  
+
+  
 </div>
 
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-04-15</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
+  
 </div>
 
   </div>
@@ -315,33 +358,44 @@
     <div class="flex flex-col-reverse lg:flex-row justify-between">
   
   <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="font-bold text-xl hover:text-eureka">Golang指针vs值</a>
-</div>
-<div class="content">
-  Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&#34;%p\n&#34;, &amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&#34;%p&#34;, &amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
+    <div class="prose">
+  <a href="https://www.haohongfan.com/posts/2018-03-24-golang-pointer-vs-value-vs-reference/" class="no-underline">
+    <h3 class="mt-0">Golang指针vs值</h3>
+  </a>
+  
+    Go语言允许通过值和指针的方式来传递参数. 严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址. 对于参数为值的时候: func test(p int) { fmt.Printf(&#34;%p\n&#34;, &amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&#34;%p&#34;, &amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解
+  
+
+  
+    <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2018-03-24</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>3分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka"
+          >golang</a
+        >
+      
+    </div>
+  
+
+  
 </div>
 
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-03-24</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
+  
 </div>
 
   </div>
@@ -354,33 +408,44 @@
     <div class="flex flex-col-reverse lg:flex-row justify-between">
   
   <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="font-bold text-xl hover:text-eureka">Golang命名规范</a>
-</div>
-<div class="content">
-  文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
+    <div class="prose">
+  <a href="https://www.haohongfan.com/posts/2018-01-23-golang_named/" class="no-underline">
+    <h3 class="mt-0">Golang命名规范</h3>
+  </a>
+  
+    文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充. 包
+  
+
+  
+    <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2018-01-23</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>3分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka"
+          >golang</a
+        >
+      
+    </div>
+  
+
+  
 </div>
 
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2018-01-23</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>3分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
+  
 </div>
 
   </div>
@@ -393,33 +458,44 @@
     <div class="flex flex-col-reverse lg:flex-row justify-between">
   
   <div class="w-full ">
-    <div class="mb-4">
-  <a href="https://www.haohongfan.com/posts/2017-08-10-label/" class="font-bold text-xl hover:text-eureka">Golang Label使用方法</a>
-</div>
-<div class="content">
-  写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La
+    <div class="prose">
+  <a href="https://www.haohongfan.com/posts/2017-08-10-label/" class="no-underline">
+    <h3 class="mt-0">Golang Label使用方法</h3>
+  </a>
+  
+    写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的. 不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了. 在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点. 注意点: La
+  
+
+  
+    <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2017-08-10</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>4分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka"
+          >golang</a
+        >
+      
+    </div>
+  
+
+  
 </div>
 
-<div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2017-08-10</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>4分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/golang/" class="hover:text-eureka">golang</a>
-        
-    </div>
-    
-
-    
+  
 </div>
 
   </div>
@@ -431,56 +507,47 @@
 </div>
 
 
-</div>
+  </div>
+  
+    <ul class="pagination pagination-default">
+      <li class="page-item">
+        <a href="/categories/golang/" aria-label="First" class="page-link" role="button"><span aria-hidden="true">&laquo;&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/7/" aria-label="Previous" class="page-link" role="button"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/5/" aria-label="Page 5" class="page-link" role="button">5</a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/6/" aria-label="Page 6" class="page-link" role="button">6</a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/7/" aria-label="Page 7" class="page-link" role="button">7</a>
+      </li>
+      <li class="page-item active">
+        <a aria-current="page" aria-label="Page 8" class="page-link" role="button">8</a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/9/" aria-label="Page 9" class="page-link" role="button">9</a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/9/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/categories/golang/page/9/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      </li>
+    </ul>
 
-<ul class="pagination">
-  <li class="page-item">
-    <a href="/categories/golang/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a href="/categories/golang/page/7/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/categories/golang/">1</a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/2/">2</a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/3/">3</a>
-  </li>
-  <li class="page-item disabled">
-    <span aria-hidden="true">&nbsp;&hellip;&nbsp;</span>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/7/">7</a>
-  </li>
-  <li class="page-item active">
-    <a class="page-link" href="/categories/golang/page/8/">8</a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/categories/golang/page/9/">9</a>
-  </li>
-  <li class="page-item">
-    <a href="/categories/golang/page/9/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a href="/categories/golang/page/9/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
-  </li>
-</ul>
-
-
-
-      </div>
-    </div>
-    
-  </main>
-  <footer class="pl-scrollbar">
-    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+          </div>
+        </div>
+      
+    </main>
+    <footer class="pl-scrollbar">
+      <div class="mx-auto w-full max-w-screen-xl"><div class="text-center p-6 pin-b">
     <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
  &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
 </div></div>
-  </footer>
-</body>
-
+    </footer>
+  </body>
 </html>

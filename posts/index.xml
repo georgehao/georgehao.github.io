@@ -190,21 +190,21 @@
     </item>
     
     <item>
-      <title>最清晰易懂的 Go WaitGroup 源码剖析</title>
-      <link>https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/</link>
-      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
-      
-      <guid>https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/</guid>
-      <description>hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为</description>
-    </item>
-    
-    <item>
       <title>看过这篇剖析，你还不懂 Go sync.Map 吗</title>
       <link>https://www.haohongfan.com/posts/2021-05-10-sync-map/</link>
       <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
       
       <guid>https://www.haohongfan.com/posts/2021-05-10-sync-map/</guid>
       <description>hi, 大家好，我是 haohongfan。 本篇文章会从使用方式和原码角度剖析 sync.Map。不过不管是日常开发还是开源项目中，好像 sync.Map 并没有得到很好的利用，大家还是习惯使用 Mutex + Map 来使用。 下面这段代码，看起来很有道理，其实是用错了（背景：并发场景中获取注册信息）。 instance, ok := instanceMap[name] if ok { return instance, nil } initLock.Lock() defer initLock.Unlock() // double check instance, ok = instanceMap[name] if ok { return instance, nil } 这里使用使用 sync.Map 会更合理些，因为 sync.Map 底层完</description>
+    </item>
+    
+    <item>
+      <title>这可能是最容易理解的 Go Mutex 源码剖析</title>
+      <link>https://www.haohongfan.com/posts/2021-04-01-mutex/</link>
+      <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
+      
+      <guid>https://www.haohongfan.com/posts/2021-04-01-mutex/</guid>
+      <description>Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争</description>
     </item>
     
     <item>
@@ -217,12 +217,12 @@
     </item>
     
     <item>
-      <title>这可能是最容易理解的 Go Mutex 源码剖析</title>
-      <link>https://www.haohongfan.com/posts/2021-04-01-mutex/</link>
+      <title>最清晰易懂的 Go WaitGroup 源码剖析</title>
+      <link>https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/</link>
       <pubDate>Thu, 01 Apr 2021 09:57:16 +0800</pubDate>
       
-      <guid>https://www.haohongfan.com/posts/2021-04-01-mutex/</guid>
-      <description>Hi，大家好，我是 haohongfan。 上一篇文章《一文完全掌握 Go math/rand》，我们知道 math/rand 的 global rand 有一个全局锁，我的文章里面有一句话：“修复方案: 就是把 rrRand 换成了 globalRand, 在线上高并发场景下, 发现全局锁影响并不大.”， 有同学私聊我“他们遇到线上服务的锁竞争特别激烈”。确实我这句话说的并不严谨。但是也让我有了一个思考：到底多高的 QPS 才能让 Mutex 产生强烈的锁竞争</description>
+      <guid>https://www.haohongfan.com/posts/2021-05-10-sync-waitgroup/</guid>
+      <description>hi，大家好，我是haohongfan。 本篇主要介绍 WaitGroup 的一些特性，让我们从本质上去了解 WaitGroup。关于 WaitGroup 的基本用法这里就不做过多介绍了。相对于《这可能是最容易理解的 Go Mutex 源码剖析》来说，WaitGroup 就简单的太多了。 源码剖析 type WaitGroup struct { noCopy noCopy state1 [3]uint32 } WaitGroup 底层结构看起来简单，但 WaitGroup.state1 其实代表三个字段：counter，waiter，sema。 counter ：可以理解为</description>
     </item>
     
     <item>
@@ -573,7 +573,7 @@
       <pubDate>Fri, 25 Aug 2017 11:52:58 +0000</pubDate>
       
       <guid>https://www.haohongfan.com/index.php/2017/08/25/thread_error/</guid>
-      <description>这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&amp;gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. GetCallbackContent()&#34; 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有</description>
+      <description>这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&amp;gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题. 怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现 感觉上没有什</description>
     </item>
     
     <item>

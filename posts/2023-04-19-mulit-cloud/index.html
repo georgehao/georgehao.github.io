@@ -1,41 +1,58 @@
 <!DOCTYPE html>
-<html lang='zh' ><meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
+<html
+  lang="zh"
+  dir="ltr"
+  
+><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 
 <title>聊聊我对多云多活方案的看法 | HHFCodeRv</title>
 
-<meta name="generator" content="Hugo Eureka 0.8.2" />
-<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.css">
-<script defer src="https://www.haohongfan.com/js/eureka.min.js"></script>
+<meta name="generator" content="Hugo Eureka 0.9.3" />
+<link rel="stylesheet" href="https://www.haohongfan.com/css/eureka.min.9cec6350e37e534b0338fa9a085bf06855de3b0f2dcf857e792e5e97b07ea905d4d5513db554cbc26a9c3da622bae92d.css">
+<script defer src="https://www.haohongfan.com/js/eureka.min.fa9a6bf6d7a50bb635b4cca7d2ba5cf3dfb095ae3798773f1328f7950028b48c17d06276594e1b5f244a25a6c969a705.js"></script>
 
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload"
-  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&amp;family=Noto&#43;Serif&#43;SC:wght@400;600;700&amp;display=swap"
   as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/styles/base16/solarized-light.min.css"
    media="print"
   onload="this.media='all';this.onload=null" crossorigin>
-<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/highlight.min.js"
    crossorigin></script>
-
-  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/languages/dart.min.js"
      crossorigin></script>
-
-<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
-   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+<link rel="stylesheet" href="https://www.haohongfan.com/css/highlightjs.min.2958991528e43eb6fc9b8c4f2b8e052f79c4010718e1d1e888a777620e9ee63021c2c57ec7417a3108019bb8c41943e6.css" media="print" onload="this.media='all';this.onload=null">
 
 
+<script defer type="text/javascript" src="https://www.haohongfan.com/js/fontawesome.min.7ecdf591e18d9b7d9a9acfee01f5545be9b15d3fb9a6235fc83f0f7b48df77c7d3fd123037395d75224bf17af86143c1.js"></script>
 
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
-   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"
+   integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ"  media="print"
   onload="this.media='all';this.onload=null" crossorigin>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
-  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
-   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js" 
+  integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js"
+   integrity="sha384-&#43;XBljXPPiv&#43;OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"  crossorigin></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     renderMathInElement(document.body, {
@@ -50,12 +67,12 @@
 </script>
 
 
-<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
-  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.14.0/dist/mermaid.min.js" 
+  integrity="sha384-atOyb0FxAgN9LyAc6PEf9BjgwLISyansgdH8/VXQH8p2o5vfrRgmGIJ2Sg22L0A0"  crossorigin></script>
 
 
-<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_3.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.haohongfan.com/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_3.png">
 
 <meta name="description"
   content="互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。 在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。 虽说每个云服务商都号称自己">
@@ -94,7 +111,7 @@
     },
     "publisher": {
         "@type": "Person",
-        "name": "C. Wang",
+        "name": "WANG Chucheng",
         "logo": {
             "@type": "ImageObject",
             "url": "https://www.haohongfan.com/images/icon.png"
@@ -161,27 +178,30 @@
 
 
 
-<body class="flex flex-col min-h-screen">
-  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
-    <div class="w-full max-w-screen-xl mx-auto"><script>
+
+  <body class="flex min-h-screen flex-col">
+    <header
+      class="min-h-16 pl-scrollbar bg-secondary-bg fixed z-50 flex w-full items-center shadow-sm"
+    >
+      <div class="mx-auto w-full max-w-screen-xl"><script>
     let storageColorScheme = localStorage.getItem("lightDarkMode")
     if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
         document.getElementsByTagName('html')[0].classList.add('dark')
     }
 </script>
 <nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
-    <a href="/" class="mr-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
+    <a href="/" class="me-6 text-primary-text text-xl font-bold">HHFCodeRv</a>
     <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div id="target"
-        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
-        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
-            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  mr-4">文章</a>
-            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Go 源码分析与实战</a>
-            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">归档</a>
-            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">好友推荐</a>
+        class="hidden block md:flex md:grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  selected-menu-item  me-4">文章</a>
+            <a href="https://gohandbook1.haohongfan.com" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">Go 源码分析与实战</a>
+            <a href="/archive/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">归档</a>
+            <a href="/friends/friends/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  me-4">好友推荐</a>
         </div>
 
         <div class="flex">
@@ -191,7 +211,7 @@
                 </div>
                 <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
                 </div>
-                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                <div class="absolute flex flex-col start-0 md:start-auto end-auto md:end-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
                     id='lightDarkOptions'>
                     <span class="px-4 py-1 hover:text-eureka" name="Light">浅色</span>
                     <span class="px-4 py-1 hover:text-eureka" name="Dark">深色</span>
@@ -228,43 +248,52 @@
     });
 </script>
 </div>
-  </header>
-  <main class="flex-grow pt-16">
-    <div class="pl-scrollbar">
-      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
-
-
-<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    </header>
+    <main class="grow pt-16">
+        <div class="pl-scrollbar">
+          <div class="mx-auto w-full max-w-screen-xl lg:px-4 xl:px-8">
+  
+  
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-8 lg:pt-12">
     <div
-        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
-        <h1 class="font-bold text-3xl text-primary-text">聊聊我对多云多活方案的看法</h1>
-        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
-    <div class="mr-6 my-2">
-        <i class="fas fa-calendar mr-1"></i>
-        <span>2023-04-16</span>
-    </div>
-    <div class="mr-6 my-2">
-        <i class="fas fa-clock mr-1"></i>
-        <span>5分钟阅读时长</span>
-    </div>
-    
-    
-    <div class="mr-6 my-2">
-        <i class="fas fa-folder mr-1"></i>
-        
-        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka">Go</a>
-        
-    </div>
-    
+      class=" bg-secondary-bg col-span-2 rounded px-6 py-8 lg:col-span-6"
+    >
+      <article class="prose">
+  <h1 class="mb-4">聊聊我对多云多活方案的看法</h1>
 
-    
+  <div
+  class="text-tertiary-text not-prose mt-2 flex flex-row flex-wrap items-center"
+>
+  <div class="me-6 my-2">
+    <i class="fas fa-calendar me-1"></i>
+    <span
+      >2023-04-16</span
+    >
+  </div>
+  <div class="me-6 my-2">
+    <i class="fas fa-clock me-1"></i>
+    <span>5分钟阅读时长</span>
+  </div>
+
+  
+    <div class="me-6 my-2">
+      <i class="fas fa-folder me-1"></i>
+      
+        <a href="https://www.haohongfan.com/categories/go/" class="hover:text-eureka"
+          >Go</a
+        >
+      
+    </div>
+  
+
+  
 </div>
-        
-        
-        
 
-        <div class="content">
-            <p>互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。</p>
+
+  
+  
+
+  <p>互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。</p>
 <p>在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/georgehao/img/danyun.png" alt=""></p>
 <p>虽说每个云服务商都号称自己的稳定性能达到 N 个 9，但是如果一旦该云服务商出现比较严重的问题时，我们只能祈祷该服务商能赶紧恢复，事后云服务商发优惠券补偿。但是对我们业务的客户却造成了很大的伤害，甚者还会造成数据的永久丢失。</p>
@@ -324,92 +353,100 @@
 <h2 id="结论">结论</h2>
 <p>综上可以看出来，目前这个“多云多活”的瓶颈就在于存储层，让整个集群处于“伪多活”的状态。这个方案确实能解决一些问题，但是高可用并没有想象中的那么出色，更多时候这样项目一般都沦落成某些人晋升的 KPI。</p>
 
-        </div>
-        
+</article>
+
+
+      
         <div class="my-4">
     
-    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 mr-2 hover:text-eureka">#Go</a>
+    <a href="https://www.haohongfan.com/tags/go/" class="inline-block bg-tertiary-bg text-sm rounded px-3 py-1 my-1 me-2 hover:text-eureka">#Go</a>
     
 </div>
-        
-        
-        
+      
+
+      
 
 
-        
-        
+
+      
         <div class="py-2">
-    
-    <div class="flex flex-col md:flex-row items-center my-8">
-        <a href="https://www.haohongfan.com/authors/hhf/" class="w-24 h-24 md:mr-4">
-            
-            
-            <img src="https://images.haohongfan.com/tx.jpg" class="w-full bg-primary-bg rounded-full" alt="Avatar">
-            
+  
+    <div class="my-8 flex flex-col items-center md:flex-row">
+      <a href="https://www.haohongfan.com/authors/hhf/" class="md:me-4 text-primary-text h-24 w-24">
+        
+        
+          <img
+            src="https://images.haohongfan.com/tx.jpg"
+            class="bg-primary-bg w-full rounded-full"
+            alt="Avatar"
+          />
+        
+      </a>
+      <div class="mt-4 w-full md:mt-0 md:w-auto">
+        <a
+          href="https://www.haohongfan.com/authors/hhf/"
+          class="mb-2 block border-b pb-1 text-lg font-bold"
+        >
+          <h3>HHFCodeRv</h3>
         </a>
-        <div class="w-full md:w-auto mt-4 md:mt-0">
-            <a href="https://www.haohongfan.com/authors/hhf/" class="block font-bold text-lg pb-1 mb-2 border-b">HHFCodeRv</a>
-            <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
-            
-            
-            
-            
-            
-            <a href="https://images.haohongfan.com/gzh1.png" class="mr-1">
-                <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
-            </a>
-            
-        </div>
+        <span class="block pb-2">欢迎关注我的公众号：HHFCodeRv, 了解我的最新状态。</span>
+        
+          
+          
+          
+          
+          <a href="https://images.haohongfan.com/gzh1.png" class="me-2">
+            <i class="&lt;nil&gt; fa-&lt;nil&gt;"></i>
+          </a>
+        
+      </div>
     </div>
-    
+  
 </div>
-        
-        
-        
-<div class="flex flex-col md:flex-row md:justify-between -mx-2 mt-4 px-2 pt-4 border-t">
+
+      
+
+      
+  <div
+    class="-mx-2 mt-4 flex flex-col border-t px-2 pt-4 md:flex-row md:justify-between"
+  >
     <div>
-        
-        <span class="block font-bold">上一页</span>
+      
+        <span class="text-primary-text block font-bold"
+          >上一页</span
+        >
         <a href="https://www.haohongfan.com/posts/2023-04-19-go-workspace/" class="block">Go1.18 Go workspace 初体验</a>
-        
+      
     </div>
-    <div class="md:text-right mt-4 md:mt-0">
-        
-        <span class="block font-bold">下一页</span>
+    <div class="mt-4 md:mt-0 md:text-right">
+      
+        <span class="text-primary-text block font-bold">下一页</span>
         <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" class="block">性能优化 | Go Ballast 让内存控制更加丝滑</a>
-        
+      
     </div>
-</div>
-
-        
+  </div>
 
 
+      
 
-  <script id="utterances" src="https://utteranc.es/client.js"
-            issue-term=pathname
-            repo=georgehao/oblog
-              theme=preferred-color-scheme
-        crossorigin="anonymous"
-        async>
-</script>
-<script>
-    if (storageColorScheme == "Light") {
-      document.getElementById('utterances').setAttribute('theme', 'github-light')
-    } else if (storageColorScheme == "Dark") {
-      document.getElementById('utterances').setAttribute('theme', 'github-dark')
-    }
-</script>
+
 
     </div>
     
-    <div class="col-span-2">
+      <div class="col-span-2">
         
         
-        <div class="sticky top-16 z-10 hidden lg:block px-6 py-4  bg-primary-bg ">
-    <span class="text-lg font-semibold">本页内容</span>
+          <div
+  class="
+    bg-primary-bg
+   prose sticky top-16 z-10 hidden px-6 py-4 lg:block"
+>
+  <h3>本页内容</h3>
 </div>
-<div class="sticky-toc hidden lg:block px-6 pb-6 ">
-    <nav id="TableOfContents">
+<div
+  class="sticky-toc  hidden px-6 pb-6 lg:block"
+>
+  <nav id="TableOfContents">
   <ul>
     <li><a href="#多活为什么重要">多活为什么重要？</a></li>
     <li><a href="#服务容灾有哪些方案">服务容灾有哪些方案</a>
@@ -432,59 +469,60 @@
 </nav>
 </div>
 <script>
-    window.addEventListener('DOMContentLoaded', () => {
-        enableStickyToc();
-    });
+  window.addEventListener("DOMContentLoaded", () => {
+    enableStickyToc();
+  });
 </script>
+
         
-    </div>
-    
-
-    
-    
-    <div
-        class="col-span-2  lg:col-span-6 bg-secondary-bg rounded p-6">
-        <h2 class="text-lg font-semibold mb-4">相关</h2>
-        <div class="content">
-            
-            <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/">性能优化 | Go Ballast 让内存控制更加丝滑</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-10-07-getty/">Go 网络库 getty 的那些事</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/">聊聊我对 GraphQL 的一些认知</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/">gin 源码阅读(3) - gin 路由的实现剖析</a>
-            <br />
-            
-            <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/">gin 源码阅读(2) - http请求是如何流入gin的?</a>
-            <br />
-            
-        </div>
-    </div>
-    
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', ()=>{
-        hljs.initHighlightingOnLoad();
-    })
-</script>
-
       </div>
-    </div>
     
-  </main>
-  <footer class="pl-scrollbar">
-    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+
+    
+    
+      <div
+        class=" bg-secondary-bg prose col-span-2 rounded p-6 lg:col-span-6"
+      >
+        <h3>相关</h3>
+        
+          <a href="https://www.haohongfan.com/posts/2023-04-19-go-ballest/" class="no-underline">性能优化 | Go Ballast 让内存控制更加丝滑</a>
+          <br />
+        
+          <a href="https://www.haohongfan.com/posts/2022-12-08-go-mysql-driver-bug/" class="no-underline">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug</a>
+          <br />
+        
+          <a href="https://www.haohongfan.com/posts/2021-10-07-getty/" class="no-underline">Go 网络库 getty 的那些事</a>
+          <br />
+        
+          <a href="https://www.haohongfan.com/posts/2021-10-06-graphql/" class="no-underline">聊聊我对 GraphQL 的一些认知</a>
+          <br />
+        
+          <a href="https://www.haohongfan.com/posts/2021-10-05-gin3/" class="no-underline">gin 源码阅读(3) - gin 路由的实现剖析</a>
+          <br />
+        
+          <a href="https://www.haohongfan.com/posts/2021-10-05-gin2/" class="no-underline">gin 源码阅读(2) - http请求是如何流入gin的?</a>
+          <br />
+        
+      </div>
+    
+  </div>
+
+  
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        hljs.highlightAll();
+      });
+    </script>
+
+          </div>
+        </div>
+      
+    </main>
+    <footer class="pl-scrollbar">
+      <div class="mx-auto w-full max-w-screen-xl"><div class="text-center p-6 pin-b">
     <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a>
  &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
 </div></div>
-  </footer>
-</body>
-
+    </footer>
+  </body>
 </html>
