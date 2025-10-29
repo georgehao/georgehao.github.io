@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Authors on HHFCodeRv</title>
+    <link>https://georgehao.github.io/authors/</link>
+    <description>Recent content in Authors on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Tue, 18 Apr 2023 21:27:21 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/authors/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HHFCodeRv</title>
+      <link>https://georgehao.github.io/authors/hhf/</link>
+      <pubDate>Tue, 18 Apr 2023 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/authors/hhf/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

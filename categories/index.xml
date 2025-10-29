@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Categories on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/</link>
+    <description>Recent content in Categories on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Tue, 18 Apr 2023 21:27:21 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go</title>
+      <link>https://georgehao.github.io/categories/go/</link>
+      <pubDate>Tue, 18 Apr 2023 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/go/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Go-Sql-Driver/Mysql</title>
+      <link>https://georgehao.github.io/categories/go-sql-driver/mysql/</link>
+      <pubDate>Thu, 08 Dec 2022 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/go-sql-driver/mysql/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Mysql</title>
+      <link>https://georgehao.github.io/categories/mysql/</link>
+      <pubDate>Thu, 08 Dec 2022 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/mysql/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Bff</title>
+      <link>https://georgehao.github.io/categories/bff/</link>
+      <pubDate>Wed, 06 Oct 2021 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/bff/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Graphql</title>
+      <link>https://georgehao.github.io/categories/graphql/</link>
+      <pubDate>Wed, 06 Oct 2021 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/graphql/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Golang</title>
+      <link>https://georgehao.github.io/categories/golang/</link>
+      <pubDate>Tue, 05 Oct 2021 23:47:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/golang/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Gin</title>
+      <link>https://georgehao.github.io/categories/gin/</link>
+      <pubDate>Tue, 05 Oct 2021 23:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/gin/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Kratos</title>
+      <link>https://georgehao.github.io/categories/kratos/</link>
+      <pubDate>Sun, 23 Aug 2020 11:59:45 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/kratos/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>每日一译</title>
+      <link>https://georgehao.github.io/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/</link>
+      <pubDate>Tue, 04 Jun 2019 11:11:54 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Php</title>
+      <link>https://georgehao.github.io/categories/php/</link>
+      <pubDate>Mon, 12 Nov 2018 18:43:15 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/php/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Elasticsearch</title>
+      <link>https://georgehao.github.io/categories/elasticsearch/</link>
+      <pubDate>Thu, 27 Sep 2018 11:44:44 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/elasticsearch/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Es</title>
+      <link>https://georgehao.github.io/categories/es/</link>
+      <pubDate>Thu, 27 Sep 2018 11:44:44 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/es/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Mongodb</title>
+      <link>https://georgehao.github.io/categories/mongodb/</link>
+      <pubDate>Wed, 13 Jun 2018 21:59:26 +0800</pubDate>
+      <guid>https://georgehao.github.io/categories/mongodb/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Ops</title>
+      <link>https://georgehao.github.io/categories/ops/</link>
+      <pubDate>Wed, 15 Nov 2017 12:05:39 +0000</pubDate>
+      <guid>https://georgehao.github.io/categories/ops/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Python</title>
+      <link>https://georgehao.github.io/categories/python/</link>
+      <pubDate>Tue, 03 Oct 2017 13:44:30 +0000</pubDate>
+      <guid>https://georgehao.github.io/categories/python/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>https://georgehao.github.io/categories/c&#43;&#43;/</link>
+      <pubDate>Fri, 25 Aug 2017 12:02:07 +0000</pubDate>
+      <guid>https://georgehao.github.io/categories/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Cmake</title>
+      <link>https://georgehao.github.io/categories/cmake/</link>
+      <pubDate>Fri, 25 Aug 2017 11:56:24 +0000</pubDate>
+      <guid>https://georgehao.github.io/categories/cmake/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Posts | HHFCodeRv</title>
+<meta name="keywords" content="">
+<meta name="description" content="Posts - HHFCodeRv">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="http://localhost:1313/posts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/images/icon.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/images/icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/posts/index.xml" title="rss">
+<link rel="alternate" hreflang="zh" href="http://localhost:1313/posts/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Posts">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Posts">
+<meta name="twitter:description" content="">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }
+  ]
+}
+</script>
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="http://localhost:1313/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="文章">
+                    <span class="active">文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">主页</a></div>
+  <h1>
+    Posts
+    <a href="/posts/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">C&#43;&#43;实现ping
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>
+最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行.
+先说下原理:
+使用ICMP协议, 组织ICMP包 socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了
+##组织ICMP标示
+p_icmp = (struct icmp *)buffer; p_icmp-&gt;icmp_type = ICMP_ECHO; p_icmp-&gt;icmp_code = 0; p_icmp-&gt;icmp_cksum = 0; p_icmp-&gt;icmp_seq = 12345; p_icmp-&gt;icmp_id = getpid(); p_icmp-&gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64); 这里组织我们需要的ICMP的一些标示
+3.发送ICMP给host
+int send_chars = sendto(socket_id, (char *)buffer, 64, 0, (struct sockaddr*) &amp;to, (socklen_t) sizeof(struct sockaddr_in)); 发送ICMP包给你host
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 12:02:07 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>304 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to C&#43;&#43;实现ping" href="http://localhost:1313/posts/2017-08-25-cping/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LD_LIBRARY_PATH与-L的关系以及延伸
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>最近跟同学讨论c&#43;&#43;在编译时g&#43;&#43; -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。 我遇到的问题：
+g&#43;&#43; multiple.cpp -L/usr/local/lib -lboost_program_options编译完后，ldd ./a.out发现libboost_program_options.so.1.55.0 =&gt; not found
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 11:56:24 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>848 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to LD_LIBRARY_PATH与-L的关系以及延伸" href="http://localhost:1313/posts/2017-08-25-ld_library_path/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">有关LD_LIBRARY_PATH与ld.so.conf
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>我之前写过一篇关于LD_LIBRARY_PATH与gcc/g&#43;&#43; -L的关系的文章. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH, 这个不够优美, 经过一番寻找终于找到了—ld.so.conf可以完美解决这个问题。 为什么LD_LIBRARY_PATH不行？ 可以看看老外是怎么说的
+升级共享库时，替换之前先测试一下类似的，升级后的某个程序可能依赖于一些动态链接库，如果你将某个链接库替换了，程序可能就无法工作了。这时候，你可以使用LD_LIBRARY_PATH指向存有备份的一个目录，然后，你可以没有顾忌地替换系统版本了。万一出错，拷贝回去就是了
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 11:55:53 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1699 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 有关LD_LIBRARY_PATH与ld.so.conf" href="http://localhost:1313/posts/2017-08-25-id_library_path_ld_so_conf/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">使用System V信号量同步引起的Interrupted system call坑
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程.
+本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后坑就这么产生了.
+先看Monitor代码:
+然后gdb去调试的时候, 总是出现
+我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样用的呀. 一番查找下, 我就确定我这样用是没错的, 就去Google了一下, 发现了真相.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 11:54:11 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1188 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 使用System V信号量同步引起的Interrupted system call坑" href="http://localhost:1313/index.php/2017/08/25/ipc_interrupted_system_call/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">修改系统时间导致的坑
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>有一天测试人员对我说, 我怎么测试10点开站会这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧.
+好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来.
+程序总是在这个函数中阻塞住. 为什么会阻塞呢? 然后我就在这段代码中到处加log打印
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 11:53:30 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>291 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 修改系统时间导致的坑" href="http://localhost:1313/index.php/2017/08/25/system_time/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">记一次线程不同步的坑
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>
+这段简单的代码, 总是在某些时候, 就会出现p_cur_ctx-&gt;GetCallbackContent()不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题.
+怎么看, 这都是不可能发生的事情!!!, 为什么memcpy会失败呢? 再看GetCallbackContent()的代码实现
+感觉上没有什么问题, 这个问题就诡异了.为什么以前程序跑的好好的, 突然间连memcpy都不靠谱了.这个世界是怎么了.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-25 11:52:58 +0000 +0000'>2017年8月25日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>319 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 记一次线程不同步的坑" href="http://localhost:1313/index.php/2017/08/25/thread_error/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang Label使用方法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的.
+不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了.
+在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点.
+注意点:
+Label在continue, break中是可选的, 但是在goto中是必须的 作用范围: 定义Label的函数体内. Label可以声明在函数体的任何位置, 不管Label声明在调用点的前面还是后面. 看到国外一篇文章写的不错, 加上自己的一些理解, 写了这么一篇文章.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-10 06:07:19 +0000 +0000'>2017年8月10日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1762 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang Label使用方法" href="http://localhost:1313/posts/2017-08-10-label/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">golang面向对象分析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>说道面向对象(OOP)编程, 就不得不提到下面几个概念:
+抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:
+reddit google group 那么问题来了
+Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-07-24 01:51:37 +0000 +0000'>2017年7月24日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2703 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to golang面向对象分析" href="http://localhost:1313/posts/2017-07-24-golang_oop/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">golang中defer, panic, recover用法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出
+一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C&#43;&#43;的话这样的代码, 你会经常看到.
+class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c&#43;&#43;的BUG都是由这个引起的). 这个时候我们就会利用c&#43;&#43;的析构函数, 去自动释放这些变量. 在c&#43;&#43;11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-07-20 09:49:28 +0000 +0000'>2017年7月20日</span>&nbsp;·&nbsp;<span>7 分钟</span>&nbsp;·&nbsp;<span>3007 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to golang中defer, panic, recover用法" href="http://localhost:1313/posts/2017-07-20-golang_defer_panic_recover/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">nginx代理wordpress无法访问的问题
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>先说说我遇到的问题, 这简直就是坑中之王.
+最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时域名还没有通过备案. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了.
+无论我怎么在浏览器中输入我的域名www.haohongfan.com, 怎么莫名其妙的自动给我跳转到www.haohongfan.com:7654上来. 莫名其妙不是!!! ...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-07-19 09:22:00 +0000 +0000'>2017年7月19日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1131 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to nginx代理wordpress无法访问的问题" href="http://localhost:1313/posts/2017-07-19-wordpress_error/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="http://localhost:1313/posts/page/7/">
+      «&nbsp;上一页&nbsp;
+    </a>
+    <a class="next" href="http://localhost:1313/posts/page/9/">下一页&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://www.haohongfan.com/">haohongfan</a> <a href="">京ICP备17041575号</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

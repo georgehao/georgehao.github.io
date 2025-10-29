@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>golang面向对象分析 | HHFCodeRv</title>
+<meta name="keywords" content="">
+<meta name="description" content="说道面向对象(OOP)编程, 就不得不提到下面几个概念:
+
+抽象
+封装
+继承
+多态
+
+其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:
+
+reddit
+google group
+
+那么问题来了
+
+Golang是OOP吗?
+使用Golang如何实现OOP?
+
+我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2017-07-24-golang_oop/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2017-07-24-golang_oop/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2017-07-24-golang_oop/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="golang面向对象分析">
+  <meta property="og:description" content="说道面向对象(OOP)编程, 就不得不提到下面几个概念:
+抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:
+reddit google group 那么问题来了
+Golang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2017-07-24T01:51:37+00:00">
+    <meta property="article:modified_time" content="2017-07-24T01:51:37+00:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang面向对象分析">
+<meta name="twitter:description" content="说道面向对象(OOP)编程, 就不得不提到下面几个概念:
+
+抽象
+封装
+继承
+多态
+
+其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:
+
+reddit
+google group
+
+那么问题来了
+
+Golang是OOP吗?
+使用Golang如何实现OOP?
+
+我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C&#43;&#43;, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "golang面向对象分析",
+      "item": "https://georgehao.github.io/posts/2017-07-24-golang_oop/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "golang面向对象分析",
+  "name": "golang面向对象分析",
+  "description": "说道面向对象(OOP)编程, 就不得不提到下面几个概念:\n抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:\nreddit google group 那么问题来了\nGolang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "说道面向对象(OOP)编程, 就不得不提到下面几个概念:\n抽象 封装 继承 多态 其实有个问题Is Go An Object Oriented Language?, 随便谷歌了一下, 你就发现讨论这个的文章有很多:\nreddit google group 那么问题来了\nGolang是OOP吗? 使用Golang如何实现OOP? 我入门教程基本就是A Tour Of Go以及Go Web 编程. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.\n一. 抽象和封装 抽象和封装就放在一块说了. 这个其实挺简单. 看一个例子就行了.\ntype rect struct { width int height int } func (r *rect) area() int { return r.width * r.height } func main() { r := rect{width: 10, height: 5} fmt.Println(\"area: \", r.area()) } 完整代码\n要说明的几个地方: 1、Golang中的struct和其他语言的class是一样的.\n2、可见性. 这个遵循Go语法的大小写的特性\n3、上面例子中, 称*rect为receiver. 关于receiver 可以有两种方式的写法:\nfunc (r *rect) area() int { return r.width * r.height } func (r rect) area() int { return r.width * r.height } 这其中有什么区别和联系呢? 关于详细解释请查看astaxie的解释, 写的非常清晰.\n简单来说, Receiver可以是值传递, 还是可以是指针, 两者的差别在于, 指针作为Receiver会对实例对象的内容发生操作,而普通类型作为Receiver仅仅是以副本作为操作对象,并不对原实例对象发生操作。\n4、当Receiver为*rect指针的时候, 使用的是r.width, 而不是(*r).width, 是由于Go自动帮我转了,两种方式都是正确的.\n5、任何类型都可以声明成新的类型, 因为任何类型都可以有方法.\ntype Interger int func (i Interger) Add(interger Interger) Interger { return i + interger } 6、虽然Interger是从int声明而来, 但是这样用是错误的.\nvar i Interger = 1 var a int = i //cannot use i (type Interger) as type int in assignment 这是因为Go中没有隐式转换(写C++的同学都会特别讨厌这个, 因为编译器背着我们干的事情太多了). Golang中类型之间的相互赋值都必须显式声明.\n上面的例子改成下面的方式就可以了.\nvar i Interger = 1 var a int = int(i) 二. 继承(Composition) 说道继承，其实在Golang中是没有继承(Extend)这个概念. 因为Golang舍弃掉了像C++, Java的这种传统的、类型驱动的子类。\nGo Effictive says: Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.\n换句话说, Golang中没有继承, 只有Composition.\nGolang中的Compostion有两种形式, 匿名组合(Pseudo is-a)和非匿名组合(has-a)\n注: 如果不了解OOP的is-a和has-a关系的话, 请自行google.\n1. has-a package main import ( \"fmt\" ) type Human struct { name string age int phone string } type Student struct { h Human //非匿名字段 school string } func (h *Human) SayHi() { fmt.Printf(\"Hi, I am %s you can call me on %s\\n\", h.name, h.phone) } func (s *Student) SayHi() { fmt.Printf(\"Hi student, I am %s you can call me on %s\", s.h.name, s.h.phone) } func main() { mark := Student{Human{\"Mark\", 25, \"222-222-YYYY\"}, \"MIT\"} fmt.Println(mark.h.name, mark.h.age, mark.h.phone, mark.school) mark.h.SayHi() mark.SayHi() } Output\nMark 25 222-222-YYYY MIT Hi, I am Mark you can call me on 222-222-YYYY Hi student, I am Mark you can call me on 222-222-YYYY 完整代码\n这种组合方式, 其实对于了解传统OOP的话, 很好理解, 就是把一个struct作为另一个struct的字段.\n从上面例子可以, Human完全作为Student的一个字段使用. 所以也就谈不上继承的相关问题了.我们也不去重点讨论.\n2. is-a(Pseudo)—-Embedding type Human struct { name string age int phone string } type Student struct { Human //匿名字段 school string } func (h *Human) SayHi() { fmt.Printf(\"Hi, I am %s you can call me on %s\\n\", h.name, h.phone) } func main() { mark := Student{Human{\"Mark\", 25, \"222-222-YYYY\"}, \"MIT\"} fmt.Println(mark.name, mark.age, mark.phone, mark.school) mark.SayHi() } Output\nMark 25 222-222-YYYY MIT Hi, I am Mark you can call me on 222-222-YYYY 完整代码\n这里要说的有几点:\n1、字段 现在Student访问Human的字符, 就可以直接访问了, 感觉就是在访问自己的属性一样. 这样就实现了OOP的继承.\nfmt.Println(\"Student age:\", mark.age) //输出: Student age: 25 但是, 我们也可以间接访问:\nfmt.Println(\"Student age:\", mark.Human.age) //输出: Student age: 25 这有个问题, 如果在Student也有个字段name, 那么当使用mark.name会以Student的name为准.\nfmt.Println(\"Student name:\", mark.name) //输出:Student Name: student name 完整代码\n2、方法 Student也继承了Human的SayHi()方法\nmark.SayHi() // 输出: Hi, I am Mark you can call me on 222-222-YYYY 当然, 我们也可以重写SayHi()方法:\ntype Human struct { name string age int phone string } type Student struct { Human //匿名字段 school string name string } func (h *Human) SayHi() { fmt.Printf(\"Hi, I am %s you can call me on %s\\n\", h.name, h.phone) } func (h *Student) SayHi() { fmt.Println(\"Student Sayhi\") } func main() { mark := Student{Human{\"Mark\", 25, \"222-222-YYYY\"}, \"MIT\", \"student name\"}\tmark.SayHi() } Output\nStudent Sayhi 完整代码\n3、为什么称其为Pseudo is-a呢?\n因为匿名组合不提供多态的特性. 如下面的代码:\npackage main type A struct{ } type B struct { A //B is-a A } func save(A) { //do something } func main() { b := new(B) save(*b); } Output\ncannot use *b (type B) as type A in argument to save 完整代码\n还有一个面试题的例子\ntype People struct{} func (p *People) ShowA() { fmt.Println(\"showA\") p.ShowB() } func (p *People) ShowB() { fmt.Println(\"showB\") } type Teacher struct { People } func (t *Teacher) ShowB() { fmt.Println(\"teacher showB\") } func main() { t := Teacher{} t.ShowA() } 输出结果是什么呢?\nOutput\nShowA ShowB Effective Go Says:\nThere’s an important way in which embedding differs from subclassing. When we embed a type, the methods of that type become methods of the outer type, but when they are invoked the receiver of the method is the inner type, not the outer one\n也就是说, Teacher由于组合了People, 所以Teacher也有了ShowA()方法, 但是在ShowA()方法里执行到ShowB时, 这个时候的receiver是*People而不是*Teacher, 主要原因还是因为embedding是一个Pseudo is-a, 没有多态的功能.\n4、 “多继承\"的问题\npackage main import \"fmt\" type School struct { address string } func (s *School) Address() { fmt.Println(\"School Address:\", s.address) } type Home struct { address string } func (h *Home) Address() { fmt.Println(\"Home Address:\", h.address) } type Student struct { School Home name string } func main() { mark := Student{School{\"aaa\"}, Home{\"bbbb\"}, \"cccc\"} fmt.Println(mark) mark.Address() fmt.Println(mark.address) mark.Home.Address() fmt.Println(mark.Home.address) } 输出结果:\n30: ambiguous selector mark.Address 31: ambiguous selector mark.address 完整代码\n由此可以看出, Golang中不管是方法还是属性都不存在类似C++那样的多继承的问题. 要访问Embedding相关的属性和方法, 需要在加那个相应的匿名字段, 如:\nmark.Home.Address() 5、Embedding value和 Embedding pointer的区别\npackage main import ( \"fmt\" ) type Person struct { name string } type Student struct { *Person age int } type Teacher struct { Person age int } func main() { s := Student{\u0026Person{\"student\"}, 10} t := Teacher{Person{\"teacher\"}, 40} fmt.Println(s, s.name) fmt.Println(t, t.name) } Output\n{0x1040c108 10} student {{teacher} 40} teacher 完整代码\nI. 两者对于结果来说, 没有啥区别, 只是对传参的时候有影响 II. Embedding value是比较常规的写法 III. Embedding pointer比较有优势一点, 不需要关注指针是什么时间被初始化的.\n三. Interface Golang中Composite不提供多态的功能, 那是否Golang不提供多态呢? 答案肯定是否定. Golang依靠Interface实现多态的功能.\n下面是我工程里面一段代码的简化:\npackage main import ( \"fmt\" ) type Check interface { CheckOss() } type CheckAudio struct { //something } func (c *CheckAudio) CheckOss() { fmt.Println(\"CheckAudio do CheckOss\") } func main() { checkAudio := CheckAudio{} var i Check i = \u0026checkAudio //想一下这里为啥需要\u0026 i.CheckOss() } 完整代码\n1、Interface 如何Composite ?\ntype Reader interface { Read(p []byte) (n int, err error) } type Writer interface { Write(p []byte) (n int, err error) } type ReadWriter interface { Reader Writer } 其实很简单, 就是把Reader, Writer嵌入到ReadWriter中, 这样ReadWriter就拥有了Reader和Writer的方法.\n尾声 至此, 基本说完了Golang的面向对象. 有哪里我理解的不对的地方, 请给我留言.\n参考资料\nEffective Go: Embedding Go面试题 Is Go An Object Oriented Language? go web编程 object-oriented-programming-in-go ",
+  "wordCount" : "2703",
+  "inLanguage": "zh",
+  "datePublished": "2017-07-24T01:51:37Z",
+  "dateModified": "2017-07-24T01:51:37Z",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2017-07-24-golang_oop/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      golang面向对象分析
+    </h1>
+    <div class="post-meta"><span title='2017-07-24 01:51:37 +0000 +0000'>2017年7月24日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2703 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#一-抽象和封装">一. 抽象和封装</a></li>
+    <li><a href="#二-继承composition">二. <del>继承</del>(Composition)</a>
+      <ul>
+        <li><a href="#1-has-a">1. has-a</a></li>
+        <li><a href="#2-is-apseudo-embedding">2. is-a(Pseudo)&mdash;-Embedding</a></li>
+        <li><a href="#三-interface">三. Interface</a></li>
+      </ul>
+    </li>
+    <li><a href="#尾声">尾声</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>说道面向对象(OOP)编程, 就不得不提到下面几个概念:</p>
+<ul>
+<li>抽象</li>
+<li>封装</li>
+<li>继承</li>
+<li>多态</li>
+</ul>
+<p>其实有个问题<code>Is Go An Object Oriented Language?</code>, 随便谷歌了一下, 你就发现讨论这个的文章有很多:</p>
+<ol>
+<li><a href="https://www.reddit.com/r/golang/comments/27p2bc/is_go_an_object_oriented_language_spf13com/?st=j5tjkwov&amp;sh=87c16f01">reddit</a></li>
+<li><a href="https://groups.google.com/forum/#!topic/Golang-Nuts/bSXry29pNo4">google group</a></li>
+</ol>
+<p>那么问题来了</p>
+<ol>
+<li>Golang是OOP吗?</li>
+<li>使用Golang如何实现OOP?</li>
+</ol>
+<p>我入门教程基本就是<code>A Tour Of Go</code>以及<code>Go Web 编程</code>. 由于之前是写C++, 但是说到Go面向对象编程, 总是感觉怪怪的, 总感觉缺少点什么. 我搜集了一些资料和例子, 加上我的一些理解, 整理出这样一篇文章.</p>
+<h2 id="一-抽象和封装">一. 抽象和封装<a hidden class="anchor" aria-hidden="true" href="#一-抽象和封装">#</a></h2>
+<p>抽象和封装就放在一块说了. 这个其实挺简单. 看一个例子就行了.</p>
+<pre tabindex="0"><code>type rect struct {
+    width int
+    height int
+}
+
+func (r *rect) area() int {
+    return r.width * r.height
+}
+
+func main() {
+    r := rect{width: 10, height: 5}
+    fmt.Println(&#34;area: &#34;, r.area())
+}
+</code></pre><p><a href="https://play.golang.org/p/a3bV2vRBMQ">完整代码</a></p>
+<p>要说明的几个地方:
+1、Golang中的<code>struct</code>和其他语言的<code>class</code>是一样的.</p>
+<p>2、可见性. 这个遵循Go语法的大小写的特性</p>
+<p>3、上面例子中, 称<code>*rect</code>为<code>receiver</code>. 关于<code>receiver</code> 可以有两种方式的写法:</p>
+<pre tabindex="0"><code>func (r *rect) area() int {
+    return r.width * r.height
+}
+</code></pre><pre tabindex="0"><code>func (r rect) area() int {
+    return r.width * r.height
+}
+</code></pre><p>这其中有什么区别和联系呢? 关于详细解释请查看<a href="https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/02.5.md">astaxie的解释</a>, 写的非常清晰.</p>
+<p>简单来说, Receiver可以是值传递, 还是可以是指针, 两者的差别在于, 指针作为Receiver会对实例对象的内容发生操作,而普通类型作为Receiver仅仅是以副本作为操作对象,并不对原实例对象发生操作。</p>
+<p>4、当<code>Receiver</code>为<code>*rect</code>指针的时候, 使用的是<code>r.width</code>, 而不是<code>(*r).width</code>, 是由于Go自动帮我转了,两种方式都是正确的.</p>
+<p>5、任何类型都可以声明成新的类型, 因为任何类型都可以有方法.</p>
+<pre tabindex="0"><code>type Interger int
+func (i Interger) Add(interger Interger) Interger {
+	return i + interger
+}
+</code></pre><p>6、虽然Interger是从int声明而来, 但是这样用是错误的.</p>
+<pre tabindex="0"><code>var i Interger = 1
+var a int = i //cannot use i (type Interger) as type int in assignment 
+</code></pre><p>这是因为Go中没有<code>隐式转换</code>(写C++的同学都会特别讨厌这个, 因为编译器背着我们干的事情太多了). Golang中类型之间的相互赋值都必须<code>显式声明</code>.</p>
+<p>上面的例子改成下面的方式就可以了.</p>
+<pre tabindex="0"><code>var i Interger = 1
+var a int = int(i)
+</code></pre><h2 id="二-继承composition">二. <del>继承</del>(Composition)<a hidden class="anchor" aria-hidden="true" href="#二-继承composition">#</a></h2>
+<p>说道继承，其实在Golang中是没有继承(Extend)这个概念. 因为Golang舍弃掉了像C++, Java的这种传统的、类型驱动的子类。</p>
+<blockquote>
+<p>Go Effictive says:
+Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.</p>
+</blockquote>
+<p>换句话说, Golang中没有继承, 只有<code>Composition</code>.</p>
+<p>Golang中的<code>Compostion</code>有两种形式, <code>匿名组合(Pseudo is-a)</code>和<code>非匿名组合(has-a)</code></p>
+<p>注: 如果不了解OOP的<code>is-a</code>和<code>has-a</code>关系的话, 请自行google.</p>
+<h3 id="1-has-a">1. has-a<a hidden class="anchor" aria-hidden="true" href="#1-has-a">#</a></h3>
+<pre tabindex="0"><code>package main
+
+import (
+	&#34;fmt&#34;
+)
+
+type Human struct {
+	name  string
+	age   int
+	phone string
+}
+
+type Student struct {
+	h      Human //非匿名字段
+	school string
+}
+
+func (h *Human) SayHi() {
+	fmt.Printf(&#34;Hi, I am %s you can call me on %s\n&#34;, h.name, h.phone)
+}
+
+func (s *Student) SayHi() {
+	fmt.Printf(&#34;Hi student, I am %s you can call me on %s&#34;, s.h.name, s.h.phone)
+}
+
+func main() {
+	mark := Student{Human{&#34;Mark&#34;, 25, &#34;222-222-YYYY&#34;}, &#34;MIT&#34;}
+	fmt.Println(mark.h.name, mark.h.age, mark.h.phone, mark.school)
+	mark.h.SayHi()
+	mark.SayHi()
+
+}
+</code></pre><blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>Mark 25 222-222-YYYY MIT
+Hi, I am Mark you can call me on 222-222-YYYY
+Hi student, I am Mark you can call me on 222-222-YYYY
+</code></pre><p><a href="https://play.golang.org/p/LDjPNu92qH">完整代码</a></p>
+<p>这种组合方式, 其实对于了解传统OOP的话, 很好理解, 就是把一个<code>struct</code>作为另一个<code>struct</code>的字段.</p>
+<p>从上面例子可以, Human完全作为Student的一个字段使用. 所以也就谈不上继承的相关问题了.我们也不去重点讨论.</p>
+<h3 id="2-is-apseudo-embedding">2. is-a(Pseudo)&mdash;-Embedding<a hidden class="anchor" aria-hidden="true" href="#2-is-apseudo-embedding">#</a></h3>
+<pre tabindex="0"><code>type Human struct {
+	name string
+	age int
+	phone string
+}
+
+type Student struct {
+	Human //匿名字段
+	school string
+}
+
+func (h *Human) SayHi() {
+	fmt.Printf(&#34;Hi, I am %s you can call me on %s\n&#34;, h.name, h.phone)
+}
+
+func main() {
+	mark := Student{Human{&#34;Mark&#34;, 25, &#34;222-222-YYYY&#34;}, &#34;MIT&#34;}
+	fmt.Println(mark.name, mark.age, mark.phone, mark.school)
+	mark.SayHi()
+}
+</code></pre><blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>Mark 25 222-222-YYYY MIT 
+Hi, I am Mark you can call me on 222-222-YYYY
+</code></pre><p><a href="https://play.golang.org/p/_hBrSQrsvq">完整代码</a></p>
+<p><strong>这里要说的有几点:</strong></p>
+<p><strong>1、字段</strong>
+现在<code>Student</code>访问<code>Human</code>的字符, 就可以直接访问了, 感觉就是在访问自己的属性一样.  这样就实现了OOP的继承.</p>
+<pre tabindex="0"><code>fmt.Println(&#34;Student age:&#34;, mark.age) //输出: Student age: 25
+</code></pre><p>但是, 我们也可以间接访问:</p>
+<pre tabindex="0"><code>fmt.Println(&#34;Student age:&#34;, mark.Human.age) //输出: Student age: 25
+</code></pre><p>这有个问题, 如果在<code>Student</code>也有个字段<code>name</code>, 那么当使用<code>mark.name</code>会以<code>Student</code>的<code>name</code>为准.</p>
+<pre tabindex="0"><code>fmt.Println(&#34;Student name:&#34;, mark.name) //输出:Student Name: student name
+</code></pre><p><a href="https://play.golang.org/p/KIEk6yi1kp">完整代码</a></p>
+<p><strong>2、方法</strong>
+<code>Student</code>也继承了<code>Human</code>的<code>SayHi()</code>方法</p>
+<pre tabindex="0"><code>mark.SayHi() // 输出: Hi, I am Mark you can call me on 222-222-YYYY
+</code></pre><p>当然, 我们也可以重写<code>SayHi()</code>方法:</p>
+<pre tabindex="0"><code>type Human struct {
+	name  string
+	age   int
+	phone string
+}
+
+type Student struct {
+	Human  //匿名字段
+	school string
+	name   string
+}
+
+func (h *Human) SayHi() {
+	fmt.Printf(&#34;Hi, I am %s you can call me on %s\n&#34;, h.name, h.phone)
+}
+
+func (h *Student) SayHi() {
+	fmt.Println(&#34;Student Sayhi&#34;)
+}
+
+func main() {
+	mark := Student{Human{&#34;Mark&#34;, 25, &#34;222-222-YYYY&#34;}, &#34;MIT&#34;, &#34;student name&#34;}	
+	mark.SayHi()
+}
+</code></pre><blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>Student Sayhi
+</code></pre><p><a href="https://play.golang.org/p/Ts673bwyV2">完整代码</a></p>
+<p><strong>3、为什么称其为<code>Pseudo is-a</code>呢?</strong></p>
+<p>因为<code>匿名组合</code>不提供<code>多态</code>的特性. 如下面的代码:</p>
+<pre tabindex="0"><code>package main
+
+type A struct{
+}
+
+type B struct {
+	A  //B is-a A
+}
+
+func save(A) {
+	//do something
+}
+
+func main() {
+	b := new(B)
+	save(*b);  
+}
+</code></pre><blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>cannot use *b (type B) as type A in argument to save
+</code></pre><p><a href="https://play.golang.org/p/4TqVZf2_8g">完整代码</a></p>
+<p>还有一个面试题的例子</p>
+<pre tabindex="0"><code>type People struct{}
+
+func (p *People) ShowA() {
+	fmt.Println(&#34;showA&#34;)
+	p.ShowB()
+}
+func (p *People) ShowB() {
+	fmt.Println(&#34;showB&#34;)
+}
+
+type Teacher struct {
+	People
+}
+
+func (t *Teacher) ShowB() {
+	fmt.Println(&#34;teacher showB&#34;)
+}
+
+func main() {
+	t := Teacher{}
+	t.ShowA()
+}
+</code></pre><p>输出结果是什么呢?</p>
+<blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>ShowA
+ShowB
+</code></pre><p>Effective Go Says:</p>
+<blockquote>
+<p>There&rsquo;s an important way in which embedding differs from subclassing. When we embed a type, the methods of that type become methods of the outer type, but when they are invoked the receiver of the method is the inner type, not the outer one</p>
+</blockquote>
+<p>也就是说, <code>Teacher</code>由于组合了<code>People</code>, 所以<code>Teacher</code>也有了<code>ShowA()</code>方法, 但是在<code>ShowA()</code>方法里执行到<code>ShowB</code>时, 这个时候的<code>receiver</code>是<code>*People</code>而不是<code>*Teacher</code>, 主要原因还是因为<code>embedding</code>是一个<code>Pseudo is-a</code>, 没有多态的功能.</p>
+<p><strong>4、 &ldquo;多继承&quot;的问题</strong></p>
+<pre tabindex="0"><code>package main
+
+import &#34;fmt&#34;
+
+type School struct {
+	address string
+}
+
+func (s *School) Address() {
+	fmt.Println(&#34;School Address:&#34;, s.address)
+}
+
+type Home struct {
+	address string
+}
+
+func (h *Home) Address() {
+	fmt.Println(&#34;Home Address:&#34;, h.address)
+}
+
+type Student struct {
+	School
+	Home
+	name string
+}
+
+func main() {
+	mark := Student{School{&#34;aaa&#34;}, Home{&#34;bbbb&#34;}, &#34;cccc&#34;}
+	fmt.Println(mark)
+	mark.Address()
+	fmt.Println(mark.address)
+
+	mark.Home.Address()
+	fmt.Println(mark.Home.address)
+}
+</code></pre><blockquote>
+<p>输出结果:</p>
+</blockquote>
+<pre tabindex="0"><code>30: ambiguous selector mark.Address
+31: ambiguous selector mark.address
+</code></pre><p><a href="https://play.golang.org/p/tImy0NTTiH">完整代码</a></p>
+<p>由此可以看出, Golang中不管是方法还是属性都不存在类似C++那样的多继承的问题. 要访问<code>Embedding</code>相关的属性和方法, 需要在加那个相应的<code>匿名字段</code>, 如:</p>
+<pre tabindex="0"><code>mark.Home.Address()
+</code></pre><p><strong>5、<code>Embedding value</code>和 <code>Embedding pointer</code>的区别</strong></p>
+<pre tabindex="0"><code>package main
+
+import (
+	&#34;fmt&#34;
+)
+
+type Person struct {
+	name string
+}
+
+type Student struct {
+	*Person
+	age int
+}
+
+type Teacher struct {
+	Person
+	age int
+}
+
+func main()  {
+	s := Student{&amp;Person{&#34;student&#34;}, 10}
+	t := Teacher{Person{&#34;teacher&#34;}, 40}
+	fmt.Println(s, s.name)
+	fmt.Println(t, t.name)
+}
+</code></pre><blockquote>
+<p>Output</p>
+</blockquote>
+<pre tabindex="0"><code>{0x1040c108 10} student
+{{teacher} 40} teacher
+</code></pre><p><a href="https://play.golang.org/p/zoIXGfvadf">完整代码</a></p>
+<p>I. 两者对于结果来说, 没有啥区别, 只是对传参的时候有影响
+II. <code>Embedding value</code>是比较常规的写法
+III. <code>Embedding  pointer</code>比较有优势一点, 不需要关注指针是什么时间被初始化的.</p>
+<h3 id="三-interface">三. Interface<a hidden class="anchor" aria-hidden="true" href="#三-interface">#</a></h3>
+<p>Golang中<code>Composite</code>不提供多态的功能,  那是否<code>Golang</code>不提供多态呢? 答案肯定是否定. Golang依靠<code>Interface</code>实现多态的功能.</p>
+<p>下面是我工程里面一段代码的简化:</p>
+<pre tabindex="0"><code>package main
+
+import (
+	&#34;fmt&#34;
+)
+
+type Check interface {
+	CheckOss()
+}
+
+type CheckAudio struct {
+	//something
+}
+
+func (c *CheckAudio) CheckOss() {
+	fmt.Println(&#34;CheckAudio do CheckOss&#34;)
+}
+
+func main() {
+	checkAudio := CheckAudio{}
+
+	var i Check
+
+	i = &amp;checkAudio //想一下这里为啥需要&amp;
+
+	i.CheckOss()
+}
+</code></pre><p><a href="https://play.golang.org/p/wEv6e8vSOF">完整代码</a></p>
+<p><strong>1、Interface 如何<code>Composite</code> ?</strong></p>
+<pre tabindex="0"><code>type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+type ReadWriter interface {
+    Reader
+    Writer
+}
+</code></pre><p>其实很简单, 就是把<code>Reader</code>, <code>Writer</code>嵌入到<code>ReadWriter</code>中, 这样<code>ReadWriter</code>就拥有了<code>Reader</code>和<code>Writer</code>的方法.</p>
+<h2 id="尾声">尾声<a hidden class="anchor" aria-hidden="true" href="#尾声">#</a></h2>
+<p>至此, 基本说完了Golang的面向对象.  有哪里我理解的不对的地方, 请给我留言.</p>
+<p>参考资料</p>
+<ol>
+<li><a href="https://golang.org/doc/effective_go.html#Embedding">Effective Go: Embedding</a></li>
+<li><a href="https://yushuangqi.com/blog/2017/golang-mian-shi-ti-da-an-yujie-xi.html">Go面试题</a></li>
+<li><a href="http://spf13.com/post/is-go-object-oriented/">Is Go An Object Oriented Language?</a></li>
+<li><a href="https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/02.4.md">go web编程</a></li>
+<li><a href="https://www.goinggo.net/2013/07/object-oriented-programming-in-go.html">object-oriented-programming-in-go</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on x"
+            href="https://x.com/intent/tweet/?text=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f&amp;hashtags=">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f&amp;title=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90&amp;summary=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f&title=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on whatsapp"
+            href="https://api.whatsapp.com/send?text=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on telegram"
+            href="https://telegram.me/share/url?text=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang面向对象分析 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=golang%e9%9d%a2%e5%90%91%e5%af%b9%e8%b1%a1%e5%88%86%e6%9e%90&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-24-golang_oop%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

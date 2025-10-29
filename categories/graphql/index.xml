@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Graphql on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/graphql/</link>
+    <description>Recent content in Graphql on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Wed, 06 Oct 2021 21:27:21 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/graphql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>聊聊我对 GraphQL 的一些认知</title>
+      <link>https://georgehao.github.io/posts/2021-10-06-graphql/</link>
+      <pubDate>Wed, 06 Oct 2021 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2021-10-06-graphql/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/2018-07-16-graphql.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。&lt;/p&gt;
+&lt;p&gt;因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Graphql最大复杂度和最大深度设置</title>
+      <link>https://georgehao.github.io/posts/2018-09-19-graphql-maxth-depth/</link>
+      <pubDate>Wed, 19 Sep 2018 16:44:46 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2018-09-19-graphql-maxth-depth/</guid>
+      <description>&lt;h1 id=&#34;设置最大深度和最大负责度的好处&#34;&gt;设置最大深度和最大负责度的好处&lt;/h1&gt;
+&lt;p&gt;因为把查询的权利交给了客户端, 客户端可以进行非常复杂的查询. 因为客户端可能进行恶意的查询或者进行非常大的查询, 因此服务端要拒绝这样的查询.&lt;/p&gt;
+&lt;p&gt;总共有三种方式可以进行:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;设置响应过期时间&lt;/li&gt;
+&lt;li&gt;设置查询最大深度&lt;/li&gt;
+&lt;li&gt;设置查询最大复杂度&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;设置响应过期时间需要对服务端代码和性能要求比较高, 可以先不管, 当服务器代码和性能上去再设置.&lt;/p&gt;
+&lt;h1 id=&#34;如何判断最大深度&#34;&gt;如何判断最大深度&lt;/h1&gt;
+&lt;h4 id=&#34;1-简单的查询depth--0&#34;&gt;1. 简单的查询,depth = 0&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query shallow1 {
+  thing1
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;2-内联片段inline-fragments不能增加depth-depth--0&#34;&gt;2. 内联片段（Inline Fragments）不能增加depth, depth = 0&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query shallow2 {
+  thing1
+  ... on Query {
+    thing2
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;3-named-fragments同样不能增加depth-depth--0&#34;&gt;3. Named Fragments同样不能增加depth, depth = 0&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query shallow3 {
+  ...queryFragment
+}
+
+fragment queryFragment on Query {
+  thing1
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;4-depth--1的查询&#34;&gt;4. depth = 1的查询&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query deep1_1 {
+  viewer {
+    name
+  }
+}
+
+query deep1_2 { // Inline Fragments
+  viewer {
+    ... on User {
+      name
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;5-depth--2的查询&#34;&gt;5. depth = 2的查询&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query deep2 {
+  viewer {
+    albums {
+      title
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;6-depth--3的查询&#34;&gt;6. depth = 3的查询&lt;/h4&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;query deep3 {
+  viewer {
+    albums {
+      ...musicInfo
+      songs{
+        ...musicInfo
+      }
+    }
+  }
+}
+
+fragment musicInfo on Music {
+  id
+  title
+  artists
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;introspectionquery&#34;&gt;IntrospectionQuery&lt;/h2&gt;
+&lt;p&gt;这里需要注意, 客户端在使用服务端graphql的时候, 需要去问GraphQL Schema它支持哪些查询, GraphQL 通过内省系统让我们可以做到这点. 通过查询 __schema 字段来向 GraphQL 询问哪些类型是可用的&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

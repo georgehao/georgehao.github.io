@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 | HHFCodeRv</title>
+<meta name="keywords" content="compose, transporter, elasticsearch, mongodb">
+<meta name="description" content="工具选型
+主要查看这篇文章
+
+mongo-connector
+elasticsearch-river-mongodb
+Logstash
+transporter
+Mongoosastic
+
+mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题
+
+mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com`
+
+elasticsearch-river-mongodb不支持elasticsearch5.0以版本.
+最终选择Transporter.
+选择Transporter原因
+
+项目活跃度较高
+实时同步
+配置简单
+golang写的(golang忠实粉丝)
+IBM公司产品
+
+开头文章提到的问题:">
+<meta name="author" content="GeorgeHao">
+<link rel="canonical" href="https://georgehao.github.io/posts/2018-06-13-compose-transporter/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2018-06-13-compose-transporter/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2018-06-13-compose-transporter/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步">
+  <meta property="og:description" content="工具选型 主要查看这篇文章
+mongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题
+mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com`
+elasticsearch-river-mongodb不支持elasticsearch5.0以版本.
+最终选择Transporter.
+选择Transporter原因 项目活跃度较高 实时同步 配置简单 golang写的(golang忠实粉丝) IBM公司产品 开头文章提到的问题:">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-06-13T21:59:26+08:00">
+    <meta property="article:modified_time" content="2018-06-13T21:59:26+08:00">
+    <meta property="article:tag" content="Compose">
+    <meta property="article:tag" content="Transporter">
+    <meta property="article:tag" content="Elasticsearch">
+    <meta property="article:tag" content="Mongodb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步">
+<meta name="twitter:description" content="工具选型
+主要查看这篇文章
+
+mongo-connector
+elasticsearch-river-mongodb
+Logstash
+transporter
+Mongoosastic
+
+mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题
+
+mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com`
+
+elasticsearch-river-mongodb不支持elasticsearch5.0以版本.
+最终选择Transporter.
+选择Transporter原因
+
+项目活跃度较高
+实时同步
+配置简单
+golang写的(golang忠实粉丝)
+IBM公司产品
+
+开头文章提到的问题:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+      "item": "https://georgehao.github.io/posts/2018-06-13-compose-transporter/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+  "name": "Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步",
+  "description": "工具选型 主要查看这篇文章\nmongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题\nmongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com`\nelasticsearch-river-mongodb不支持elasticsearch5.0以版本.\n最终选择Transporter.\n选择Transporter原因 项目活跃度较高 实时同步 配置简单 golang写的(golang忠实粉丝) IBM公司产品 开头文章提到的问题:\n",
+  "keywords": [
+    "compose", "transporter", "elasticsearch", "mongodb"
+  ],
+  "articleBody": "工具选型 主要查看这篇文章\nmongo-connector elasticsearch-river-mongodb Logstash transporter Mongoosastic mongo-connector是mongodb-labs官方的开源项目. 但是官方不在支持, 关闭了issue, 导致很多问题无法找到答案, 也就无法解决遇到的问题\nmongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact seth.payne@mongodb.com`\nelasticsearch-river-mongodb不支持elasticsearch5.0以版本.\n最终选择Transporter.\n选择Transporter原因 项目活跃度较高 实时同步 配置简单 golang写的(golang忠实粉丝) IBM公司产品 开头文章提到的问题:\nIt’s important to know that the transporter synchronizing only once. When the job is done, the transporter comes to its end.\n这个问题已经不存在了. 查看这个文章\nAnd the Transporter starts copying the collection… and when it’s done it stops running. That’s great for this collection because of its historical data. But what if that collection was live data; how would we manage to copy it consistently. With the MongoDB adaptor, there’s an option to tail the oplog, MongoDB’s replication trail and this lets programs see changes in real time. Turn the option on and when the initial copying has finished, the Transporter stays running listening to the oplog and creating new messages which contain documents with all the changes. So all you need to add to the source properties is “tail”: true.\n可以看出来, transporter和mongo-connector都是监听oplog的变化来实现数据的实时同步.\nOplog 查看oplog大小 db.printReplicationInfo() db.oplog.rs.stats().maxSize 单位k 一般复制集的oplog size 默认是磁盘容量的5%(最小1G，最大50G）\n如何估算oplog大小 http://www.mongoing.com/blog/oplog-size\n如何修改oplog大小 官方文档: https://docs.mongodb.com/v3.4/tutorial/change-oplog-size/\n不过阿里云官方不支持修改oplog, 所以如果遇到oplog过小导致同步失败的问题, 只能增加磁盘大小\ntransporter使用 官方: https://github.com/compose/transporter\n博客: https://www.compose.com/articles/search/?s=transporter\nWIKI: https://github.com/compose/transporter/wiki\nCompose官网: https://www.compose.com/\n命令 run run pipeline loaded from a file test display the compiled nodes without starting a pipeline about show information about available adaptors init initialize a config and pipeline file based from provided adaptors xlog manage the commit log offset manage the offset for sinks 查看支持的adaptors root@364293f04e45:~# ./transporter about rabbitmq - an adaptor that handles publish/subscribe messaging with RabbitMQ rethinkdb - a rethinkdb adaptor that functions as both a source and a sink elasticsearch - an elasticsearch sink adaptor file - an adaptor that reads / writes files mongodb - a mongodb adaptor that functions as both a source and a sink postgres - a postgres adaptor that functions as both a source and a sink 初始化配置文件 root@364293f04e45:~# ./transporter init mongodb elasticsearch Writing pipeline.js... 会生成一个pipeline.js\n配置文件 默认:\nvar source = mongodb({ \"uri\": \"${MONGODB_URI}\" // \"timeout\": \"30s\", // \"tail\": false, // \"ssl\": false, // \"cacerts\": [\"/path/to/cert.pem\"], // \"wc\": 1, // \"fsync\": false, // \"bulk\": false, // \"collection_filters\": \"{}\", // \"read_preference\": \"Primary\" }) var sink = elasticsearch({ \"uri\": \"${ELASTICSEARCH_URI}\" // \"timeout\": \"10s\", // defaults to 30s // \"aws_access_key\": \"ABCDEF\", // used for signing requests to AWS Elasticsearch service // \"aws_access_secret\": \"ABCDEF\" // used for signing requests to AWS Elasticsearch service // \"parent_id\": \"elastic_parent\" // defaults to \"elastic_parent\" parent identifier for Elasticsearch }) t.Source(\"source\", source, \"/.*/\").Save(\"sink\", sink, \"/.*/\") 主要参考Configuration, Pipelines, Transformers 进行配置.\nt.Source(\"source\", source, \"/.*/\").Save(\"sink\", sink, \"/.*/\")的namespaces(/.*/)是一个正则表达式. 以^开头并以$结尾\n关于这一块查看issue的时候要注意, 尽量不看2017年之前的issue, 因为在0.3.0改变了transporter的使用方式. 尽量按照wiki的方式来.\n我的配置文件\nvar source = mongodb({ \"uri\": \"mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin\" // \"timeout\": \"30s\", \"tail\": true, // \"ssl\": false, // \"cacerts\": [\"/path/to/cert.pem\"], // \"wc\": 1, // \"fsync\": false, // \"bulk\": false, //\"collection_filters\": \"{ }\", // \"read_preference\": \"Primary\" }) var sink = elasticsearch({ \"uri\": \"http://***:***@es-cn-mp90mbej1000dyum9.elasticsearch.aliyuncs.com:9200/story\" // \"timeout\": \"10s\", // defaults to 30s // \"aws_access_key\": \"ABCDEF\", // used for signing requests to AWS Elasticsearch service // \"aws_access_secret\": \"ABCDEF\" // used for signing requests to AWS Elasticsearch service // \"parent_id\": \"elastic_parent\" // defaults to \"elastic_parent\" parent identifier for Elasticsearch }) t.Source(\"source\", source, \"/^tracks$|^albums$|^picture_books$|^picture_books_items$/\").Transform(omit({\"fields\":[\"code\"]})).Save(\"sink\", sink, \"/^tracks$|^albums$|^picture_books$|^picture_books_items$/\") 还存在两个问题:\n如何mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin换成MongoDB connection string? 如何在同一脚本中同时同步多个数据库? 测试配置文件是否正常 root@364293f04e45:~# ./transporter test Transporter: - Source: source mongodb ^tracks$|^albums$|^picture_books$|^picture_books_items$ - Sink: sink elasticsearch ^tracks$|^albums$|^picture_books$|^picture_books_items$ 运行 root@364293f04e45:~# ./transporter run INFO[0000] adaptor Listening... name=sink path=\"source/sink\" type=elasticsearch INFO[0000] starting with metadata map[] name=source path=source type=mongodb INFO[0000] adaptor Starting... name=source path=source type=mongodb INFO[0000] boot map[source:mongodb sink:elasticsearch] ts=1529296920584180591 INFO[0000] testing oplog access uri=\"mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin\" INFO[0000] oplog access good INFO[0000] starting Read func db=story INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)... INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established. INFO[0000] collection count db=story num_collections=39 INFO[0000] skipping iteration... collection=abc db=story INFO[0000] adding for iteration... collection=albums db=story INFO[0000] skipping iteration... collection=\"cartoon_albums\" db=story INFO[0000] skipping iteration... collection=categories db=story INFO[0000] skipping iteration... collection=\"category_groups\" db=story INFO[0000] skipping iteration... collection=\"child_ugcs\" db=story INFO[0000] skipping iteration... collection=\"feedback_categories\" db=story INFO[0000] skipping iteration... collection=feedbacks db=story INFO[0000] skipping iteration... collection=handpicks db=story INFO[0000] skipping iteration... collection=languages db=story INFO[0000] skipping iteration... collection=\"picture_book_items\" db=story INFO[0000] adding for iteration... collection=\"picture_books\" db=story INFO[0000] skipping iteration... collection=system.profile db=story INFO[0000] skipping iteration... collection=tags db=story INFO[0000] skipping iteration... collection=testcoll db=story INFO[0000] adding for iteration... collection=tracks db=story INFO[0000] done iterating collections db=story INFO[0000] iterating... collection=albums INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)... INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established. INFO[0000] iterating complete collection=albums db=story INFO[0000] oplog start timestamp: 6568280257273528320 collection=albums INFO[0000] tailing oplog with query map[ns:story.albums ts:map[$gte:6568280257273528320]] db=story INFO[0000] iterating... collection=\"picture_books\" INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)... INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established. ^CINFO[0000] adaptor Stopping... name=source path=source type=mongo 默认打印INFO级别的log, 其他级别的还有debug,error, 只需要加上参数: -log.level \"debug\"\nDocker运行 https://github.com/compose/transporter/wiki/Running-with-Docker\ndocker pull quay.io/compose/transporter docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter init mongodb file #!/bin/sh docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter run 创建mapping 在使用transporter的时候最好要提前创建好index, 这样通过到ES的数据才会按照我们想要的格式建立索引. 如果不提前设置创建index, 那么ES需要打开自动创建索引选项, 不建议这么做.\n创建index { \"index\":{ \"analysis\":{ \"analyzer\":{ \"by_smart\":{ \"type\":\"custom\", \"tokenizer\":\"ik_smart\", \"filter\":[ \"by_tfr\", \"by_sfr\" ], \"char_filter\":[ \"by_cfr\" ] }, \"by_max_word\":{ \"type\":\"custom\", \"tokenizer\":\"ik_max_word\", \"filter\":[ \"by_tfr\", \"by_sfr\" ], \"char_filter\":[ \"by_cfr\" ] } }, \"filter\":{ \"by_tfr\":{ \"type\":\"stop\", \"stopwords\":[ \" \" ] }, \"by_sfr\":{ \"type\":\"synonym\", \"synonyms_path\":\"analysis/synonyms.txt\" } }, \"char_filter\":{ \"by_cfr\":{ \"type\":\"mapping\", \"mappings\":[ \"| =\u003e |\" ] } } } } } 创建type { \"properties\": { \"title\": { \"type\": \"text\", \"fields\": { \"keyword\": { \"type\": \"keyword\", \"ignore_above\": 256 } }, \"index\": \"analyzed\", \"analyzer\": \"by_max_word\", \"search_analyzer\": \"by_smart\" }, \"authors\": { \"properties\":{ \"name\": { \"type\": \"text\", \"fields\": { \"keyword\": { \"type\": \"keyword\", \"ignore_above\": 256 } }, \"index\": \"analyzed\", \"analyzer\": \"by_max_word\", \"search_analyzer\": \"by_smart\"\t} } }, \"nickname\": { \"type\": \"text\", \"fields\": { \"keyword\": { \"type\": \"keyword\", \"ignore_above\": 256 } }, \"index\": \"analyzed\", \"analyzer\": \"by_max_word\", \"search_analyzer\": \"by_smart\" } } } ",
+  "wordCount" : "1799",
+  "inLanguage": "zh",
+  "datePublished": "2018-06-13T21:59:26+08:00",
+  "dateModified": "2018-06-13T21:59:26+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "GeorgeHao"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2018-06-13-compose-transporter/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步
+    </h1>
+    <div class="post-meta"><span title='2018-06-13 21:59:26 +0800 CST'>2018年6月13日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1799 字</span>&nbsp;·&nbsp;<span>GeorgeHao</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#工具选型">工具选型</a></li>
+    <li><a href="#选择transporter原因">选择<code>Transporter</code>原因</a></li>
+    <li><a href="#oplog">Oplog</a>
+      <ul>
+        <li><a href="#查看oplog大小">查看<code>oplog</code>大小</a></li>
+        <li><a href="#如何估算oplog大小">如何估算oplog大小</a></li>
+        <li><a href="#如何修改oplog大小">如何修改oplog大小</a></li>
+      </ul>
+    </li>
+    <li><a href="#transporter使用">transporter使用</a>
+      <ul>
+        <li><a href="#命令">命令</a></li>
+        <li><a href="#查看支持的adaptors">查看支持的adaptors</a></li>
+        <li><a href="#初始化配置文件">初始化配置文件</a></li>
+        <li><a href="#配置文件">配置文件</a></li>
+        <li><a href="#测试配置文件是否正常">测试配置文件是否正常</a></li>
+        <li><a href="#运行">运行</a></li>
+        <li><a href="#docker运行">Docker运行</a></li>
+        <li><a href="#创建mapping">创建mapping</a>
+          <ul>
+            <li><a href="#创建index">创建index</a></li>
+            <li><a href="#创建type">创建type</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="工具选型">工具选型<a hidden class="anchor" aria-hidden="true" href="#工具选型">#</a></h2>
+<p>主要查看<a href="https://code.likeagirl.io/5-different-ways-to-synchronize-data-from-mongodb-to-elasticsearch-d8456b83d44f">这篇文章</a></p>
+<ul>
+<li><a href="https://github.com/mongodb-labs/mongo-connector">mongo-connector</a></li>
+<li><a href="https://github.com/richardwilly98/elasticsearch-river-mongodb">elasticsearch-river-mongodb</a></li>
+<li><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html">Logstash</a></li>
+<li><a href="https://github.com/compose/transporter">transporter</a></li>
+<li><a href="https://www.compose.com/articles/mongoosastic-the-power-of-mongodb-and-elasticsearch-together/">Mongoosastic</a></li>
+</ul>
+<p><code>mongo-connector</code>是<a href="https://github.com/mongodb-labs/mongo-connector">mongodb-labs</a>官方的开源项目. 但是官方不在支持, 关闭了<code>issue</code>, 导致很多问题无法找到答案, 也就无法解决遇到的问题</p>
+<blockquote>
+<p>mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact <a href="mailto:seth.payne@mongodb.com">seth.payne@mongodb.com</a>`</p>
+</blockquote>
+<p><code>elasticsearch-river-mongodb</code>不支持<code>elasticsearch</code>5.0以版本.</p>
+<p>最终选择<code>Transporter</code>.</p>
+<h2 id="选择transporter原因">选择<code>Transporter</code>原因<a hidden class="anchor" aria-hidden="true" href="#选择transporter原因">#</a></h2>
+<ol>
+<li>项目活跃度较高</li>
+<li>实时同步</li>
+<li>配置简单</li>
+<li><code>golang</code>写的(golang忠实粉丝)</li>
+<li>IBM公司产品</li>
+</ol>
+<p>开头文章提到的问题:</p>
+<blockquote>
+<p>It’s important to know that the transporter synchronizing only once. When the job is done, the transporter comes to its end.</p>
+</blockquote>
+<p>这个问题已经不存在了. 查看这个<a href="https://www.compose.com/articles/transporter-mongodb-and-synchronization/">文章</a></p>
+<blockquote>
+<p>And the Transporter starts copying the collection&hellip; and when it&rsquo;s done it stops running. That&rsquo;s great for this collection because of its historical data. But what if that collection was live data; how would we manage to copy it consistently. With the MongoDB adaptor, there&rsquo;s an option to tail the oplog, MongoDB&rsquo;s replication trail and this lets programs see changes in real time. Turn the option on and when the initial copying has finished, the Transporter stays running listening to the oplog and creating new messages which contain documents with all the changes. So all you need to add to the source properties is &ldquo;tail&rdquo;: true.</p>
+</blockquote>
+<p>可以看出来, <code>transporter</code>和<code>mongo-connector</code>都是监听<code>oplog</code>的变化来实现数据的实时同步.</p>
+<h2 id="oplog">Oplog<a hidden class="anchor" aria-hidden="true" href="#oplog">#</a></h2>
+<h3 id="查看oplog大小">查看<code>oplog</code>大小<a hidden class="anchor" aria-hidden="true" href="#查看oplog大小">#</a></h3>
+<pre tabindex="0"><code>db.printReplicationInfo()
+db.oplog.rs.stats().maxSize 单位k
+</code></pre><p>一般复制集的oplog size 默认是磁盘容量的5%(最小1G，最大50G）</p>
+<h3 id="如何估算oplog大小">如何估算oplog大小<a hidden class="anchor" aria-hidden="true" href="#如何估算oplog大小">#</a></h3>
+<p><a href="http://www.mongoing.com/blog/oplog-size">http://www.mongoing.com/blog/oplog-size</a></p>
+<h3 id="如何修改oplog大小">如何修改oplog大小<a hidden class="anchor" aria-hidden="true" href="#如何修改oplog大小">#</a></h3>
+<p>官方文档: <a href="https://docs.mongodb.com/v3.4/tutorial/change-oplog-size/">https://docs.mongodb.com/v3.4/tutorial/change-oplog-size/</a></p>
+<p>不过阿里云官方不支持修改oplog, 所以如果遇到oplog过小导致同步失败的问题, 只能增加磁盘大小</p>
+<h2 id="transporter使用">transporter使用<a hidden class="anchor" aria-hidden="true" href="#transporter使用">#</a></h2>
+<p>官方: <a href="https://github.com/compose/transporter">https://github.com/compose/transporter</a></p>
+<p>博客: <a href="https://www.compose.com/articles/search/?s=transporter">https://www.compose.com/articles/search/?s=transporter</a></p>
+<p>WIKI: <a href="https://github.com/compose/transporter/wiki">https://github.com/compose/transporter/wiki</a></p>
+<p>Compose官网: <a href="https://www.compose.com/">https://www.compose.com/</a></p>
+<h3 id="命令">命令<a hidden class="anchor" aria-hidden="true" href="#命令">#</a></h3>
+<pre tabindex="0"><code>run       run pipeline loaded from a file
+test      display the compiled nodes without starting a pipeline
+about     show information about available adaptors
+init      initialize a config and pipeline file based from provided adaptors
+xlog      manage the commit log
+offset    manage the offset for sinks
+</code></pre><h3 id="查看支持的adaptors">查看支持的adaptors<a hidden class="anchor" aria-hidden="true" href="#查看支持的adaptors">#</a></h3>
+<pre tabindex="0"><code>root@364293f04e45:~# ./transporter about
+rabbitmq - an adaptor that handles publish/subscribe messaging with RabbitMQ
+rethinkdb - a rethinkdb adaptor that functions as both a source and a sink
+elasticsearch - an elasticsearch sink adaptor
+file - an adaptor that reads / writes files
+mongodb - a mongodb adaptor that functions as both a source and a sink
+postgres - a postgres adaptor that functions as both a source and a sink
+</code></pre><h3 id="初始化配置文件">初始化配置文件<a hidden class="anchor" aria-hidden="true" href="#初始化配置文件">#</a></h3>
+<pre tabindex="0"><code>root@364293f04e45:~# ./transporter init mongodb elasticsearch
+Writing pipeline.js...
+</code></pre><p>会生成一个<code>pipeline.js</code></p>
+<h3 id="配置文件">配置文件<a hidden class="anchor" aria-hidden="true" href="#配置文件">#</a></h3>
+<p>默认:</p>
+<pre tabindex="0"><code>var source = mongodb({
+  &#34;uri&#34;: &#34;${MONGODB_URI}&#34;
+  // &#34;timeout&#34;: &#34;30s&#34;,
+  // &#34;tail&#34;: false,
+  // &#34;ssl&#34;: false,
+  // &#34;cacerts&#34;: [&#34;/path/to/cert.pem&#34;],
+  // &#34;wc&#34;: 1,
+  // &#34;fsync&#34;: false,
+  // &#34;bulk&#34;: false,
+  // &#34;collection_filters&#34;: &#34;{}&#34;,
+  // &#34;read_preference&#34;: &#34;Primary&#34;
+})
+
+var sink = elasticsearch({
+  &#34;uri&#34;: &#34;${ELASTICSEARCH_URI}&#34;
+  // &#34;timeout&#34;: &#34;10s&#34;, // defaults to 30s
+  // &#34;aws_access_key&#34;: &#34;ABCDEF&#34;, // used for signing requests to AWS Elasticsearch service
+  // &#34;aws_access_secret&#34;: &#34;ABCDEF&#34; // used for signing requests to AWS Elasticsearch service
+  // &#34;parent_id&#34;: &#34;elastic_parent&#34; // defaults to &#34;elastic_parent&#34; parent identifier for Elasticsearch
+})
+
+t.Source(&#34;source&#34;, source, &#34;/.*/&#34;).Save(&#34;sink&#34;, sink, &#34;/.*/&#34;)
+</code></pre><p>主要参考<a href="https://github.com/compose/transporter/wiki/Configuration">Configuration</a>, <a href="https://github.com/compose/transporter/wiki/Pipelines">Pipelines</a>, <a href="https://github.com/compose/transporter/wiki/Transformers">Transformers</a> 进行配置.</p>
+<p><code>t.Source(&quot;source&quot;, source, &quot;/.*/&quot;).Save(&quot;sink&quot;, sink, &quot;/.*/&quot;)</code>的<code>namespaces</code>(<code>/.*/</code>)是一个正则表达式. 以<code>^</code>开头并以<code>$</code>结尾</p>
+<p>关于这一块查看issue的时候要注意, 尽量不看<code>2017年</code>之前的<code>issue</code>, 因为在<a href="https://www.compose.com/articles/transporter-0-3-0-released-transporter-streamlined/">0.3.0</a>改变了<code>transporter</code>的使用方式. 尽量按照wiki的方式来.</p>
+<p>我的配置文件</p>
+<pre tabindex="0"><code>var source = mongodb({
+  &#34;uri&#34;: &#34;mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin&#34;
+  // &#34;timeout&#34;: &#34;30s&#34;,
+  &#34;tail&#34;: true,
+  // &#34;ssl&#34;: false,
+  // &#34;cacerts&#34;: [&#34;/path/to/cert.pem&#34;],
+  // &#34;wc&#34;: 1,
+  // &#34;fsync&#34;: false,
+  // &#34;bulk&#34;: false,
+  //&#34;collection_filters&#34;: &#34;{ }&#34;,
+  // &#34;read_preference&#34;: &#34;Primary&#34;
+})
+
+
+var sink = elasticsearch({
+  &#34;uri&#34;: &#34;http://***:***@es-cn-mp90mbej1000dyum9.elasticsearch.aliyuncs.com:9200/story&#34;
+  // &#34;timeout&#34;: &#34;10s&#34;, // defaults to 30s
+  // &#34;aws_access_key&#34;: &#34;ABCDEF&#34;, // used for signing requests to AWS Elasticsearch service
+  // &#34;aws_access_secret&#34;: &#34;ABCDEF&#34; // used for signing requests to AWS Elasticsearch service
+  // &#34;parent_id&#34;: &#34;elastic_parent&#34; // defaults to &#34;elastic_parent&#34; parent identifier for Elasticsearch
+})
+
+t.Source(&#34;source&#34;, source, &#34;/^tracks$|^albums$|^picture_books$|^picture_books_items$/&#34;).Transform(omit({&#34;fields&#34;:[&#34;code&#34;]})).Save(&#34;sink&#34;, sink, &#34;/^tracks$|^albums$|^picture_books$|^picture_books_items$/&#34;)
+</code></pre><p>还存在两个问题:</p>
+<ol>
+<li>如何<code>mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin</code>换成MongoDB connection string?</li>
+<li>如何在同一脚本中同时同步多个数据库?</li>
+</ol>
+<h3 id="测试配置文件是否正常">测试配置文件是否正常<a hidden class="anchor" aria-hidden="true" href="#测试配置文件是否正常">#</a></h3>
+<pre tabindex="0"><code>root@364293f04e45:~# ./transporter test
+Transporter:
+ - Source:         source                                   mongodb         ^tracks$|^albums$|^picture_books$|^picture_books_items$
+  - Sink:          sink                                     elasticsearch   ^tracks$|^albums$|^picture_books$|^picture_books_items$
+</code></pre><h3 id="运行">运行<a hidden class="anchor" aria-hidden="true" href="#运行">#</a></h3>
+<pre tabindex="0"><code>root@364293f04e45:~# ./transporter run
+INFO[0000] adaptor Listening...                          name=sink path=&#34;source/sink&#34; type=elasticsearch
+INFO[0000] starting with metadata map[]                  name=source path=source type=mongodb
+INFO[0000] adaptor Starting...                           name=source path=source type=mongodb
+INFO[0000] boot map[source:mongodb sink:elasticsearch]   ts=1529296920584180591
+INFO[0000] testing oplog access                          uri=&#34;mongodb://**:**@dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717/story?authSource=admin&#34;
+INFO[0000] oplog access good
+INFO[0000] starting Read func                            db=story
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+INFO[0000] collection count                              db=story num_collections=39
+INFO[0000] skipping iteration...                         collection=abc db=story
+INFO[0000] adding for iteration...                       collection=albums db=story
+INFO[0000] skipping iteration...                         collection=&#34;cartoon_albums&#34; db=story
+INFO[0000] skipping iteration...                         collection=categories db=story
+INFO[0000] skipping iteration...                         collection=&#34;category_groups&#34; db=story
+INFO[0000] skipping iteration...                         collection=&#34;child_ugcs&#34; db=story
+INFO[0000] skipping iteration...                         collection=&#34;feedback_categories&#34; db=story
+INFO[0000] skipping iteration...                         collection=feedbacks db=story
+INFO[0000] skipping iteration...                         collection=handpicks db=story
+INFO[0000] skipping iteration...                         collection=languages db=story
+INFO[0000] skipping iteration...                         collection=&#34;picture_book_items&#34; db=story
+INFO[0000] adding for iteration...                       collection=&#34;picture_books&#34; db=story
+INFO[0000] skipping iteration...                         collection=system.profile db=story
+INFO[0000] skipping iteration...                         collection=tags db=story
+INFO[0000] skipping iteration...                         collection=testcoll db=story
+INFO[0000] adding for iteration...                       collection=tracks db=story
+INFO[0000] done iterating collections                    db=story
+INFO[0000] iterating...                                  collection=albums
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+INFO[0000] iterating complete                            collection=albums db=story
+INFO[0000] oplog start timestamp: 6568280257273528320    collection=albums
+INFO[0000] tailing oplog with query map[ns:story.albums ts:map[$gte:6568280257273528320]]  db=story
+INFO[0000] iterating...                                  collection=&#34;picture_books&#34;
+INFO[0000] Establishing new connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 (timeout=1h0m0s)...
+INFO[0000] Connection to dds-2ze007b62390d8241.mongodb.rds.aliyuncs.com:3717 established.
+^CINFO[0000] adaptor Stopping...                           name=source path=source type=mongo
+</code></pre><p>默认打印<code>INFO</code>级别的log, 其他级别的还有<code>debug</code>,<code>error</code>, 只需要加上参数: <code>-log.level &quot;debug&quot;</code></p>
+<h3 id="docker运行">Docker运行<a hidden class="anchor" aria-hidden="true" href="#docker运行">#</a></h3>
+<p><a href="https://github.com/compose/transporter/wiki/Running-with-Docker">https://github.com/compose/transporter/wiki/Running-with-Docker</a></p>
+<pre tabindex="0"><code>docker pull quay.io/compose/transporter
+docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter init mongodb file
+#!/bin/sh
+docker run --rm -v $(pwd):/workdir -w /workdir quay.io/compose/transporter:latest transporter run
+</code></pre><h3 id="创建mapping">创建mapping<a hidden class="anchor" aria-hidden="true" href="#创建mapping">#</a></h3>
+<p>在使用<code>transporter</code>的时候最好要提前创建好index, 这样通过到ES的数据才会按照我们想要的格式建立索引. 如果不提前设置创建index, 那么ES需要打开<code>自动创建索引</code>选项, 不建议这么做.</p>
+<h4 id="创建index">创建index<a hidden class="anchor" aria-hidden="true" href="#创建index">#</a></h4>
+<pre tabindex="0"><code>{
+    &#34;index&#34;:{
+        &#34;analysis&#34;:{
+            &#34;analyzer&#34;:{
+                &#34;by_smart&#34;:{
+                    &#34;type&#34;:&#34;custom&#34;,
+                    &#34;tokenizer&#34;:&#34;ik_smart&#34;,
+                    &#34;filter&#34;:[
+                        &#34;by_tfr&#34;,
+                        &#34;by_sfr&#34;
+                    ],
+                    &#34;char_filter&#34;:[
+                        &#34;by_cfr&#34;
+                    ]
+                },
+                &#34;by_max_word&#34;:{
+                    &#34;type&#34;:&#34;custom&#34;,
+                    &#34;tokenizer&#34;:&#34;ik_max_word&#34;,
+                    &#34;filter&#34;:[
+                        &#34;by_tfr&#34;,
+                        &#34;by_sfr&#34;
+                    ],
+                    &#34;char_filter&#34;:[
+                        &#34;by_cfr&#34;
+                    ]
+                }
+            },
+            &#34;filter&#34;:{
+                &#34;by_tfr&#34;:{
+                    &#34;type&#34;:&#34;stop&#34;,
+                    &#34;stopwords&#34;:[
+                        &#34; &#34;
+                    ]
+                },
+                &#34;by_sfr&#34;:{
+                    &#34;type&#34;:&#34;synonym&#34;,
+                    &#34;synonyms_path&#34;:&#34;analysis/synonyms.txt&#34;
+                }
+            },
+            &#34;char_filter&#34;:{
+                &#34;by_cfr&#34;:{
+                    &#34;type&#34;:&#34;mapping&#34;,
+                    &#34;mappings&#34;:[
+                        &#34;| =&gt; |&#34;
+                    ]
+                }
+            }
+        }
+    }
+}
+</code></pre><h4 id="创建type">创建type<a hidden class="anchor" aria-hidden="true" href="#创建type">#</a></h4>
+<pre tabindex="0"><code>{
+	&#34;properties&#34;: {
+	    &#34;title&#34;: {
+	    	&#34;type&#34;: &#34;text&#34;,
+	    	&#34;fields&#34;: {
+		    	&#34;keyword&#34;: {
+		        	&#34;type&#34;: &#34;keyword&#34;,
+		        	&#34;ignore_above&#34;: 256
+		    	}
+	    	},
+			&#34;index&#34;: &#34;analyzed&#34;,
+		    &#34;analyzer&#34;: &#34;by_max_word&#34;,
+		    &#34;search_analyzer&#34;: &#34;by_smart&#34;
+    	},
+    	&#34;authors&#34;: {
+    		&#34;properties&#34;:{
+    			&#34;name&#34;: {
+    				&#34;type&#34;: &#34;text&#34;,
+			    	&#34;fields&#34;: {
+				    	&#34;keyword&#34;: {
+				        	&#34;type&#34;: &#34;keyword&#34;,
+				        	&#34;ignore_above&#34;: 256
+				    	}
+			    	},
+					&#34;index&#34;: &#34;analyzed&#34;,
+				    &#34;analyzer&#34;: &#34;by_max_word&#34;,
+				    &#34;search_analyzer&#34;: &#34;by_smart&#34;		
+    			}
+    		}
+    	},
+    	&#34;nickname&#34;: {
+	    	&#34;type&#34;: &#34;text&#34;,
+	    	&#34;fields&#34;: {
+		    	&#34;keyword&#34;: {
+		        	&#34;type&#34;: &#34;keyword&#34;,
+		        	&#34;ignore_above&#34;: 256
+		    	}
+	    	},
+			&#34;index&#34;: &#34;analyzed&#34;,
+		    &#34;analyzer&#34;: &#34;by_max_word&#34;,
+		    &#34;search_analyzer&#34;: &#34;by_smart&#34;
+    	}
+	}
+}
+</code></pre>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/compose/">Compose</a></li>
+      <li><a href="https://georgehao.github.io/tags/transporter/">Transporter</a></li>
+      <li><a href="https://georgehao.github.io/tags/elasticsearch/">Elasticsearch</a></li>
+      <li><a href="https://georgehao.github.io/tags/mongodb/">Mongodb</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2018-09-19-graphql-maxth-depth/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Graphql最大复杂度和最大深度设置</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on x"
+            href="https://x.com/intent/tweet/?text=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f&amp;hashtags=compose%2ctransporter%2celasticsearch%2cmongodb">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f&amp;title=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5&amp;summary=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f&title=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on whatsapp"
+            href="https://api.whatsapp.com/send?text=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on telegram"
+            href="https://telegram.me/share/url?text=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Compose%20Transporter%20--%20%e5%9f%ba%e4%ba%8e%e9%98%bf%e9%87%8c%e4%ba%91MongoDB%e5%92%8cES%e4%b9%8b%e9%97%b4%e7%9a%84%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-06-13-compose-transporter%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

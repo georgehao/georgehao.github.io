@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ES简单使用 | HHFCodeRv</title>
+<meta name="keywords" content="elasticsearch, es">
+<meta name="description" content="常用命令
+
+查看有哪些indexes
+
+curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices
+
+删除索引
+
+curl -u *:* -XDELETE 127.0.0.1:9200/story 
+
+查看type
+
+curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty
+
+查看结构
+
+curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty
+
+创建index
+
+curl -u *:*  -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty
+
+模糊查询
+
+curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39;
+查询
+https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
+Match查询
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;match&#34; : {
+            &#34;testField&#34; : &#34;abc&#34;
+        }
+    }
+}&#39;
+$data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;match&#39; =&gt; [
+                &#39;title&#39; =&gt; &#39;黑猫&#39;,
+            ]
+        ],
+    ]
+];
+Bool查询
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;must&#34;: [
+                {
+                    &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; }
+                },
+                {
+                    &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; }
+                }
+            ]
+        }
+    }
+}&#39;
+ $data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;bool&#39; =&gt; [
+                &#39;must&#39; =&gt; [
+                    [&#39;match&#39; =&gt; [&#39;title&#39; =&gt; &#39;黑猫&#39;,]],
+                    [&#39;match&#39; =&gt; [&#39;anchor_nickname&#39; =&gt; &#39;可乐&#39;]],
+                ]
+            ]
+        ],
+    ]
+];
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;filter&#34; : {
+                &#34;term&#34; : { &#34;my_field&#34; : &#34;abc&#34; }
+            },
+            &#34;should&#34; : {
+                &#34;match&#34; : { &#34;my_other_field&#34; : &#34;xyz&#34; }
+            }
+        }
+    }
+}&#39;
+Query DSL
+Match Query">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2018-09-28-es-simple/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2018-09-28-es-simple/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2018-09-28-es-simple/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="ES简单使用">
+  <meta property="og:description" content="常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
+Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;must&#34;: [ { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } }, { &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt; [ &#39;must&#39; =&gt; [ [&#39;match&#39; =&gt; [&#39;title&#39; =&gt; &#39;黑猫&#39;,]], [&#39;match&#39; =&gt; [&#39;anchor_nickname&#39; =&gt; &#39;可乐&#39;]], ] ] ], ] ]; curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;filter&#34; : { &#34;term&#34; : { &#34;my_field&#34; : &#34;abc&#34; } }, &#34;should&#34; : { &#34;match&#34; : { &#34;my_other_field&#34; : &#34;xyz&#34; } } } } }&#39; Query DSL Match Query">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-09-27T11:44:44+08:00">
+    <meta property="article:modified_time" content="2018-09-27T11:44:44+08:00">
+    <meta property="article:tag" content="Es">
+    <meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES简单使用">
+<meta name="twitter:description" content="常用命令
+
+查看有哪些indexes
+
+curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices
+
+删除索引
+
+curl -u *:* -XDELETE 127.0.0.1:9200/story 
+
+查看type
+
+curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty
+
+查看结构
+
+curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty
+
+创建index
+
+curl -u *:*  -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty
+
+模糊查询
+
+curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39;
+查询
+https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
+Match查询
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;match&#34; : {
+            &#34;testField&#34; : &#34;abc&#34;
+        }
+    }
+}&#39;
+$data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;match&#39; =&gt; [
+                &#39;title&#39; =&gt; &#39;黑猫&#39;,
+            ]
+        ],
+    ]
+];
+Bool查询
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;must&#34;: [
+                {
+                    &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; }
+                },
+                {
+                    &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; }
+                }
+            ]
+        }
+    }
+}&#39;
+ $data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;bool&#39; =&gt; [
+                &#39;must&#39; =&gt; [
+                    [&#39;match&#39; =&gt; [&#39;title&#39; =&gt; &#39;黑猫&#39;,]],
+                    [&#39;match&#39; =&gt; [&#39;anchor_nickname&#39; =&gt; &#39;可乐&#39;]],
+                ]
+            ]
+        ],
+    ]
+];
+curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;filter&#34; : {
+                &#34;term&#34; : { &#34;my_field&#34; : &#34;abc&#34; }
+            },
+            &#34;should&#34; : {
+                &#34;match&#34; : { &#34;my_other_field&#34; : &#34;xyz&#34; }
+            }
+        }
+    }
+}&#39;
+Query DSL
+Match Query">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ES简单使用",
+      "item": "https://georgehao.github.io/posts/2018-09-28-es-simple/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ES简单使用",
+  "name": "ES简单使用",
+  "description": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H \u0026#39;Content-Type:application/json\u0026#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET \u0026#39;127.0.0.1:9200/story/_search?q=mary\u0026amp;pretty\u0026#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html\nMatch查询 curl -XGET \u0026#39;localhost:9200/my_index/my_type/_search\u0026#39; -d \u0026#39;{ \u0026#34;query\u0026#34; : { \u0026#34;match\u0026#34; : { \u0026#34;testField\u0026#34; : \u0026#34;abc\u0026#34; } } }\u0026#39; $data = [ \u0026#39;body\u0026#39; =\u0026gt; [ \u0026#39;query\u0026#39; =\u0026gt; [ \u0026#39;match\u0026#39; =\u0026gt; [ \u0026#39;title\u0026#39; =\u0026gt; \u0026#39;黑猫\u0026#39;, ] ], ] ]; Bool查询 curl -XGET \u0026#39;localhost:9200/my_index/my_type/_search\u0026#39; -d \u0026#39;{ \u0026#34;query\u0026#34; : { \u0026#34;bool\u0026#34; : { \u0026#34;must\u0026#34;: [ { \u0026#34;match\u0026#34; : { \u0026#34;testField\u0026#34; : \u0026#34;abc\u0026#34; } }, { \u0026#34;match\u0026#34; : { \u0026#34;testField2\u0026#34; : \u0026#34;xyz\u0026#34; } } ] } } }\u0026#39; $data = [ \u0026#39;body\u0026#39; =\u0026gt; [ \u0026#39;query\u0026#39; =\u0026gt; [ \u0026#39;bool\u0026#39; =\u0026gt; [ \u0026#39;must\u0026#39; =\u0026gt; [ [\u0026#39;match\u0026#39; =\u0026gt; [\u0026#39;title\u0026#39; =\u0026gt; \u0026#39;黑猫\u0026#39;,]], [\u0026#39;match\u0026#39; =\u0026gt; [\u0026#39;anchor_nickname\u0026#39; =\u0026gt; \u0026#39;可乐\u0026#39;]], ] ] ], ] ]; curl -XGET \u0026#39;localhost:9200/my_index/my_type/_search\u0026#39; -d \u0026#39;{ \u0026#34;query\u0026#34; : { \u0026#34;bool\u0026#34; : { \u0026#34;filter\u0026#34; : { \u0026#34;term\u0026#34; : { \u0026#34;my_field\u0026#34; : \u0026#34;abc\u0026#34; } }, \u0026#34;should\u0026#34; : { \u0026#34;match\u0026#34; : { \u0026#34;my_other_field\u0026#34; : \u0026#34;xyz\u0026#34; } } } } }\u0026#39; Query DSL Match Query\n",
+  "keywords": [
+    "elasticsearch", "es"
+  ],
+  "articleBody": "常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H 'Content-Type:application/json' -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET '127.0.0.1:9200/story/_search?q=mary\u0026pretty' 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html\nMatch查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \"query\" : { \"match\" : { \"testField\" : \"abc\" } } }' $data = [ 'body' =\u003e [ 'query' =\u003e [ 'match' =\u003e [ 'title' =\u003e '黑猫', ] ], ] ]; Bool查询 curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \"query\" : { \"bool\" : { \"must\": [ { \"match\" : { \"testField\" : \"abc\" } }, { \"match\" : { \"testField2\" : \"xyz\" } } ] } } }' $data = [ 'body' =\u003e [ 'query' =\u003e [ 'bool' =\u003e [ 'must' =\u003e [ ['match' =\u003e ['title' =\u003e '黑猫',]], ['match' =\u003e ['anchor_nickname' =\u003e '可乐']], ] ] ], ] ]; curl -XGET 'localhost:9200/my_index/my_type/_search' -d '{ \"query\" : { \"bool\" : { \"filter\" : { \"term\" : { \"my_field\" : \"abc\" } }, \"should\" : { \"match\" : { \"my_other_field\" : \"xyz\" } } } } }' Query DSL Match Query\nGET /_search { \"query\": { \"match\" : { \"message\" : \"this is a test\" } } } GET /_search { \"query\": { \"match\" : { \"message\" : { \"query\" : \"this is a test\", \"operator\" : \"and\" } } } } Term Query\nPOST _search { \"query\": { \"term\" : { \"user\" : \"Kimchy\" } } } Exists Query\nGET /_search { \"query\": { \"exists\" : { \"field\" : \"user\" } } } Prefix Query\nGET /_search { \"query\": { \"prefix\" : { \"user\" : \"ki\" } } } Join Query Nested Query\nPUT /my_index { \"mappings\": { \"type1\" : { \"properties\" : { \"obj1\" : { \"type\" : \"nested\" } } } } } GET /_search { \"query\": { \"nested\" : { \"path\" : \"obj1\", \"score_mode\" : \"avg\", \"query\" : { \"bool\" : { \"must\" : [ { \"match\" : {\"obj1.name\" : \"blue\"} }, { \"range\" : {\"obj1.count\" : {\"gt\" : 5}} } ] } } } } } Has Child Query\nGET /_search { \"query\": { \"has_child\" : { \"type\" : \"blog_tag\", \"query\" : { \"term\" : { \"tag\" : \"something\" } } } } } bool联合查询: must,should,must_not 如果我们想要请求\"content中带宝马，但是tag中不带宝马\"这样类似的需求，就需要用到bool联合查询。 联合查询就会使用到must,should,must_not三种关键词。\n这三个可以这么理解\nmust: 文档必须完全匹配条件 should: should下面会带一个以上的条件，至少满足一个条件，这个文档就符合should must_not: 文档必须不匹配条件\n{ \"query\": { \"bool\": { \"must\": { \"term\": { \"content\": \"宝马\" } }, \"must_not\": { \"term\": { \"tags\": \"宝马\" } } } } } { \"index\": { \"analysis\": { \"analyzer\": { \"ik_pinyin_analyzer\": { \"type\": \"custom\", \"tokenizer\": \"ik_max_word\", \"filter\": [\"my_pinyin\", \"word_delimiter\"] } }, \"filter\": { \"my_pinyin\": { \"type\": \"pinyin\", \"first_letter\": \"prefix\", \"padding_char\": \" \" } } } } } multi match { \"query\": { \"multi_match\": { \"query\" : \"我的宝马多少马力\", \"fields\" : [\"title\", \"content\"] } } } 我们希望完全匹配的文档占的评分比较高，则需要使用best_fields\n{ \"query\": { \"multi_match\": { \"query\": \"我的宝马发动机多少\", \"type\": \"best_fields\", \"fields\": [ \"tag\", \"content\" ], \"tie_breaker\": 0.3 } } } 意思就是完全匹配\"宝马 发动机\"的文档评分会比较靠前，如果只匹配宝马的文档评分乘以0.3的系数\n我们希望越多字段匹配的文档评分越高，就要使用most_fields\n{ \"query\": { \"multi_match\": { \"query\": \"我的宝马发动机多少\", \"type\": \"most_fields\", \"fields\": [ \"tag\", \"content\" ] } } } 嵌套查询 GET /my_index/blogpost/_search { \"query\":{ \"bool\":{ \"must\":[ { \"match\":{ \"title\":\"eggs\" } }, { \"nested\":{ \"path\":\"comments\", \"query\":{ \"bool\":{ \"must\":[ { \"match\":{ \"comments.name\":\"john\" } }, { \"match\":{ \"comments.age\":28 } } ] } } } } ] } } } ES同义词配置 创建index { \"index\": { \"analysis\": { \"analyzer\": { \"by_smart\": { \"type\": \"custom\", \"tokenizer\": \"ik_smart\", \"filter\": [\"by_tfr\",\"by_sfr\"], \"char_filter\": [\"by_cfr\"] }, \"by_max_word\": { \"type\": \"custom\", \"tokenizer\": \"ik_max_word\", \"filter\": [\"by_tfr\",\"by_sfr\"], \"char_filter\": [\"by_cfr\"] } }, \"filter\": { \"by_tfr\": { \"type\": \"stop\", \"stopwords\": [\" \"] }, \"by_sfr\": { \"type\": \"synonym\", \"synonyms_path\": \"analysis/synonyms.txt\" } }, \"char_filter\": { \"by_cfr\": { \"type\": \"mapping\", \"mappings\": [\"| =\u003e |\"] } } } } } 创建type { \"properties\": { \"title\": { \"type\": \"text\", \"fields\": { \"keyword\": { \"type\": \"keyword\", \"ignore_above\": 256 } }, \"index\": \"analyzed\", \"analyzer\": \"by_max_word\", \"search_analyzer\": \"by_smart\" }, \"authors\": { \"properties\":{ \"name\": { \"type\": \"text\", \"fields\": { \"keyword\": { \"type\": \"keyword\", \"ignore_above\": 256 } }, \"index\": \"analyzed\", \"analyzer\": \"by_max_word\", \"search_analyzer\": \"by_smart\"\t} } } } } 分页 from-size\"浅\"分页 可以理解为简单意义上的分页。它的原理很简单，就是查询前20条数据，然后截断前10条，只返回10-20的数据。这样其实白白浪费了前10条的查询。\n{ \"from\" : 0, \"size\" : 10, \"query\" : { \"term\" : { \"user\" : \"kimchy\" } } } 其中，from定义了目标数据的偏移值，size定义当前返回的事件数目。 默认from为0，size为10，即所有的查询默认仅仅返回前10条数据。\n做过测试，越往后的分页，执行的效率越低。\nscroll“深”分页 可以把 scroll 理解为关系型数据库里的 cursor，因此，scroll 并不适合用来做实时搜索，而更适用于后台批处理任务，比如群发。\n可以把 scroll 分为初始化和遍历两步，初始化时将所有符合搜索条件的搜索结果缓存起来，可以想象成快照，在遍历时，从这个快照里取数据，也就是说，在初始化后对索引插入、删除、更新数据都不会影响遍历结果。\nPOST ip:port/my_index/my_type/_search?scroll=1m { \"query\": { \"match_all\": {}} } POST /_search?scroll=1m { \"scroll_id\":\"xxxxxx\" } 分组查询 { \"size\": 20, \"query\": { \"match\": { \"title\" : { \"query\" : \"黑猫\" } } }, \"aggs\": { \"group_by_title\": { \"terms\": { \"field\": \"title.keyword\" } } } } 遇到的问题 match 和 term 的区别 term再搜索前不会对单词进行分词, 会直接进行进行搜索 match在搜索前会对单词进行分词, 然后进行搜索 keyword与text的区别 keyword：存储数据时候，不会分词建立索引 text：存储数据时候，会自动分词，并生成索引（这是很智能的，但在有些字段里面是没用的，所以对于有些字段使用text则浪费了空间） 中文分词 ik_smart会将清华大学整个分为一个词， ik_max_word会将清华大学分为清华大学，清华和大学，按需选其中之一就可以了。 能否在查询时指定分词器? 阿里云目前不能实现.\n不能对已经生成的数据, 重新设置分词\nPUT /school_index { “settings” : { “index” : { “analysis.analyzer.default.type”: “ik_max_word” } } }\nFielddat问题 Fielddat is disabled on text fields by default. Set fielddata=true on [title] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead 解决方法: https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html\nes既想包含查询,又想精确查询 如果es既想包含查询（即类似数据库like）又想精确查询（完全相等，类似于数据库＝)，则只要建立mapping中如下设置即可。查包含时直接字段名，＝查询时加.raw\n{ “properties”: { “user”: { “properties”: { “name”: { “type”: “string”, “fields”: { “raw”: { “type”: “string”, “index”: “not_analyzed” } } } } } } }\n参考资料 19 个很有用的 ElasticSearch 查询语句 ",
+  "wordCount" : "2034",
+  "inLanguage": "zh",
+  "datePublished": "2018-09-27T11:44:44+08:00",
+  "dateModified": "2018-09-27T11:44:44+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2018-09-28-es-simple/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      ES简单使用
+    </h1>
+    <div class="post-meta"><span title='2018-09-27 11:44:44 +0800 CST'>2018年9月27日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2034 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#常用命令">常用命令</a></li>
+  </ul>
+
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#match查询">Match查询</a></li>
+        <li><a href="#bool查询">Bool查询</a></li>
+        <li><a href="#query-dsl">Query DSL</a></li>
+        <li><a href="#join-query">Join Query</a></li>
+        <li><a href="#bool联合查询-mustshouldmust_not">bool联合查询: must,should,must_not</a></li>
+        <li><a href="#multi-match">multi match</a></li>
+        <li><a href="#嵌套查询">嵌套查询</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#创建index">创建index</a></li>
+    <li><a href="#创建type">创建type</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#from-size浅分页">from-size&quot;浅&quot;分页</a></li>
+    <li><a href="#scroll深分页">scroll“深”分页</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#match-和-term-的区别">match 和 term 的区别</a></li>
+    <li><a href="#keyword与text的区别">keyword与text的区别</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#能否在查询时指定分词器">能否在查询时指定分词器?</a></li>
+    <li><a href="#fielddat问题">Fielddat问题</a></li>
+    <li><a href="#es既想包含查询又想精确查询">es既想包含查询,又想精确查询</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="常用命令">常用命令<a hidden class="anchor" aria-hidden="true" href="#常用命令">#</a></h2>
+<ol>
+<li>查看有哪些indexes</li>
+</ol>
+<pre tabindex="0"><code>curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices
+</code></pre><ol start="2">
+<li>删除索引</li>
+</ol>
+<pre tabindex="0"><code>curl -u *:* -XDELETE 127.0.0.1:9200/story 
+</code></pre><ol start="3">
+<li>查看type</li>
+</ol>
+<pre tabindex="0"><code>curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty
+</code></pre><ol start="4">
+<li>查看结构</li>
+</ol>
+<pre tabindex="0"><code>curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty
+</code></pre><ol start="5">
+<li>创建index</li>
+</ol>
+<pre tabindex="0"><code>curl -u *:*  -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty
+</code></pre><ol start="6">
+<li>模糊查询</li>
+</ol>
+<pre tabindex="0"><code>curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39;
+</code></pre><h1 id="查询">查询<a hidden class="anchor" aria-hidden="true" href="#查询">#</a></h1>
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html</a></p>
+<h3 id="match查询">Match查询<a hidden class="anchor" aria-hidden="true" href="#match查询">#</a></h3>
+<pre tabindex="0"><code>curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;match&#34; : {
+            &#34;testField&#34; : &#34;abc&#34;
+        }
+    }
+}&#39;
+</code></pre><pre tabindex="0"><code>$data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;match&#39; =&gt; [
+                &#39;title&#39; =&gt; &#39;黑猫&#39;,
+            ]
+        ],
+    ]
+];
+</code></pre><h3 id="bool查询">Bool查询<a hidden class="anchor" aria-hidden="true" href="#bool查询">#</a></h3>
+<pre tabindex="0"><code>curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;must&#34;: [
+                {
+                    &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; }
+                },
+                {
+                    &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; }
+                }
+            ]
+        }
+    }
+}&#39;
+</code></pre><pre tabindex="0"><code> $data = [
+    &#39;body&#39; =&gt; [
+        &#39;query&#39; =&gt; [
+            &#39;bool&#39; =&gt; [
+                &#39;must&#39; =&gt; [
+                    [&#39;match&#39; =&gt; [&#39;title&#39; =&gt; &#39;黑猫&#39;,]],
+                    [&#39;match&#39; =&gt; [&#39;anchor_nickname&#39; =&gt; &#39;可乐&#39;]],
+                ]
+            ]
+        ],
+    ]
+];
+</code></pre><pre tabindex="0"><code>curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{
+    &#34;query&#34; : {
+        &#34;bool&#34; : {
+            &#34;filter&#34; : {
+                &#34;term&#34; : { &#34;my_field&#34; : &#34;abc&#34; }
+            },
+            &#34;should&#34; : {
+                &#34;match&#34; : { &#34;my_other_field&#34; : &#34;xyz&#34; }
+            }
+        }
+    }
+}&#39;
+</code></pre><h3 id="query-dsl">Query DSL<a hidden class="anchor" aria-hidden="true" href="#query-dsl">#</a></h3>
+<p>Match Query</p>
+<pre tabindex="0"><code>GET /_search
+{
+    &#34;query&#34;: {
+        &#34;match&#34; : {
+            &#34;message&#34; : &#34;this is a test&#34;
+        }
+    }
+}
+</code></pre><pre tabindex="0"><code>GET /_search
+{
+    &#34;query&#34;: {
+        &#34;match&#34; : {
+            &#34;message&#34; : {
+                &#34;query&#34; : &#34;this is a test&#34;,
+                &#34;operator&#34; : &#34;and&#34;
+            }
+        }
+    }
+}
+</code></pre><p>Term Query</p>
+<pre tabindex="0"><code>POST _search
+{
+  &#34;query&#34;: {
+    &#34;term&#34; : { &#34;user&#34; : &#34;Kimchy&#34; } 
+  }
+}
+</code></pre><p>Exists Query</p>
+<pre tabindex="0"><code>GET /_search
+{
+    &#34;query&#34;: {
+        &#34;exists&#34; : { &#34;field&#34; : &#34;user&#34; }
+    }
+}
+</code></pre><p>Prefix Query</p>
+<pre tabindex="0"><code>GET /_search
+{ &#34;query&#34;: {
+    &#34;prefix&#34; : { &#34;user&#34; : &#34;ki&#34; }
+  }
+}
+</code></pre><h3 id="join-query">Join Query<a hidden class="anchor" aria-hidden="true" href="#join-query">#</a></h3>
+<p>Nested Query</p>
+<pre tabindex="0"><code>PUT /my_index
+{
+    &#34;mappings&#34;: {
+        &#34;type1&#34; : {
+            &#34;properties&#34; : {
+                &#34;obj1&#34; : {
+                    &#34;type&#34; : &#34;nested&#34;
+                }
+            }
+        }
+    }
+}
+</code></pre><pre tabindex="0"><code>GET /_search
+{
+    &#34;query&#34;: {
+        &#34;nested&#34; : {
+            &#34;path&#34; : &#34;obj1&#34;,
+            &#34;score_mode&#34; : &#34;avg&#34;,
+            &#34;query&#34; : {
+                &#34;bool&#34; : {
+                    &#34;must&#34; : [
+                    { &#34;match&#34; : {&#34;obj1.name&#34; : &#34;blue&#34;} },
+                    { &#34;range&#34; : {&#34;obj1.count&#34; : {&#34;gt&#34; : 5}} }
+                    ]
+                }
+            }
+        }
+    }
+}
+</code></pre><p>Has Child Query</p>
+<pre tabindex="0"><code>GET /_search
+{
+    &#34;query&#34;: {
+        &#34;has_child&#34; : {
+            &#34;type&#34; : &#34;blog_tag&#34;,
+            &#34;query&#34; : {
+                &#34;term&#34; : {
+                    &#34;tag&#34; : &#34;something&#34;
+                }
+            }
+        }
+    }
+}
+</code></pre><h3 id="bool联合查询-mustshouldmust_not">bool联合查询: must,should,must_not<a hidden class="anchor" aria-hidden="true" href="#bool联合查询-mustshouldmust_not">#</a></h3>
+<p>如果我们想要请求&quot;content中带宝马，但是tag中不带宝马&quot;这样类似的需求，就需要用到bool联合查询。
+联合查询就会使用到must,should,must_not三种关键词。</p>
+<p>这三个可以这么理解</p>
+<p>must: 文档必须完全匹配条件
+should: should下面会带一个以上的条件，至少满足一个条件，这个文档就符合should
+must_not: 文档必须不匹配条件</p>
+<pre tabindex="0"><code>{
+  &#34;query&#34;: {
+    &#34;bool&#34;: {
+      &#34;must&#34;: {
+        &#34;term&#34;: {
+          &#34;content&#34;: &#34;宝马&#34;
+        }
+      },
+      &#34;must_not&#34;: {
+        &#34;term&#34;: {
+          &#34;tags&#34;: &#34;宝马&#34;
+        }
+      }
+    }
+  }
+}
+</code></pre><pre tabindex="0"><code>{
+    &#34;index&#34;: {
+        &#34;analysis&#34;: {
+            &#34;analyzer&#34;: {
+                &#34;ik_pinyin_analyzer&#34;: {
+                    &#34;type&#34;: &#34;custom&#34;,
+                    &#34;tokenizer&#34;: &#34;ik_max_word&#34;,
+                    &#34;filter&#34;: [&#34;my_pinyin&#34;, &#34;word_delimiter&#34;]
+                }
+            },
+            &#34;filter&#34;: {
+                &#34;my_pinyin&#34;: {
+                    &#34;type&#34;: &#34;pinyin&#34;,
+                    &#34;first_letter&#34;: &#34;prefix&#34;,
+                    &#34;padding_char&#34;: &#34; &#34;
+                }
+            }
+        }
+    }
+}
+</code></pre><h3 id="multi-match">multi match<a hidden class="anchor" aria-hidden="true" href="#multi-match">#</a></h3>
+<pre tabindex="0"><code>{
+  &#34;query&#34;: {
+    &#34;multi_match&#34;: {
+        &#34;query&#34; : &#34;我的宝马多少马力&#34;,
+        &#34;fields&#34; : [&#34;title&#34;, &#34;content&#34;]
+    }
+  }
+}
+</code></pre><p>我们希望完全匹配的文档占的评分比较高，则需要使用best_fields</p>
+<pre tabindex="0"><code>{
+  &#34;query&#34;: {
+    &#34;multi_match&#34;: {
+      &#34;query&#34;: &#34;我的宝马发动机多少&#34;,
+      &#34;type&#34;: &#34;best_fields&#34;,
+      &#34;fields&#34;: [
+        &#34;tag&#34;,
+        &#34;content&#34;
+      ],
+      &#34;tie_breaker&#34;: 0.3
+    }
+  }
+}
+</code></pre><p>意思就是完全匹配&quot;宝马 发动机&quot;的文档评分会比较靠前，如果只匹配宝马的文档评分乘以0.3的系数</p>
+<p>我们希望越多字段匹配的文档评分越高，就要使用most_fields</p>
+<pre tabindex="0"><code>{
+  &#34;query&#34;: {
+    &#34;multi_match&#34;: {
+      &#34;query&#34;: &#34;我的宝马发动机多少&#34;,
+      &#34;type&#34;: &#34;most_fields&#34;,
+      &#34;fields&#34;: [
+        &#34;tag&#34;,
+        &#34;content&#34;
+      ]
+    }
+  }
+}
+</code></pre><h3 id="嵌套查询">嵌套查询<a hidden class="anchor" aria-hidden="true" href="#嵌套查询">#</a></h3>
+<pre tabindex="0"><code>GET /my_index/blogpost/_search
+{
+    &#34;query&#34;:{
+        &#34;bool&#34;:{
+            &#34;must&#34;:[
+                {
+                    &#34;match&#34;:{
+                        &#34;title&#34;:&#34;eggs&#34;
+                    }
+                },
+                {
+                    &#34;nested&#34;:{
+                        &#34;path&#34;:&#34;comments&#34;,
+                        &#34;query&#34;:{
+                            &#34;bool&#34;:{
+                                &#34;must&#34;:[
+                                    {
+                                        &#34;match&#34;:{
+                                            &#34;comments.name&#34;:&#34;john&#34;
+                                        }
+                                    },
+                                    {
+                                        &#34;match&#34;:{
+                                            &#34;comments.age&#34;:28
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+</code></pre><h1 id="es同义词配置">ES同义词配置<a hidden class="anchor" aria-hidden="true" href="#es同义词配置">#</a></h1>
+<h2 id="创建index">创建index<a hidden class="anchor" aria-hidden="true" href="#创建index">#</a></h2>
+<pre tabindex="0"><code>{
+  &#34;index&#34;: {
+    &#34;analysis&#34;: {
+      &#34;analyzer&#34;: {
+        &#34;by_smart&#34;: {
+          &#34;type&#34;: &#34;custom&#34;,
+          &#34;tokenizer&#34;: &#34;ik_smart&#34;,
+          &#34;filter&#34;: [&#34;by_tfr&#34;,&#34;by_sfr&#34;],
+          &#34;char_filter&#34;: [&#34;by_cfr&#34;]
+        },
+        &#34;by_max_word&#34;: {
+          &#34;type&#34;: &#34;custom&#34;,
+          &#34;tokenizer&#34;: &#34;ik_max_word&#34;,
+          &#34;filter&#34;: [&#34;by_tfr&#34;,&#34;by_sfr&#34;],
+          &#34;char_filter&#34;: [&#34;by_cfr&#34;]
+        }
+      },
+      &#34;filter&#34;: {
+        &#34;by_tfr&#34;: {
+          &#34;type&#34;: &#34;stop&#34;,
+          &#34;stopwords&#34;: [&#34; &#34;]
+        },
+        &#34;by_sfr&#34;: {
+          &#34;type&#34;: &#34;synonym&#34;,
+          &#34;synonyms_path&#34;: &#34;analysis/synonyms.txt&#34;
+        }
+      },
+      &#34;char_filter&#34;: {
+        &#34;by_cfr&#34;: {
+          &#34;type&#34;: &#34;mapping&#34;,
+          &#34;mappings&#34;: [&#34;| =&gt; |&#34;]
+        }
+      }
+    }
+  }
+}
+</code></pre><h2 id="创建type">创建type<a hidden class="anchor" aria-hidden="true" href="#创建type">#</a></h2>
+<pre tabindex="0"><code>{
+	&#34;properties&#34;: {
+	    &#34;title&#34;: {
+	    	&#34;type&#34;: &#34;text&#34;,
+	    	&#34;fields&#34;: {
+		    	&#34;keyword&#34;: {
+		        	&#34;type&#34;: &#34;keyword&#34;,
+		        	&#34;ignore_above&#34;: 256
+		    	}
+	    	},
+			&#34;index&#34;: &#34;analyzed&#34;,
+		    &#34;analyzer&#34;: &#34;by_max_word&#34;,
+		    &#34;search_analyzer&#34;: &#34;by_smart&#34;
+    	},
+    	&#34;authors&#34;: {
+    		&#34;properties&#34;:{
+    			&#34;name&#34;: {
+    				&#34;type&#34;: &#34;text&#34;,
+			    	&#34;fields&#34;: {
+				    	&#34;keyword&#34;: {
+				        	&#34;type&#34;: &#34;keyword&#34;,
+				        	&#34;ignore_above&#34;: 256
+				    	}
+			    	},
+					&#34;index&#34;: &#34;analyzed&#34;,
+				    &#34;analyzer&#34;: &#34;by_max_word&#34;,
+				    &#34;search_analyzer&#34;: &#34;by_smart&#34;		
+    			}
+    		}
+    	}
+	}
+}
+</code></pre><h1 id="分页">分页<a hidden class="anchor" aria-hidden="true" href="#分页">#</a></h1>
+<h2 id="from-size浅分页">from-size&quot;浅&quot;分页<a hidden class="anchor" aria-hidden="true" href="#from-size浅分页">#</a></h2>
+<p>可以理解为简单意义上的分页。它的原理很简单，就是查询前20条数据，然后截断前10条，只返回10-20的数据。这样其实白白浪费了前10条的查询。</p>
+<pre tabindex="0"><code>{
+    &#34;from&#34; : 0,
+    &#34;size&#34; : 10,
+    &#34;query&#34; : {
+        &#34;term&#34; : { &#34;user&#34; : &#34;kimchy&#34; }
+    }
+}
+</code></pre><p>其中，from定义了目标数据的偏移值，size定义当前返回的事件数目。
+默认from为0，size为10，即所有的查询默认仅仅返回前10条数据。</p>
+<p>做过测试，越往后的分页，执行的效率越低。</p>
+<h2 id="scroll深分页">scroll“深”分页<a hidden class="anchor" aria-hidden="true" href="#scroll深分页">#</a></h2>
+<p>可以把 scroll 理解为关系型数据库里的 cursor，因此，scroll 并不适合用来做实时搜索，而更适用于后台批处理任务，比如群发。</p>
+<p>可以把 scroll 分为初始化和遍历两步，初始化时将所有符合搜索条件的搜索结果缓存起来，可以想象成快照，在遍历时，从这个快照里取数据，也就是说，在初始化后对索引插入、删除、更新数据都不会影响遍历结果。</p>
+<pre tabindex="0"><code>POST ip:port/my_index/my_type/_search?scroll=1m
+{
+	&#34;query&#34;: { &#34;match_all&#34;: {}}
+}
+
+POST /_search?scroll=1m
+{
+    &#34;scroll_id&#34;:&#34;xxxxxx&#34;
+}
+</code></pre><h1 id="分组查询">分组查询<a hidden class="anchor" aria-hidden="true" href="#分组查询">#</a></h1>
+<pre tabindex="0"><code>{
+  &#34;size&#34;: 20,
+   &#34;query&#34;: {
+      &#34;match&#34;: {
+        &#34;title&#34; : {
+            &#34;query&#34; : &#34;黑猫&#34;
+        }
+    }
+  },
+  &#34;aggs&#34;: {
+    &#34;group_by_title&#34;: {
+      &#34;terms&#34;: {
+        &#34;field&#34;: &#34;title.keyword&#34;
+      }
+    }
+  }
+}
+</code></pre><h1 id="遇到的问题">遇到的问题<a hidden class="anchor" aria-hidden="true" href="#遇到的问题">#</a></h1>
+<h2 id="match-和-term-的区别">match 和 term 的区别<a hidden class="anchor" aria-hidden="true" href="#match-和-term-的区别">#</a></h2>
+<ul>
+<li><code>term</code>再搜索前不会对单词进行分词, 会直接进行进行搜索</li>
+<li><code>match</code>在搜索前会对单词进行分词, 然后进行搜索</li>
+</ul>
+<h2 id="keyword与text的区别">keyword与text的区别<a hidden class="anchor" aria-hidden="true" href="#keyword与text的区别">#</a></h2>
+<ul>
+<li>keyword：存储数据时候，不会分词建立索引</li>
+<li>text：存储数据时候，会自动分词，并生成索引（这是很智能的，但在有些字段里面是没用的，所以对于有些字段使用text则浪费了空间）</li>
+</ul>
+<h1 id="中文分词">中文分词<a hidden class="anchor" aria-hidden="true" href="#中文分词">#</a></h1>
+<ul>
+<li><code>ik_smart</code>会将<code>清华大学</code>整个分为一个词，</li>
+<li><code>ik_max_word</code>会将<code>清华大学</code>分为<code>清华大学</code>，<code>清华</code>和<code>大学</code>，按需选其中之一就可以了。</li>
+</ul>
+<h2 id="能否在查询时指定分词器">能否在查询时指定分词器?<a hidden class="anchor" aria-hidden="true" href="#能否在查询时指定分词器">#</a></h2>
+<p>阿里云目前不能实现.</p>
+<p>不能对已经生成的数据, 重新设置分词</p>
+<p>PUT /school_index
+{
+&ldquo;settings&rdquo; : {
+&ldquo;index&rdquo; : {
+&ldquo;analysis.analyzer.default.type&rdquo;: &ldquo;ik_max_word&rdquo;
+}
+}
+}</p>
+<h2 id="fielddat问题">Fielddat问题<a hidden class="anchor" aria-hidden="true" href="#fielddat问题">#</a></h2>
+<pre tabindex="0"><code>Fielddat is disabled on text fields by default. Set fielddata=true on [title] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead
+</code></pre><p>解决方法: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html</a></p>
+<h2 id="es既想包含查询又想精确查询">es既想包含查询,又想精确查询<a hidden class="anchor" aria-hidden="true" href="#es既想包含查询又想精确查询">#</a></h2>
+<p>如果es既想包含查询（即类似数据库like）又想精确查询（完全相等，类似于数据库＝)，则只要建立mapping中如下设置即可。查包含时直接字段名，＝查询时加.raw</p>
+<p>{
+&ldquo;properties&rdquo;: {
+&ldquo;user&rdquo;: {
+&ldquo;properties&rdquo;: {
+&ldquo;name&rdquo;: {
+&ldquo;type&rdquo;: &ldquo;string&rdquo;,
+&ldquo;fields&rdquo;: {
+&ldquo;raw&rdquo;: {
+&ldquo;type&rdquo;:  &ldquo;string&rdquo;,
+&ldquo;index&rdquo;: &ldquo;not_analyzed&rdquo;
+}
+}
+}
+}
+}
+}
+}</p>
+<h1 id="参考资料">参考资料<a hidden class="anchor" aria-hidden="true" href="#参考资料">#</a></h1>
+<ol>
+<li><a href="https://n3xtchen.github.io/n3xtchen/elasticsearch/2017/07/05/elasticsearch-23-useful-query-example">19 个很有用的 ElasticSearch 查询语句</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/es/">Es</a></li>
+      <li><a href="https://georgehao.github.io/tags/elasticsearch/">Elasticsearch</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2018-09-30-mongo-duplicate/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>MongoDB 数据重复的处理方法</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2018-09-19-graphql-maxth-depth/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Graphql最大复杂度和最大深度设置</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on x"
+            href="https://x.com/intent/tweet/?text=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f&amp;hashtags=es%2celasticsearch">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f&amp;title=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8&amp;summary=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f&title=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on whatsapp"
+            href="https://api.whatsapp.com/send?text=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on telegram"
+            href="https://telegram.me/share/url?text=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share ES简单使用 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=ES%e7%ae%80%e5%8d%95%e4%bd%bf%e7%94%a8&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2018-09-28-es-simple%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

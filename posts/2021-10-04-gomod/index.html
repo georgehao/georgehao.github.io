@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>如何欺骗 Go Mod | HHFCodeRv</title>
+<meta name="keywords" content="Go, golang">
+<meta name="description" content="hi，大家好，我是 hhf。
+最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。
+我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）
+在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。
+Prometheus 的局限性
+说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2021-10-04-gomod/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2021-10-04-gomod/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2021-10-04-gomod/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="如何欺骗 Go Mod">
+  <meta property="og:description" content="hi，大家好，我是 hhf。
+最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。
+我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）
+在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。
+Prometheus 的局限性 说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-10-04T20:27:21+08:00">
+    <meta property="article:modified_time" content="2021-10-04T20:27:21+08:00">
+    <meta property="article:tag" content="Go">
+    <meta property="article:tag" content="Golang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何欺骗 Go Mod">
+<meta name="twitter:description" content="hi，大家好，我是 hhf。
+最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。
+我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）
+在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。
+Prometheus 的局限性
+说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "如何欺骗 Go Mod",
+      "item": "https://georgehao.github.io/posts/2021-10-04-gomod/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何欺骗 Go Mod",
+  "name": "如何欺骗 Go Mod",
+  "description": "hi，大家好，我是 hhf。\n最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。\n我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）\n在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。\nPrometheus 的局限性 说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。\n",
+  "keywords": [
+    "Go", "golang"
+  ],
+  "articleBody": "hi，大家好，我是 hhf。\n最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。\n我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）\n在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。\nPrometheus 的局限性 说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。\n但是呢，Promethues 也有其自身局限性，其中影响最大的就是其数据的高可用方案和集群方案。监控也是业务系统的重中一环，不能因为监控系统宕机导致报警无法及时发出。\nPrometheus 官方也有提出联邦方案来解决集群问题，但是这个方案极其复杂而且很多问题还是解决不了，于是就造就了另外两个 CNCF 的沙箱项目：cortex 和 thanos。这两个项目都是为了解决 Promethues 的集群，高可用的。\n由于这两个项目要解决问题的目的是一致的，所以就会出现很多功能都是可以相互复用的，于是有趣的事情就发生了。\ncortex 话说因为某些的需求，不得已需要更改下 thanos 的相关代码。我本地调试的时候将 cortex 依赖的 thanos 给 replace 了一下。\nreplace github.com/thanos-io/thanos =\u003e /Users/hhf/goproject/cortex/thanos 再等我编译的时候，就编译不过了\n# github.com/sercand/kuberesolver ../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:108:82: undefined: resolver.BuildOption ../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:163:32: undefined: resolver.ResolveNowOption 这就让人很无奈，别着急，我们看看这个 kuberesolver 是被谁依赖的。\n先看下被 replace 之前:\n▶ go mod graph| grep kuberesolver github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/weaveworks/common@v0.0.0-20210112142934-23c8d7fa6120 github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/weaveworks/common@v0.0.0-20200206153930-760e36ae819a github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/weaveworks/common@v0.0.0-20201119133501-0619918236ec github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/weaveworks/common@v0.0.0-20200914083218-61ffdd448099 github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/weaveworks/common@v0.0.0-20200625145055-4b1847531bc9 github.com/sercand/kuberesolver@v2.1.0+incompatible github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/sercand/kuberesolver@v2.4.0+incompatible 可以看到正常版本下，kuberesolver@2.4.0 被 thanos 所依赖，kuberesolver@v2.1.0 被 weaveworks 所依赖。\nreplace 之后\n▶ go mod graph| grep kuberesolver github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible 是不是很神奇，kuberesolver@v2.4.0 这个版本竟然消失了。由于 kuberesolver 的 v2.1.0 和 v2.4.0 是不兼容的，所以导致 replace 之后就无法编译了。\nGomod replace 语义 其实这并不神奇，这个涉及到 Go mod 的 replace 语义，不过也是很容易让人忽略的特性。\nreplace directives：(https://golang.org/ref/mod#go-mod-file-replace)\nreplace directives only apply in the main module’s go.mod file and are ignored in other modules. See Minimal version selection for details. 其实很简单，replace 只对主模块（也就是你的当前项目）是生效的。可以做如下的总结：\n主模块的 replace 对于被依赖的模块是不生效的 被依赖的模块的 go.mod 的 replace 对主模块也是不生效的 所以，当 replace 之后，cortex 依赖的 thanos 的 replace 是不生效的。我们理一下依赖树：\n主模块 cortex =\u003e require github.com/weaveworks/common v0.0.0-20210419092856-009d1eebd624 weaveworks =\u003e requre github.com/sercand/kuberesolver v2.1.0+incompatible 于是整体上 kuberesolver 就只有了 v2.1.0 了 这个逻辑是跟 gomod 的 replace 语义是吻合的，也就是 replace 之后编译不过是正确的。\n欺骗 gomod 那就更加神奇了，为何 cortex 直接 require thanos 就能编译成功，按照 gomod replace 语义来说，这也是编译不过的才是正确的。\n因为根据文档我们知道，replace 仅仅作用于主模块，脱离了主模块是一律不生效的，这个是毋庸置疑的。\n我做了个实验放在了 https://github.com/georgehao/gomodtestmain ，有兴趣的可以试一下，这个能验证 gomod 是遵循 gomod replace 语义 和 MVS (最小版本选择）算法的。\n问题基本陷入了僵局，我们如何破局呢？\n继续使用 go mod graph 功能，来查看 cortex 依赖的 thanos 的依赖树。\ngithub.com/thanos-io/thanos@v0.19.1-0.20210729154440-aa148f8fdb28 gopkg.in/yaml.v3@v3.0.0-20210107192922-496545a6307 github.com/thanos-io/thanos@v0.13.1-0.20210401085038-d7dff0c84d17 github.com/Azure/azure-pipeline-go@v0.2.2 github.com/thanos-io/thanos@v0.8.1-0.20200109203923-552ffa4c1a0d k8s.io/utils@v0.0.0-20191114200735-6ca3b61696b6 github.com/thanos-io/thanos@v0.13.1-0.20210204123931-82545cdd16fe gopkg.in/yaml.v2@v2.3.0 github.com/thanos-io/thanos@v0.13.1-0.20201030101306-47f9a225cc52 go.uber.org/goleak@v1.1.10 github.com/thanos-io/thanos@v0.13.1-0.20200807203500-9b578afb4763 go.elastic.co/apm/module/apmot@v1.5.0 .... github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/gogo/protobuf@v1.3.1 由于这个依赖树太长（700多行），我就不贴了，基本上也能看出来，cortex 依赖了 thanos N 多个版本，其中在最后一个版本中的 go.mod 中我们发现了一个有意思的东西：\nrequire ( github.com/sercand/kuberesolver v2.4.0+incompatible // indirect ） 也就是闹了半天，由于 thanos 某个很古老的版本的 gomod require kuberesolver@v2.4.0，让 gomod 误以为 cortex 依赖的 thanos 依然是 require 了 kuberesolver@v2.4.0 了。虽然 thanos 早就改成了 repace kuberesolver，但也就让 cortex 顺利编译过去了。\n这算不算 gomod 的 bug 呢？\n为什么 cortex 会依赖 thanos 这么多版本呢？这就要回到开篇说的 cortex 和 thanos 功能复用的问题了。\n目前 cortex 和 thanos 这个两个项目，基本上是这么依赖的：\ncortex 1.9.0 -\u003e thanos v0.19.1-0.20210729154440-aa148f8fdb28 thanos v0.19.1-0.20210729154440-aa148f8fdb28 -\u003e cortex v1.8.1-0.20210422151339-cf1c444e0905 cortex v1.8.1-0.20210422151339-cf1c444e0905 -\u003e thanos v0.13.1-0.20210401085038-d7dff0c84d17 .... cortex 与 thanos 之间的相互引用，就像俄罗斯套娃一样，简直就是 gomod 的噩梦。go mod replace 语义，竟然让这两个套娃给破解了。\n如何解决 对应如何cortex replace thanos 的问题，其实知道问题的根本所在，解决起来就很简单了，有两种方式吧：\n由于 gomod MVS 算法，我们直接在主项目 cortex 中指定 kuberesolver 的版本为 v2.4.1 方案 1 仅对于向下兼容的项目比较适用，如果某项目没有这个责任心的话，这么做可能是会出问题的，所以比较直接的解决办法，直接修改 thanos 的 go.mod, 将 thanos 的所依赖的 kuberesolver 从 replace 挪到 require 中 欢迎关注公众号。更多学习学习资料分享，关注公众号回复指令：\n回复 0，获取 《Go 面经》 回复 1，获取 《Go 源码流程图》 ",
+  "wordCount" : "1737",
+  "inLanguage": "zh",
+  "datePublished": "2021-10-04T20:27:21+08:00",
+  "dateModified": "2021-10-04T20:27:21+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2021-10-04-gomod/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      如何欺骗 Go Mod
+    </h1>
+    <div class="post-meta"><span title='2021-10-04 20:27:21 +0800 CST'>2021年10月4日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1737 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#prometheus-的局限性">Prometheus 的局限性</a></li>
+    <li><a href="#cortex">cortex</a></li>
+    <li><a href="#gomod-replace-语义">Gomod replace 语义</a></li>
+    <li><a href="#欺骗-gomod">欺骗 gomod</a></li>
+    <li><a href="#如何解决">如何解决</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>hi，大家好，我是 hhf。</p>
+<p>最近在做 prometheus 生态的 cortex 优化工作，遇到一个比较坑的 go mod 的问题，这里分享一下。</p>
+<p>我为什么将标题称为：如何欺骗 Go mod 呢？这个挺有意思的，这里先卖个关子，不过确实是突破了 Go mod 的相关特性。(嗯，曹大的 Go mod 十宗罪又可以增加一宗了）</p>
+<p>在正式展开这个话题之前，需要简单的介绍下 cortex 和 thanos 这两个项目。</p>
+<h2 id="prometheus-的局限性">Prometheus 的局限性<a hidden class="anchor" aria-hidden="true" href="#prometheus-的局限性">#</a></h2>
+<p>说到业务开发基本上都离不开监控系统，Prometheus 做为云原生的宠儿，以优秀的设计，灵活的使用方式，以优异成绩从 CNCF 顺利毕业，也是很多公司做监控的首选。</p>
+<p>但是呢，Promethues 也有其自身局限性，其中影响最大的就是其数据的高可用方案和集群方案。监控也是业务系统的重中一环，不能因为监控系统宕机导致报警无法及时发出。</p>
+<p>Prometheus 官方也有提出联邦方案来解决集群问题，但是这个方案极其复杂而且很多问题还是解决不了，于是就造就了另外两个 CNCF 的沙箱项目：cortex 和 thanos。这两个项目都是为了解决 Promethues 的集群，高可用的。</p>
+<p>由于这两个项目要解决问题的目的是一致的，所以就会出现很多功能都是可以相互复用的，于是有趣的事情就发生了。</p>
+<h2 id="cortex">cortex<a hidden class="anchor" aria-hidden="true" href="#cortex">#</a></h2>
+<p>话说因为某些的需求，不得已需要更改下 thanos 的相关代码。我本地调试的时候将 cortex 依赖的 thanos 给 replace 了一下。</p>
+<pre tabindex="0"><code>replace github.com/thanos-io/thanos =&gt; /Users/hhf/goproject/cortex/thanos
+</code></pre><p>再等我编译的时候，就编译不过了</p>
+<pre tabindex="0"><code># github.com/sercand/kuberesolver
+../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:108:82: undefined: resolver.BuildOption
+../../../go/pkg/mod/github.com/sercand/kuberesolver@v2.1.0+incompatible/builder.go:163:32: undefined: resolver.ResolveNowOption
+</code></pre><p>这就让人很无奈，别着急，我们看看这个 kuberesolver 是被谁依赖的。</p>
+<p><strong>先看下被 replace 之前:</strong></p>
+<pre tabindex="0"><code>▶ go mod graph| grep kuberesolver
+github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20210112142934-23c8d7fa6120 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200206153930-760e36ae819a github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20201119133501-0619918236ec github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200914083218-61ffdd448099 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/weaveworks/common@v0.0.0-20200625145055-4b1847531bc9 github.com/sercand/kuberesolver@v2.1.0+incompatible
+github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/sercand/kuberesolver@v2.4.0+incompatible
+</code></pre><p>可以看到正常版本下，kuberesolver@2.4.0 被 thanos 所依赖，kuberesolver@v2.1.0 被 weaveworks 所依赖。</p>
+<p><strong>replace 之后</strong></p>
+<pre tabindex="0"><code>▶ go mod graph| grep kuberesolver
+github.com/weaveworks/common@v0.0.0-20210419092856-009d1eebd624 github.com/sercand/kuberesolver@v2.1.0+incompatible
+</code></pre><p>是不是很神奇，kuberesolver@v2.4.0 这个版本竟然消失了。由于 kuberesolver 的 v2.1.0 和 v2.4.0 是不兼容的，所以导致 replace 之后就无法编译了。</p>
+<h2 id="gomod-replace-语义">Gomod replace 语义<a hidden class="anchor" aria-hidden="true" href="#gomod-replace-语义">#</a></h2>
+<p>其实这并不神奇，这个涉及到 Go mod 的 replace 语义，不过也是很容易让人忽略的特性。</p>
+<p>replace directives：(<a href="https://golang.org/ref/mod#go-mod-file-replace">https://golang.org/ref/mod#go-mod-file-replace</a>)</p>
+<pre tabindex="0"><code>replace directives only apply in the main module’s go.mod file and are ignored in other modules. See Minimal version selection for details.
+</code></pre><p>其实很简单，replace 只对主模块（也就是你的当前项目）是生效的。可以做如下的总结：</p>
+<ul>
+<li>主模块的 replace 对于被依赖的模块是不生效的</li>
+<li>被依赖的模块的 go.mod 的 replace 对主模块也是不生效的</li>
+</ul>
+<p>所以，当 replace 之后，cortex 依赖的 thanos 的 replace 是不生效的。我们理一下依赖树：</p>
+<ul>
+<li>主模块 cortex =&gt; require github.com/weaveworks/common v0.0.0-20210419092856-009d1eebd624</li>
+<li>weaveworks =&gt; requre github.com/sercand/kuberesolver v2.1.0+incompatible</li>
+<li>于是整体上 kuberesolver 就只有了 v2.1.0 了</li>
+</ul>
+<p><strong>这个逻辑是跟 gomod 的 replace 语义是吻合的，也就是 replace 之后编译不过是正确的。</strong></p>
+<h2 id="欺骗-gomod">欺骗 gomod<a hidden class="anchor" aria-hidden="true" href="#欺骗-gomod">#</a></h2>
+<p>那就更加神奇了，为何 cortex 直接 require thanos 就能编译成功，按照 gomod replace 语义来说，这也是编译不过的才是正确的。</p>
+<p>因为根据文档我们知道，replace 仅仅作用于主模块，脱离了主模块是一律不生效的，这个是毋庸置疑的。</p>
+<p>我做了个实验放在了 <a href="https://github.com/georgehao/gomodtestmain">https://github.com/georgehao/gomodtestmain</a> ，有兴趣的可以试一下，这个能验证 gomod 是遵循 gomod replace 语义 和 MVS (最小版本选择）算法的。</p>
+<p>问题基本陷入了僵局，我们如何破局呢？</p>
+<p>继续使用 go mod graph 功能，来查看 cortex 依赖的 thanos 的依赖树。</p>
+<pre tabindex="0"><code>github.com/thanos-io/thanos@v0.19.1-0.20210729154440-aa148f8fdb28 gopkg.in/yaml.v3@v3.0.0-20210107192922-496545a6307
+github.com/thanos-io/thanos@v0.13.1-0.20210401085038-d7dff0c84d17 github.com/Azure/azure-pipeline-go@v0.2.2
+github.com/thanos-io/thanos@v0.8.1-0.20200109203923-552ffa4c1a0d k8s.io/utils@v0.0.0-20191114200735-6ca3b61696b6
+github.com/thanos-io/thanos@v0.13.1-0.20210204123931-82545cdd16fe gopkg.in/yaml.v2@v2.3.0
+github.com/thanos-io/thanos@v0.13.1-0.20201030101306-47f9a225cc52 go.uber.org/goleak@v1.1.10
+github.com/thanos-io/thanos@v0.13.1-0.20200807203500-9b578afb4763 go.elastic.co/apm/module/apmot@v1.5.0
+....
+github.com/thanos-io/thanos@v0.13.1-0.20200731083140-69b87607decf github.com/gogo/protobuf@v1.3.1
+</code></pre><p>由于这个依赖树太长（700多行），我就不贴了，基本上也能看出来，cortex 依赖了 thanos N 多个版本，其中在最后一个版本中的 go.mod 中我们发现了一个有意思的东西：</p>
+<pre tabindex="0"><code>require (
+  github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
+）
+</code></pre><p>也就是闹了半天，由于 thanos 某个很古老的版本的 gomod require <a href="mailto:kuberesolver@v2.4.0">kuberesolver@v2.4.0</a>，让 gomod 误以为 cortex 依赖的 thanos 依然是 require 了 <a href="mailto:kuberesolver@v2.4.0">kuberesolver@v2.4.0</a> 了。虽然 thanos 早就改成了 repace kuberesolver，但也就让 cortex 顺利编译过去了。</p>
+<p>这算不算 gomod 的 bug 呢？</p>
+<p>为什么 cortex 会依赖 thanos 这么多版本呢？这就要回到开篇说的 cortex 和 thanos 功能复用的问题了。</p>
+<p>目前 cortex 和 thanos 这个两个项目，基本上是这么依赖的：</p>
+<pre tabindex="0"><code>cortex 1.9.0 -&gt; thanos v0.19.1-0.20210729154440-aa148f8fdb28
+thanos v0.19.1-0.20210729154440-aa148f8fdb28 -&gt; cortex v1.8.1-0.20210422151339-cf1c444e0905
+cortex v1.8.1-0.20210422151339-cf1c444e0905 -&gt; thanos v0.13.1-0.20210401085038-d7dff0c84d17
+....
+</code></pre><p>cortex 与 thanos 之间的相互引用，就像俄罗斯套娃一样，简直就是 gomod 的噩梦。go mod replace 语义，竟然让这两个套娃给破解了。</p>
+<h2 id="如何解决">如何解决<a hidden class="anchor" aria-hidden="true" href="#如何解决">#</a></h2>
+<p>对应如何cortex replace thanos 的问题，其实知道问题的根本所在，解决起来就很简单了，有两种方式吧：</p>
+<ol>
+<li>由于 gomod MVS 算法，我们直接在主项目 cortex 中指定 kuberesolver 的版本为 v2.4.1</li>
+<li>方案 1 仅对于向下兼容的项目比较适用，如果某项目没有这个责任心的话，这么做可能是会出问题的，所以比较直接的解决办法，直接修改 thanos 的 go.mod, 将 thanos 的所依赖的 kuberesolver 从 replace 挪到 require 中</li>
+</ol>
+<p>欢迎关注公众号。更多学习学习资料分享，关注公众号回复指令：</p>
+<ul>
+<li>回复 0，获取 《Go 面经》</li>
+<li>回复 1，获取 《Go 源码流程图》</li>
+</ul>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png"></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/go/">Go</a></li>
+      <li><a href="https://georgehao.github.io/tags/golang/">Golang</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2021-10-05-gin1/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>gin 源码阅读(1) - gin 与 net/http 的关系</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2021-10-03-slice-memory/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>透过内存看 Slice 和 Array的异同</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on x"
+            href="https://x.com/intent/tweet/?text=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f&amp;hashtags=Go%2cgolang">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f&amp;title=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod&amp;summary=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f&title=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on telegram"
+            href="https://telegram.me/share/url?text=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何欺骗 Go Mod on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e5%a6%82%e4%bd%95%e6%ac%ba%e9%aa%97%20Go%20Mod&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-04-gomod%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

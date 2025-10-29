@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ops on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/ops/</link>
+    <description>Recent content in Ops on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Wed, 15 Nov 2017 12:05:39 +0000</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/ops/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用阿里云OSS &#43; CDN遇到的问题及解决方式</title>
+      <link>https://georgehao.github.io/posts/2017-11-15-aliyun-oss-cdn/</link>
+      <pubDate>Wed, 15 Nov 2017 12:05:39 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-11-15-aliyun-oss-cdn/</guid>
+      <description>&lt;h3 id=&#34;一-oss-配置-cdn加速&#34;&gt;一. OSS 配置 CDN加速&lt;/h3&gt;
+&lt;p&gt;CDN(Content Delivery Network)是将源站内容分发至最接近用户的节点，使用户可就近取得所需内容，提高用户访问的响应速度和成功率. CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求重新导向离用户最近的服务节点上&lt;/p&gt;
+&lt;p&gt;优点: 解决网络拥挤. 提高用户下载速度; 保护源服务器. 无论渗透攻击,还是DDos攻击, 攻击的都是CDN节点.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>nginx代理wordpress无法访问的问题</title>
+      <link>https://georgehao.github.io/posts/2017-07-19-wordpress_error/</link>
+      <pubDate>Wed, 19 Jul 2017 09:22:00 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-07-19-wordpress_error/</guid>
+      <description>&lt;p&gt;先说说我遇到的问题, 这简直就是坑中之王.&lt;/p&gt;
+&lt;p&gt;最近心血来潮, 购买了一台ECS服务器. 就在服务器上搭建了一个WordPress服务. 由于当时&lt;strong&gt;域名还没有通过备案&lt;/strong&gt;. 只好使用IP的方式进行WordPress安装, 安装完成后, 也能使用IP的方式访问网站. 突然今天通知域名通过备案了, 当时那个激动的, 立马给自己的网站换成域名的方式. 然后傻眼了.&lt;/p&gt;
+&lt;p&gt;无论我怎么在浏览器中输入我的域名&lt;code&gt;www.haohongfan.com&lt;/code&gt;, 怎么莫名其妙的自动给我跳转到&lt;code&gt;www.haohongfan.com:7654&lt;/code&gt;上来. 莫名其妙不是!!!
+&lt;img loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/7654.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

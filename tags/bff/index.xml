@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Bff on HHFCodeRv</title>
+    <link>https://georgehao.github.io/tags/bff/</link>
+    <description>Recent content in Bff on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Wed, 06 Oct 2021 21:27:21 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/tags/bff/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>聊聊我对 GraphQL 的一些认知</title>
+      <link>https://georgehao.github.io/posts/2021-10-06-graphql/</link>
+      <pubDate>Wed, 06 Oct 2021 21:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2021-10-06-graphql/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/2018-07-16-graphql.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。&lt;/p&gt;
+&lt;p&gt;因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>限流器系列(1) -- Leaky Bucket 漏斗桶 | HHFCodeRv</title>
+<meta name="keywords" content="golang, bbr, leaky bucket, token bucket">
+<meta name="description" content="限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式
+
+计数器
+漏斗通 (Leaky Bucket)
+令牌桶 (Token Bucket)
+基于 BBR 算法的自适应限流
+基于 Nginx 的限流
+分布式限流
+
+这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶
+什么是限流器
+
+Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2020-06-27-leaky-bucket/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2020-06-27-leaky-bucket/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2020-06-27-leaky-bucket/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="限流器系列(1) -- Leaky Bucket 漏斗桶">
+  <meta property="og:description" content="限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式
+计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶
+什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-06-27T10:14:07+08:00">
+    <meta property="article:modified_time" content="2020-06-27T10:14:07+08:00">
+    <meta property="article:tag" content="Golang">
+    <meta property="article:tag" content="Kratos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="限流器系列(1) -- Leaky Bucket 漏斗桶">
+<meta name="twitter:description" content="限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式
+
+计数器
+漏斗通 (Leaky Bucket)
+令牌桶 (Token Bucket)
+基于 BBR 算法的自适应限流
+基于 Nginx 的限流
+分布式限流
+
+这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶
+什么是限流器
+
+Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "限流器系列(1) -- Leaky Bucket 漏斗桶",
+      "item": "https://georgehao.github.io/posts/2020-06-27-leaky-bucket/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "限流器系列(1) -- Leaky Bucket 漏斗桶",
+  "name": "限流器系列(1) -- Leaky Bucket 漏斗桶",
+  "description": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式\n计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶\n什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.\n",
+  "keywords": [
+    "golang", "bbr", "leaky bucket", "token bucket"
+  ],
+  "articleBody": "限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式\n计数器 漏斗通 (Leaky Bucket) 令牌桶 (Token Bucket) 基于 BBR 算法的自适应限流 基于 Nginx 的限流 分布式限流 这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶\n什么是限流器 Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.\nIn case a client made too many requests within a given time frame, HTTP servers can respond with status code 429: Too Many Requests\n这段话是摘自维基百科. 简单来说限流器是基于 KV 内存数据库的一个限速判断, 在给定的时间内, 客户端请求次数过多, 服务器就会返回状态码 429: Too Many Request\n计数器 计数器是一种最简单的限流器.\n如果把 QPS 设置为100, 从第一个请求进来开始计时，在接下去的1s内，每来一个请求，就把计数加1，如果累加的数字达到了100，那么后续的请求就会被全部拒绝。等到1s结束后，把计数恢复成0，重新开始计数. 这种计数器一般称为固定窗口计数器算法.\n可以看到计数器虽说有一定的缓冲空间, 但是需要一定的恢复空窗期, 在这个恢复时间内请求全部拒绝. 计数器还存在着另外一个问题, 特殊情况下会让请求的通过量为限制的两倍.\n考虑如下情况：\n限制 1 秒内最多通过 5 个请求，在第一个窗口的最后半秒内通过了 5 个请求，第二个窗口的前半秒内又通过了 5 个请求。这样看来就是在 1 秒内通过了 10 个请求\n综合来看, 计数器方式的限流是比较简单粗暴的, 我们需要更加优雅的限流方式\n漏斗桶 相对于计数器的粗鲁方式, 漏斗桶会更加优雅一些, 如下图\n其实从字面就很好理解. 类似生活用到的漏斗, 当客户端请求进来时，相当于水倒入漏斗，然后从下端小口慢慢匀速的流出。不管上面流量多大，下面流出的速度始终保持不变.\n当水流入速度过大时, 漏斗就会溢出, 同样会造成服务拒绝. 相对于计数器的在恢复期内全部拒绝请求, 因为漏斗桶会以一定的速率消费请求, 这样就能够让后续的请求有机会进入到漏斗桶里面.\n漏斗桶的弊端 由于漏斗桶有点类似队列, 先进去才能被消费掉, 如果漏斗桶溢出了, 后续的请求都直接丢弃了, 也就是说漏斗桶是无法短时间应对突发流量的. 对于互联网行业来说, 面对突发流量, 不能一刀切将突发流量全部干掉, 这样会给产品带来口碑上影响. 因此漏斗桶也不是完美的方案.\n不过漏斗桶能够限制数据的平均传输速率, 能够满足大部分的使用场景的. 如: 我们可以使用漏斗桶限制论坛发帖频率\nUber Ratelimit Uber Ratelimit 是漏斗桶的一个具体实现. 下面主要结合 Uber Ratelimit 来介绍 Leaky Buckt(漏洞桶)\n官方 demo func main() { rl := ratelimit.New(100) // per second prev := time.Now() for i := 0; i \u003c 10; i++ { now := rl.Take() fmt.Println(i, now.Sub(prev)) prev = now } } Output:\n0 0 1 10ms 2 10ms 3 10ms 4 10ms 5 10ms 6 10ms 7 10ms 8 10ms 9 10ms 从这个例子的输出结果, 可以看出来有下面这些特点:\n初始化时需要设置 bucket 大小 输出结果是间隔 10ms, 由此可以看出来 leaky bucket 一定是保证匀速率的从桶内取值 通过 Take() 函数与 ratelimiter 来交互, 但是 Take() 的返回值却是上一次拿到的请求时间 gin 中间件 import ( \"fmt\" \"github.com/gin-gonic/gin\" \"go.uber.org/ratelimit\" \"time\" ) var rl ratelimit.Limiter func leakyBucketRateLimiter() gin.HandlerFunc { prev := time.Now() return func(c *gin.Context) { now := rl.Take() fmt.Println(now.Sub(prev)) // 这里不需要, 只是打印下多次请求之间的时间间隔 prev = now // 这里不需要, 只是打印下多次请求之间的时间间隔 } } func main() { engine := gin.Default() engine.GET(\"/test\", leakyBucketRateLimiter(), func(context *gin.Context) { context.JSON(200, true) }) engine.Run(\":9191\") } func init() { rl = ratelimit.New(10) } Output:\n[GIN] 2020/06/29 - 23:21:22 | 200 | 166.119µs | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:22 | 200 | 116.954372ms | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:23 | 200 | 203.502985ms | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:23 | 200 | 303.266345ms | 127.0.0.1 | GET /test .... [GIN] 2020/06/29 - 23:21:57 | 200 | 24.899798034s | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:57 | 200 | 24.899258055s | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:57 | 200 | 24.899960588s | 127.0.0.1 | GET /test 100ms [GIN] 2020/06/29 - 23:21:57 | 200 | 24.899834294s | 127.0.0.1 | GET /test 从这个例子的输出结果, 有下面这些特点:\n输出结果是间隔仍然是 10ms 当漏斗桶溢出后, 请求处理耗时越来越长 疑问 Uber Ratelimiter 溢出后为什么请求耗时越来越长? 为什么 Uber ratelimiter 不需要返回 429? 源码分析 New 初始化函数 func New(rate int, opts ...Option) Limiter { l := \u0026limiter{ perRequest: time.Second / time.Duration(rate), maxSlack: -10 * time.Second / time.Duration(rate), // 最大松弛度 } // ... return l } Uber Leaky Bucket 的设计有点取巧. New(10) 传入的 10 指的是 1s 内只有能有 10 个请求通过, 于是算出来每个请求之间应该间隔 100 ms. 如果两个请求之间间隔时间过短, 那么需要第二个请求 sleep 一段时间, 这样保证请求能够匀速从桶内流出. 如下图\n对比上面漏斗桶的概念, 我们发现当请求通过 Uber 限流器的时候, 如果溢出了, 就只能强行 sleep, 造成后续请求排队, 处理时长越来越长. 另外上游服务必须得有超时机制.\nTake() func (t *limiter) Take() time.Time { t.Lock() defer t.Unlock() now := t.clock.Now() // 如果是第一次请求, 直接让通过 if t.last.IsZero() { t.last = now return t.last } // 这里有个最大松弛量的概念maxSlack t.sleepFor += t.perRequest - now.Sub(t.last) if t.sleepFor \u003c t.maxSlack { t.sleepFor = t.maxSlack } // 判断是否桶溢出. 如果桶溢出了, 需要sleep一段时间 if t.sleepFor \u003e 0 { t.clock.Sleep(t.sleepFor) t.last = now.Add(t.sleepFor) t.sleepFor = 0 } else { t.last = now } return t.last } 最大松弛量 漏斗桶有个天然缺陷就是无法应对突发流量, 对于这种情况，uber-go 对 Leaky Bucket 做了一些改良，引入了最大松弛量 (maxSlack) 的概念\n上面计算 sleepFor 的第 14 行代码如果按下面这样写:\nt.sleepFor = t.perRequest - now.Sub(t.last) 请求 1 完成后，15ms 后，请求 2 才到来，可以对请求 2 立即处理。请求 2 完成后，5ms 后，请求 3 到来，这个时候距离上次请求还不足 10ms，因此还需要等待 5ms, 但是，对于这种情况，实际上三个请求一共消耗了 25ms 才完成，并不是预期的 20ms\nUber 实现的 ratelimit 中，可以把之前间隔比较长的请求的时间，匀给后面的使用，保证每秒请求数 (RPS). 对于以上 case，因为请求 2 相当于多等了 5ms，我们可以把这 5ms 移给请求 3 使用。加上请求 3 本身就是 5ms 之后过来的，一共刚好 10ms，所以请求 3 无需等待，直接可以处理。此时三个请求也恰好一共是 20ms\n但是也有特殊情况, 假设计算出来的间隔时间 100ms, 但是 请求1 和 请求2 之间的间隔时间 2h, 如果没有t.sleepFor = t.maxSlack 这段 最大松弛量 的代码, 那么 请求2 需要 sleep 2h 才能继续执行, 显然这不符合实际情况. 故引入了最大松弛量 (maxSlack), 表示允许抵消的最长时间\n参考 分布式服务限流实战，已经为你排好坑了 uber-go 漏桶限流器使用与原理分析 ",
+  "wordCount" : "2286",
+  "inLanguage": "zh",
+  "datePublished": "2020-06-27T10:14:07+08:00",
+  "dateModified": "2020-06-27T10:14:07+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2020-06-27-leaky-bucket/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      限流器系列(1) -- Leaky Bucket 漏斗桶
+    </h1>
+    <div class="post-meta"><span title='2020-06-27 10:14:07 +0800 CST'>2020年6月27日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2286 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#什么是限流器">什么是限流器</a></li>
+    <li><a href="#计数器">计数器</a></li>
+    <li><a href="#漏斗桶">漏斗桶</a>
+      <ul>
+        <li><a href="#漏斗桶的弊端">漏斗桶的弊端</a></li>
+      </ul>
+    </li>
+    <li><a href="#uber-ratelimit">Uber Ratelimit</a>
+      <ul>
+        <li><a href="#官方-demo">官方 demo</a></li>
+        <li><a href="#gin-中间件">gin 中间件</a></li>
+        <li><a href="#疑问">疑问</a></li>
+      </ul>
+    </li>
+    <li><a href="#源码分析">源码分析</a>
+      <ul>
+        <li><a href="#new-初始化函数">New 初始化函数</a></li>
+        <li><a href="#take">Take()</a></li>
+        <li><a href="#最大松弛量">最大松弛量</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>限流器(Rate Limiter)在微服务中的重要性不言而喻了. 下游服务的稳定性, 防止过载, 全靠这个组件来保证. 限流器的实现方式, 基本有下面几种方式</p>
+<ol>
+<li>计数器</li>
+<li>漏斗通 (Leaky Bucket)</li>
+<li>令牌桶 (Token Bucket)</li>
+<li>基于 BBR 算法的自适应限流</li>
+<li>基于 Nginx 的限流</li>
+<li>分布式限流</li>
+</ol>
+<p>这个系列的文章会逐一介绍各种限流器. 本篇文章会结合比较成熟组件介绍: 漏斗桶</p>
+<h2 id="什么是限流器">什么是限流器<a hidden class="anchor" aria-hidden="true" href="#什么是限流器">#</a></h2>
+<blockquote>
+<p>Web servers typically use a central in-memory key-value database, like Redis or Aerospike, for session management. A rate limiting algorithm is used to check if the user session (or IP address) has to be limited based on the information in the session cache.</p>
+<p>In case a client made too many requests within a given time frame, HTTP servers can respond with status code 429: Too Many Requests</p>
+</blockquote>
+<p>这段话是摘自<a href="https://en.wikipedia.org/wiki/Rate_limiting">维基百科</a>. 简单来说<code>限流器</code>是基于 KV 内存数据库的一个限速判断, 在给定的时间内, 客户端请求次数过多, 服务器就会返回状态码 429: Too Many Request</p>
+<h2 id="计数器">计数器<a hidden class="anchor" aria-hidden="true" href="#计数器">#</a></h2>
+<p>计数器是一种最简单的限流器.</p>
+<p>如果把 QPS 设置为100, 从第一个请求进来开始计时，在接下去的1s内，每来一个请求，就把计数加1，如果累加的数字达到了100，那么后续的请求就会被全部拒绝。等到1s结束后，把计数恢复成0，重新开始计数. 这种计数器一般称为<code>固定窗口计数器算法</code>.</p>
+<p>可以看到计数器虽说有一定的缓冲空间, 但是需要一定的恢复空窗期, 在这个恢复时间内请求全部拒绝. 计数器还存在着另外一个问题, 特殊情况下会让请求的通过量为限制的两倍.</p>
+<p>考虑如下情况：</p>
+<p>限制 1 秒内最多通过 5 个请求，在第一个窗口的最后半秒内通过了 5 个请求，第二个窗口的前半秒内又通过了 5 个请求。这样看来就是在 1 秒内通过了 10 个请求</p>
+<p>综合来看, 计数器方式的限流是比较简单粗暴的, 我们需要更加优雅的限流方式</p>
+<h2 id="漏斗桶">漏斗桶<a hidden class="anchor" aria-hidden="true" href="#漏斗桶">#</a></h2>
+<p>相对于<code>计数器</code>的粗鲁方式, 漏斗桶会更加优雅一些, 如下图</p>
+<p><img alt="leaky_bucket" loading="lazy" src="https://images.haohongfan.com/leaky_bucket1.png?imageView2/2/w/500/h/500"></p>
+<p>其实从字面就很好理解. 类似生活用到的漏斗, 当客户端请求进来时，相当于水倒入漏斗，然后从下端小口慢慢匀速的流出。不管上面流量多大，下面流出的速度始终保持不变.</p>
+<p>当水流入速度过大时, 漏斗就会溢出, 同样会造成服务拒绝. 相对于<code>计数器</code>的在恢复期内全部拒绝请求, 因为漏斗桶会以一定的速率消费请求, 这样就能够让后续的请求有机会进入到漏斗桶里面.</p>
+<h3 id="漏斗桶的弊端">漏斗桶的弊端<a hidden class="anchor" aria-hidden="true" href="#漏斗桶的弊端">#</a></h3>
+<p>由于漏斗桶有点类似队列, 先进去才能被消费掉, 如果漏斗桶溢出了, 后续的请求都直接丢弃了, 也就是说漏斗桶是无法短时间应对突发流量的. 对于互联网行业来说, 面对突发流量, 不能一刀切将突发流量全部干掉, 这样会给产品带来口碑上影响. 因此漏斗桶也不是完美的方案.</p>
+<p>不过漏斗桶能够限制数据的平均传输速率, 能够满足大部分的使用场景的. 如: 我们可以使用漏斗桶限制论坛发帖频率</p>
+<h2 id="uber-ratelimit">Uber Ratelimit<a hidden class="anchor" aria-hidden="true" href="#uber-ratelimit">#</a></h2>
+<p>Uber Ratelimit 是漏斗桶的一个具体实现. 下面主要结合 <a href="https://github.com/uber-go/ratelimit">Uber Ratelimit</a> 来介绍 Leaky Buckt(漏洞桶)</p>
+<h3 id="官方-demo">官方 demo<a hidden class="anchor" aria-hidden="true" href="#官方-demo">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rl</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ratelimit</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="c1">// per second</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">prev</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nx">now</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rl</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">prev</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nx">prev</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">now</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Output:</p>
+<pre tabindex="0"><code> 0 0
+ 1 10ms
+ 2 10ms
+ 3 10ms
+ 4 10ms
+ 5 10ms
+ 6 10ms
+ 7 10ms
+ 8 10ms
+ 9 10ms
+</code></pre><p>从这个例子的输出结果, 可以看出来有下面这些特点:</p>
+<ul>
+<li>初始化时需要设置 bucket 大小</li>
+<li>输出结果是间隔 10ms, 由此可以看出来 leaky bucket 一定是保证匀速率的从桶内取值</li>
+<li>通过 <code>Take()</code> 函数与 ratelimiter 来交互, 但是 Take() 的返回值却是上一次拿到的请求时间</li>
+</ul>
+<h3 id="gin-中间件">gin 中间件<a hidden class="anchor" aria-hidden="true" href="#gin-中间件">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;fmt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;github.com/gin-gonic/gin&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;go.uber.org/ratelimit&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;time&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">var</span><span class="w"> </span><span class="nx">rl</span><span class="w"> </span><span class="nx">ratelimit</span><span class="p">.</span><span class="nx">Limiter</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">leakyBucketRateLimiter</span><span class="p">()</span><span class="w"> </span><span class="nx">gin</span><span class="p">.</span><span class="nx">HandlerFunc</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">prev</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">now</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rl</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">now</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">prev</span><span class="p">))</span><span class="w"> </span><span class="c1">// 这里不需要, 只是打印下多次请求之间的时间间隔</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">prev</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="c1">// 这里不需要, 只是打印下多次请求之间的时间间隔</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">engine</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">gin</span><span class="p">.</span><span class="nf">Default</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">engine</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/test&#34;</span><span class="p">,</span><span class="w"> </span><span class="nf">leakyBucketRateLimiter</span><span class="p">(),</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">context</span><span class="w"> </span><span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">engine</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="s">&#34;:9191&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">init</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">ratelimit</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Output:</p>
+<pre tabindex="0"><code>[GIN] 2020/06/29 - 23:21:22 | 200 |     166.119µs |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:22 | 200 |  116.954372ms |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:23 | 200 |  203.502985ms |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:23 | 200 |  303.266345ms |       127.0.0.1 | GET      /test
+
+....
+
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899798034s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899258055s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899960588s |       127.0.0.1 | GET      /test
+100ms
+[GIN] 2020/06/29 - 23:21:57 | 200 | 24.899834294s |       127.0.0.1 | GET      /test
+</code></pre><p>从这个例子的输出结果, 有下面这些特点:</p>
+<ul>
+<li>输出结果是间隔仍然是 10ms</li>
+<li>当漏斗桶溢出后, 请求处理耗时越来越长</li>
+</ul>
+<h3 id="疑问">疑问<a hidden class="anchor" aria-hidden="true" href="#疑问">#</a></h3>
+<ol>
+<li>Uber Ratelimiter 溢出后为什么请求耗时越来越长?</li>
+<li>为什么 Uber ratelimiter 不需要返回 429?</li>
+</ol>
+<h2 id="源码分析">源码分析<a hidden class="anchor" aria-hidden="true" href="#源码分析">#</a></h2>
+<h3 id="new-初始化函数">New 初始化函数<a hidden class="anchor" aria-hidden="true" href="#new-初始化函数">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">New</span><span class="p">(</span><span class="nx">rate</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="o">...</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="nx">Limiter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">l</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">limiter</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">perRequest</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">rate</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">maxSlack</span><span class="p">:</span><span class="w">   </span><span class="o">-</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">rate</span><span class="p">),</span><span class="w"> </span><span class="c1">// 最大松弛度</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">l</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Uber Leaky Bucket 的设计有点取巧. <code>New(10)</code> 传入的 10 指的是 1s 内只有能有 10 个请求通过, 于是算出来每个请求之间应该间隔 100 ms. 如果两个请求之间间隔时间过短, 那么需要第二个请求 sleep 一段时间, 这样保证请求能够匀速从桶内流出. 如下图</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/uber_sleep_for.png?imageView2/2/w/500/h/500"></p>
+<p>对比上面漏斗桶的概念, 我们发现当请求通过 Uber 限流器的时候, 如果溢出了, 就只能强行 sleep, 造成后续请求排队, 处理时长越来越长. 另外上游服务必须得有超时机制.</p>
+<h3 id="take">Take()<a hidden class="anchor" aria-hidden="true" href="#take">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">limiter</span><span class="p">)</span><span class="w"> </span><span class="nf">Take</span><span class="p">()</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">now</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">clock</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 如果是第一次请求, 直接让通过</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="p">.</span><span class="nf">IsZero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">now</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 这里有个最大松弛量的概念maxSlack</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">perRequest</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">now</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">maxSlack</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">maxSlack</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 判断是否桶溢出. 如果桶溢出了, 需要sleep一段时间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">clock</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">now</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">now</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="最大松弛量">最大松弛量<a hidden class="anchor" aria-hidden="true" href="#最大松弛量">#</a></h3>
+<p>漏斗桶有个天然缺陷就是无法应对突发流量, 对于这种情况，uber-go 对 Leaky Bucket 做了一些改良，引入了最大松弛量 (maxSlack) 的概念</p>
+<p>上面计算 sleepFor 的第 14 行代码如果按下面这样写:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">t</span><span class="p">.</span><span class="nx">sleepFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">perRequest</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">now</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">last</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><p>请求 1 完成后，15ms 后，请求 2 才到来，可以对请求 2 立即处理。请求 2 完成后，5ms 后，请求 3 到来，这个时候距离上次请求还不足 10ms，因此还需要等待 5ms, 但是，对于这种情况，实际上三个请求一共消耗了 25ms 才完成，并不是预期的 20ms</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/uber_max_slack1.png?imageView2/2/w/500/h/500"></p>
+<p>Uber 实现的 ratelimit 中，可以把之前间隔比较长的请求的时间，匀给后面的使用，保证每秒请求数 (RPS). 对于以上 case，因为请求 2 相当于多等了 5ms，我们可以把这 5ms 移给请求 3 使用。加上请求 3 本身就是 5ms 之后过来的，一共刚好 10ms，所以请求 3 无需等待，直接可以处理。此时三个请求也恰好一共是 20ms</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/uber_max_slack2.png?imageView2/2/w/500/h/500"></p>
+<p>但是也有特殊情况, 假设计算出来的间隔时间 100ms, 但是 <code>请求1</code> 和 <code>请求2</code> 之间的间隔时间 2h, 如果没有<code>t.sleepFor = t.maxSlack</code> 这段 <code>最大松弛量</code> 的代码, 那么 <code>请求2</code> 需要 sleep 2h 才能继续执行, 显然这不符合实际情况. 故引入了最大松弛量 (maxSlack), 表示允许抵消的最长时间</p>
+<h2 id="参考">参考<a hidden class="anchor" aria-hidden="true" href="#参考">#</a></h2>
+<ol>
+<li><a href="https://www.infoq.cn/article/Qg2tX8fyw5Vt-f3HH673">分布式服务限流实战，已经为你排好坑了</a></li>
+<li><a href="https://www.cyhone.com/articles/analysis-of-uber-go-ratelimit/">uber-go 漏桶限流器使用与原理分析</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/golang/">Golang</a></li>
+      <li><a href="https://georgehao.github.io/tags/kratos/">Kratos</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2020-06-30-token-bucket/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>限流器系列(2) -- Token Bucket 令牌桶</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2020-06-09-kratos-log/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Bilibili Kratos 框架源码分析(4) -- Kratos Log</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on x"
+            href="https://x.com/intent/tweet/?text=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f&amp;hashtags=golang%2ckratos">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f&amp;title=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6&amp;summary=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f&title=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on telegram"
+            href="https://telegram.me/share/url?text=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 限流器系列(1) -- Leaky Bucket 漏斗桶 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e9%99%90%e6%b5%81%e5%99%a8%e7%b3%bb%e5%88%97%281%29%20--%20Leaky%20Bucket%20%e6%bc%8f%e6%96%97%e6%a1%b6&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-06-27-leaky-bucket%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

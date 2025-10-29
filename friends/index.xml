@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Friends on HHFCodeRv</title>
+    <link>https://georgehao.github.io/friends/</link>
+    <description>Recent content in Friends on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/friends/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>好友推荐</title>
+      <link>https://georgehao.github.io/friends/friends/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>https://georgehao.github.io/friends/friends/</guid>
+      <description>&lt;/br&gt;
+&lt;p&gt;三人行，必有我师。这里推荐我的一些大佬好友们。&lt;/p&gt;
+&lt;/br&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://studygolang.com&#34;&gt;GO 语言中文网&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://polarisxu.studygolang.com/&#34;&gt;polarisxu&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://eddycjy.com/&#34;&gt;脑子进煎鱼了&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.qcrao.com/&#34;&gt;码农桃花源&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.luozhiyun.com/&#34;&gt;luozhiyun很酷&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://xargin.com&#34;&gt;Xargin&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://qiyacloud.cn&#34;&gt;奇伢云存储&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://strikefreedom.top/&#34;&gt;远赴星辰&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://halfrost.com/&#34;&gt;五分选手&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://asong.cloud/&#34;&gt;Golang 梦工厂&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://lailin.xyz/&#34;&gt;Mohuishou&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://tangwz.com/&#34;&gt;Tangwz 的博客&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.likakuli.com/&#34;&gt;kakus 的博客&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.syst.top/&#34;&gt;吴亲强的深夜食堂&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://blog.changkun.de/&#34;&gt;欧长坤的博客&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://pdcfighting.com/&#34;&gt;爬虫与数据挖掘&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://mytechshares.com/&#34;&gt;董泽润的技术笔记&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/me.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

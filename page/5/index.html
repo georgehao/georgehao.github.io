@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.152.2"><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>HHFCodeRv</title>
+
+<meta name="description" content="">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://georgehao.github.io/index.xml" title="rss">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="HHFCodeRv">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HHFCodeRv">
+<meta name="twitter:description" content="">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "HHFCodeRv",
+  "url": "https://georgehao.github.io/",
+  "description": "",
+  "logo": "https://georgehao.github.io/images/icon.png",
+  "sameAs": [
+      "https://github.com/"
+  ]
+}
+</script>
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang是否真的没有指针运算?
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)
+func main() { a1 := []int{1, 2, 3} p1 := &amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&#34;p1: &#34;, *p1) // 1 fmt.Printf(&#34;p1 address:%p\n&#34;, p1) // 0xc00009a000 p1 = p1 &#43; 1 } invalid operation: p1 &#43; 1 (mismatched types *int and int) C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题)
+#include&lt;stdio.h&gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;a&#43;1); printf(&#34;%d,%d&#34;,*(a&#43;1),*(ptr-1)); } 这题的结果是: 2和5
+可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-07-22 11:48:24 +0800 CST'>2019年7月22日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2841 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang是否真的没有指针运算?" href="https://georgehao.github.io/posts/2019-07-22-golang-pointer/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Logrus源码阅读(1)--基本用法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下
+整体结构图
+整体来看总共提供两种方式调用:
+logrus.Info(“hello logrus”) logrus.WithField(logruns.Fields{“key1”:“v1”}).Info(“hello logrus”) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的print函数, 如: Infof, Error, Errorf, Panic等等
+在直接使用logrus等情况下exported.go是唯一入口, 但是我们可以简单封装一下, 跟项目框架更加贴合, 这个留在后面用具体例子来解释这么做的原因和好处
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-07-16 20:06:27 +0800 CST'>2019年7月16日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>2000 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Logrus源码阅读(1)--基本用法" href="https://georgehao.github.io/posts/2019-06-11-logurs-1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">一次golang deadlock的讨论
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果
+// 程序1 func main() { fmt.Println(&#34;running, not deadlock&#34;) server, err := net.Listen(&#34;tcp&#34;, &#34;127.0.0.1:9001&#34;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(&#34;server&#34;) } fmt.Printf(&#34;Received connection from %s.\n&#34;, connection.RemoteAddr()) waitQueue &lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue &lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-07-11 10:44:07 +0800 CST'>2019年7月11日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>781 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 一次golang deadlock的讨论" href="https://georgehao.github.io/posts/2019-07-11-deadlock-detector/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">我所理解的Sync Pool
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>看gin源码时发现了sync.Pool的使用
+// gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了
+因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度相关的知识. 要是不明白Golang是如何调度的, 基本是看不懂Pool的源码的(虽说它只有短短的259行代码, 文件路径: SDK/src/sync/pool.go). 这里推荐Go调度器系列系列文章
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-08 22:22:15 +0800 CST'>2019年6月8日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1677 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 我所理解的Sync Pool" href="https://georgehao.github.io/posts/2019-05-26-sync-pool/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">[每日一译]golang range与iteration之间的关系
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 原文地址
+package main import ( &#34;fmt&#34; ) type T struct { id int } func main() { t1 := T{id: 1} t2 := T{id: 2} ts1 := []T{t1, t2} ts2 := []*T{} for _, t := range ts1 { ts2 = append(ts2, &amp;t) } for _, t := range ts2 { fmt.Println((*t).id) } } 先不要看结果, 自己想想输出是什么?
+对于很多人(包括我自己), 结果可能会让人感到惊讶
+2 2 我个人期待的结果, 但是这是一个错误结果
+1 2 迭代变量t使用短变量声明的方式声明, 它的声明周期就是for代码块. 这个变量在第一次循环时是第一个元素的值, 在第二次循环时是第二个元素的值, 但是在内存的某个地方保存着slice被遍历结束时的值. t没有指向slice底层数组指向的值–这是一个临时的桶, 下一个元素会覆盖当前值. t是一个辅助变量来保存当前迭代的元素, 所以&amp;t每次循环都是相同的值
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-04 11:11:54 +0800 CST'>2019年6月4日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>447 字</span>&nbsp;·&nbsp;<span>HHF</span></footer>
+  <a class="entry-link" aria-label="post link to [每日一译]golang range与iteration之间的关系" href="https://georgehao.github.io/posts/2019-06-04-golang-range-address-of-iterator/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">[每日一译] Tags in Golang
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 原文地址: Tags in Golang
+我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束
+Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和requiredtype组成
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-03 22:22:15 +0800 CST'>2019年6月3日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1879 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to [每日一译] Tags in Golang" href="https://georgehao.github.io/posts/2019-06-03-tags-of-golang/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">GraphQL N&#43;1 问题解决方案
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>什么是N&#43;1问题 { topStories(limit: 10) { title author { name email } } } 这个简单的查询, 在Queryresolve里面会查询到top10 story, 但是StoryType却会调用10次author查询.
+大概的SQL查询:
+select * from stories limit 10 select * from author where stories.author_id = x select * from author where stories.author_id = x select * from author where stories.author_id = x ... select * from author where stories.author_id = x 这个简单的Query就会查询11次数据库.
+我们要知道Graphql的图形结构可能是个闭环结构, 例如, stories-&gt;authors-&gt;…-&gt;stories(这个树形图, 可以使用voyager来查看), 所以如果不解决N&#43;1问题, 那么Graphql接口将会严重拖慢的Server的性能.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-11-12 18:43:15 +0800 CST'>2018年11月12日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1491 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to GraphQL N&#43;1 问题解决方案" href="https://georgehao.github.io/posts/hugo-integrated-gitment-plugin/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MongoDB 数据重复的处理方法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>背景 在使用mongodb的过程中, 发现某张表因为一个bug引入了重复数据. 这个表的数据高达210多万条, 使用程序遍历查找重复数据, 并删除这些重复数据, 会显得不太合理. 下面是我解决这个问题的方法.
+引起问题的原因 确实有程序bug的影响 表相关字段没有使用unique索引 解决方式 一. 错误的解决方式 相当多的文章是用下面的解决方式:
+db.test.ensureIndex({id: 1,name: 1}, {unique: true, dropDups: true}) 这种方式由于BUG, 在Mongodb 3.0.0被废弃了.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-09-30 20:47:53 +0800 CST'>2018年9月30日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>407 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to MongoDB 数据重复的处理方法" href="https://georgehao.github.io/posts/2018-09-30-mongo-duplicate/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ES简单使用
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>常用命令 查看有哪些indexes curl -u [user]:[password] -XGET 127.0.0.1:9200/_cat/indices 删除索引 curl -u *:* -XDELETE 127.0.0.1:9200/story 查看type curl -u *:* -XGET 127.0.0.1:9200/story/_search?pretty 查看结构 curl -u *:* -XGET 127.0.0.1:9200/luka/_mapping?pretty 创建index curl -u *:* -H &#39;Content-Type:application/json&#39; -XPUT 127.0.0.1:9200/luka?pretty 模糊查询 curl -u *:* -XGET &#39;127.0.0.1:9200/story/_search?q=mary&amp;pretty&#39; 查询 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
+Match查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;match&#39; =&gt; [ &#39;title&#39; =&gt; &#39;黑猫&#39;, ] ], ] ]; Bool查询 curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;must&#34;: [ { &#34;match&#34; : { &#34;testField&#34; : &#34;abc&#34; } }, { &#34;match&#34; : { &#34;testField2&#34; : &#34;xyz&#34; } } ] } } }&#39; $data = [ &#39;body&#39; =&gt; [ &#39;query&#39; =&gt; [ &#39;bool&#39; =&gt; [ &#39;must&#39; =&gt; [ [&#39;match&#39; =&gt; [&#39;title&#39; =&gt; &#39;黑猫&#39;,]], [&#39;match&#39; =&gt; [&#39;anchor_nickname&#39; =&gt; &#39;可乐&#39;]], ] ] ], ] ]; curl -XGET &#39;localhost:9200/my_index/my_type/_search&#39; -d &#39;{ &#34;query&#34; : { &#34;bool&#34; : { &#34;filter&#34; : { &#34;term&#34; : { &#34;my_field&#34; : &#34;abc&#34; } }, &#34;should&#34; : { &#34;match&#34; : { &#34;my_other_field&#34; : &#34;xyz&#34; } } } } }&#39; Query DSL Match Query
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-09-27 11:44:44 +0800 CST'>2018年9月27日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2034 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to ES简单使用" href="https://georgehao.github.io/posts/2018-09-28-es-simple/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Graphql最大复杂度和最大深度设置
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>设置最大深度和最大负责度的好处 因为把查询的权利交给了客户端, 客户端可以进行非常复杂的查询. 因为客户端可能进行恶意的查询或者进行非常大的查询, 因此服务端要拒绝这样的查询.
+总共有三种方式可以进行:
+设置响应过期时间 设置查询最大深度 设置查询最大复杂度 设置响应过期时间需要对服务端代码和性能要求比较高, 可以先不管, 当服务器代码和性能上去再设置.
+如何判断最大深度 1. 简单的查询,depth = 0 query shallow1 { thing1 } 2. 内联片段（Inline Fragments）不能增加depth, depth = 0 query shallow2 { thing1 ... on Query { thing2 } } 3. Named Fragments同样不能增加depth, depth = 0 query shallow3 { ...queryFragment } fragment queryFragment on Query { thing1 } 4. depth = 1的查询 query deep1_1 { viewer { name } } query deep1_2 { // Inline Fragments viewer { ... on User { name } } } 5. depth = 2的查询 query deep2 { viewer { albums { title } } } 6. depth = 3的查询 query deep3 { viewer { albums { ...musicInfo songs{ ...musicInfo } } } } fragment musicInfo on Music { id title artists } IntrospectionQuery 这里需要注意, 客户端在使用服务端graphql的时候, 需要去问GraphQL Schema它支持哪些查询, GraphQL 通过内省系统让我们可以做到这点. 通过查询 __schema 字段来向 GraphQL 询问哪些类型是可用的
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-09-19 16:44:46 +0800 CST'>2018年9月19日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>731 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Graphql最大复杂度和最大深度设置" href="https://georgehao.github.io/posts/2018-09-19-graphql-maxth-depth/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://georgehao.github.io/page/4/">
+      «&nbsp;上一页&nbsp;
+    </a>
+    <a class="next" href="https://georgehao.github.io/page/6/">下一页&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

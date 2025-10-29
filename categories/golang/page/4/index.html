@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Golang | HHFCodeRv</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/categories/golang/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://georgehao.github.io/categories/golang/index.xml" title="rss">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/categories/golang/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/categories/golang/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Golang">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang">
+<meta name="twitter:description" content="">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/categories/">Categories</a></div>
+  <h1>
+    Golang
+    <a href="/categories/golang/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Logrus源码阅读(1)--基本用法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>选择golang日志库时, 使用logrus的主要原因就是因为star比较多, 而且社区活跃度非常高. 在项目使用过程中, 发现logrus的调用入口, 性能, 插件, 自定义插件, 输出格式等都非常优秀, 值得学习一下
+整体结构图
+整体来看总共提供两种方式调用:
+logrus.Info(“hello logrus”) logrus.WithField(logruns.Fields{“key1”:“v1”}).Info(“hello logrus”) 这些函数都在exported.go文件中. 当然为了提供不同级别输出日志的功能, 里面实现了各种各样的print函数, 如: Infof, Error, Errorf, Panic等等
+在直接使用logrus等情况下exported.go是唯一入口, 但是我们可以简单封装一下, 跟项目框架更加贴合, 这个留在后面用具体例子来解释这么做的原因和好处
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-07-16 20:06:27 +0800 CST'>2019年7月16日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>2000 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Logrus源码阅读(1)--基本用法" href="https://georgehao.github.io/posts/2019-06-11-logurs-1/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">一次golang deadlock的讨论
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>背景 在微信群一位同学抛出的一段代码, 各位看官猜想一下程序的执行结果
+// 程序1 func main() { fmt.Println(&#34;running, not deadlock&#34;) server, err := net.Listen(&#34;tcp&#34;, &#34;127.0.0.1:9001&#34;) if err != nil { fmt.Println(err) } waitQueue := make(chan int) for { connection, err := server.Accept() if err != nil { panic(&#34;server&#34;) } fmt.Printf(&#34;Received connection from %s.\n&#34;, connection.RemoteAddr()) waitQueue &lt;- 1 } } 我猜想大部分同学都会说是: fatal error: all goroutines are asleep - deadlock!. 因为waitQueue是个没有缓冲的channel, waitQueue &lt;- 1向里面send一个值, 理论上程序一运行就会报deadlock的错误
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-07-11 10:44:07 +0800 CST'>2019年7月11日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>781 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 一次golang deadlock的讨论" href="https://georgehao.github.io/posts/2019-07-11-deadlock-detector/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">我所理解的Sync Pool
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>看gin源码时发现了sync.Pool的使用
+// gin.go:L144 func New() *Engine { ... engine.pool.New = func() interface{} { return engine.allocateContext() } return engine } // gin.go: L346 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) { c := engine.pool.Get().(*Context) c.writermem.reset(w) c.Request = req c.reset() engine.handleHTTPRequest(c) engine.pool.Put(c) } 那个时候其实不太明白这个Pool是在干啥用, 大致觉得应该是内存池之类的. 后面想仔细看下sync.Pool具体怎么用, 我就去直接看了下Pool的源码, 然后直接懵逼了
+因为基本看不懂其逻辑, 因为Pool的源码涉及到Golang的调度相关的知识. 要是不明白Golang是如何调度的, 基本是看不懂Pool的源码的(虽说它只有短短的259行代码, 文件路径: SDK/src/sync/pool.go). 这里推荐Go调度器系列系列文章
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-08 22:22:15 +0800 CST'>2019年6月8日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1677 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 我所理解的Sync Pool" href="https://georgehao.github.io/posts/2019-05-26-sync-pool/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">[每日一译]golang range与iteration之间的关系
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 原文地址
+package main import ( &#34;fmt&#34; ) type T struct { id int } func main() { t1 := T{id: 1} t2 := T{id: 2} ts1 := []T{t1, t2} ts2 := []*T{} for _, t := range ts1 { ts2 = append(ts2, &amp;t) } for _, t := range ts2 { fmt.Println((*t).id) } } 先不要看结果, 自己想想输出是什么?
+对于很多人(包括我自己), 结果可能会让人感到惊讶
+2 2 我个人期待的结果, 但是这是一个错误结果
+1 2 迭代变量t使用短变量声明的方式声明, 它的声明周期就是for代码块. 这个变量在第一次循环时是第一个元素的值, 在第二次循环时是第二个元素的值, 但是在内存的某个地方保存着slice被遍历结束时的值. t没有指向slice底层数组指向的值–这是一个临时的桶, 下一个元素会覆盖当前值. t是一个辅助变量来保存当前迭代的元素, 所以&amp;t每次循环都是相同的值
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-04 11:11:54 +0800 CST'>2019年6月4日</span>&nbsp;·&nbsp;<span>1 分钟</span>&nbsp;·&nbsp;<span>447 字</span>&nbsp;·&nbsp;<span>HHF</span></footer>
+  <a class="entry-link" aria-label="post link to [每日一译]golang range与iteration之间的关系" href="https://georgehao.github.io/posts/2019-06-04-golang-range-address-of-iterator/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">[每日一译] Tags in Golang
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> 原文地址: Tags in Golang
+我们声明golang struct时可以在struct字段后面添加一些字符串来丰富这个字段, 这些字符串称为tag. Tags可以被当前package或者包外使用. 让我们首先看看struct是如何声明的, 然后深入研究下tag本身, 最后用几个例子结束
+Struct type struct是一系列的字段的组合. 每一个字段都由一个optional名字和requiredtype组成
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2019-06-03 22:22:15 +0800 CST'>2019年6月3日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1879 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to [每日一译] Tags in Golang" href="https://georgehao.github.io/posts/2019-06-03-tags-of-golang/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">go 跨平台编译
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Go编译支持的平台类型 amd64 (also known as x86-64) 386 (x86 or x86-32) arm (ARM) arm64 (AArch64) version &gt;= 1.5 ppc64, ppc64le version &gt;= 1.5 mips, mipsle (32-bit MIPS big- and little-endian) version &gt;= 1.8 mips64, mips64le (64-bit MIPS big- and little-endian) version &gt;= 1.6 s390x (IBM System z) version &gt;= 1.7 $GOOS $GOARCH android arm darwin 386 darwin amd64 darwin arm darwin arm64 dragonfly amd64 freebsd 386 freebsd amd64 freebsd arm linux 386 linux amd64 linux arm linux arm64 linux ppc64 linux ppc64le linux mips linux mipsle linux mips64 linux mips64le linux s390x netbsd 386 netbsd amd64 netbsd arm openbsd 386 openbsd amd64 openbsd arm plan9 386 plan9 amd64 solaris amd64 windows 386 windows amd64 源码安装go 需要安装软件 apt-get install gcc git bzip2 note 想要go支持cgo, c编译器(比如: gcc, clang)必须先安装. 如果不安装cgo, 必须设置CGO_ENABLED=0.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-05-04 05:30:16 +0000 +0000'>2018年5月4日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>808 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to go 跨平台编译" href="https://georgehao.github.io/posts/2018-05-04-go-cross-complie/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang interface入门
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>定义 Interface是定义一组方法的集合
+如何实现接口 任何type只要实现了interface的所有方法, 即可实现接口. 不需要像java需要使用implements关键字来显式声明.
+所有的类型都实现了empty interfa1ce
+type I interface { M() } type T struct { S string } // T就实现了interface I, 不需要显式声明 func (t T) M() { fmt.Println(t.S) } func main() { var i I = T{&#34;hello&#34;} i.M() } Interface本质 interface本质是一个(value, type)元组. interface的value是有一个潜在的类型.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-04-15 01:50:43 +0000 +0000'>2018年4月15日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1219 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang interface入门" href="https://georgehao.github.io/posts/2018-04-15-golang-interface-simple/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang指针vs值
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Go语言允许通过值和指针的方式来传递参数.
+严格的说Go只允许通过值的方式来传递参数. 当一个变量被当做函数的参数传递, 那么这个变量一定会被复制, 然后传入被调用的函数里. 当这个变量被复制, 那么一定会重新开辟内存地址.
+对于参数为值的时候:
+func test(p int) { fmt.Printf(&#34;%p\n&#34;, &amp;p) // 0xc42000e250 } func main() { p := 10 fmt.Printf(&#34;%p&#34;, &amp;p) // 0xc42000e218 test(p) } 从结果可以很容易看出来, 变量p和参数p是两个完全不一样地址, 就可以很容易理解变量p被复制了一份.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-03-24 15:58:13 +0000 +0000'>2018年3月24日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1273 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang指针vs值" href="https://georgehao.github.io/posts/2018-03-24-golang-pointer-vs-value-vs-reference/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang命名规范
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>文件名 没有明确的规定 根据test文件的命名规范推测, 还是使用下划线比较统一. 测试文件: path_test.go 版本区分: trap_windows_1.4.go 平台区分: file_windows.go CPU区分: vdso_linux_amd64.go 由于没有明确的文档说这个事情. 从源码来看, 我觉得&lt;a href=&#34;https://studygolang.com/articles/8542&#34;&gt;这篇文档归档的挺不错. 以后发现有别的规定再补充.
+包名 尽量短, 尽量简洁, 容易记(short, concise, evocative). 因为别人会用你的package.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2018-01-23 15:34:24 +0000 +0000'>2018年1月23日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1111 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang命名规范" href="https://georgehao.github.io/posts/2018-01-23-golang_named/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Golang Label使用方法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>写C/C&#43;&#43;的时候, 基本上都是建议不要使用goto的, 因为goto运用的不好的话, 会改变程序的运行结构, 会造成程序运行的混乱. 所以很少能看到C&#43;&#43;代码中有使用goto的.
+不过看到Golang中, 不仅保留了goto, 而且把它发扬光大了.
+在Golang中能使用Label的有goto, break, continue. 这篇文章就介绍下Golang中Label使用和注意点.
+注意点:
+Label在continue, break中是可选的, 但是在goto中是必须的 作用范围: 定义Label的函数体内. Label可以声明在函数体的任何位置, 不管Label声明在调用点的前面还是后面. 看到国外一篇文章写的不错, 加上自己的一些理解, 写了这么一篇文章.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-08-10 06:07:19 +0000 +0000'>2017年8月10日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1762 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Golang Label使用方法" href="https://georgehao.github.io/posts/2017-08-10-label/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://georgehao.github.io/categories/golang/page/3/">
+      «&nbsp;上一页&nbsp;
+    </a>
+    <a class="next" href="https://georgehao.github.io/categories/golang/page/5/">下一页&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

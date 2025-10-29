@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>golang中defer, panic, recover用法 | HHFCodeRv</title>
+<meta name="keywords" content="">
+<meta name="description" content="昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出
+一. defer 用法
+为何会有defer这样的语法呢? 如果你之前是写C&#43;&#43;的话这样的代码, 你会经常看到.
+class Demo {
+public:
+	Demo() {
+		p = new int(10);
+	}
+	
+	~Demo() {
+		if (p) { delete(p); }
+	}
+private:
+	int *p = nullptr;
+}
+本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c&#43;&#43;的BUG都是由这个引起的). 这个时候我们就会利用c&#43;&#43;的析构函数, 去自动释放这些变量.  在c&#43;&#43;11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2017-07-20-golang_defer_panic_recover/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2017-07-20-golang_defer_panic_recover/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2017-07-20-golang_defer_panic_recover/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="golang中defer, panic, recover用法">
+  <meta property="og:description" content="昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出
+一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C&#43;&#43;的话这样的代码, 你会经常看到.
+class Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c&#43;&#43;的BUG都是由这个引起的). 这个时候我们就会利用c&#43;&#43;的析构函数, 去自动释放这些变量. 在c&#43;&#43;11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2017-07-20T09:49:28+00:00">
+    <meta property="article:modified_time" content="2017-07-20T09:49:28+00:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang中defer, panic, recover用法">
+<meta name="twitter:description" content="昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出
+一. defer 用法
+为何会有defer这样的语法呢? 如果你之前是写C&#43;&#43;的话这样的代码, 你会经常看到.
+class Demo {
+public:
+	Demo() {
+		p = new int(10);
+	}
+	
+	~Demo() {
+		if (p) { delete(p); }
+	}
+private:
+	int *p = nullptr;
+}
+本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c&#43;&#43;的BUG都是由这个引起的). 这个时候我们就会利用c&#43;&#43;的析构函数, 去自动释放这些变量.  在c&#43;&#43;11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "golang中defer, panic, recover用法",
+      "item": "https://georgehao.github.io/posts/2017-07-20-golang_defer_panic_recover/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "golang中defer, panic, recover用法",
+  "name": "golang中defer, panic, recover用法",
+  "description": "昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出\n一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到.\nclass Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c++的BUG都是由这个引起的). 这个时候我们就会利用c++的析构函数, 去自动释放这些变量. 在c++11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "昨天谢大在群里发了一个golang面试题, 第一题就不会做了. 这题主要是考察defer, panic, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出\n一. defer 用法 为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到.\nclass Demo { public: Demo() { p = new int(10); } ~Demo() { if (p) { delete(p); } } private: int *p = nullptr; } 本来就是想要简单使用某个变量(比如, new出来的变量,文件句柄, mutex等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c++的BUG都是由这个引起的). 这个时候我们就会利用c++的析构函数, 去自动释放这些变量. 在c++11, boost专门为了这玩意制定出了智能指针, 说实话, 这玩意真心么有那么好用.\n在初接触到go时, 就被defer吸引住了, 要是c++也能这么写, 那就太爽了!\ndefer的特性: 在函数返回之前, 调用defer函数的操作, 简化函数的清理工作.\n使用defer关键字的时候, 有下面这些注意点:\n1. 在defer表达式确定的时候, defer修饰的函数(后面统称为defered函数)的参数也就确定了\nfunc argument() { i := 0 defer fmt.Println(i) i++ return } 2. 函数内可以有多个defered函数, 但是这些defered函数在函数返回时遵守后进先出的原则\nfunc LIFO() { for i := 0; i\u003c4; i++ { defer fmt.Print(i) } } 3. 函数命名的返回值跟defered函数一起使用 函数的返回值有可能被defer更改, 本质原因是return xxx语句并不是一条原子指令\nfunc f() (result int) { defer func() { result++ }() return 0 } func g() (r int) { t := 5 defer func() { t = t + 5 }() return t } func h() (r int) { defer func(r int) { r = r + 5 }(r) return 1 } 对于defered函数跟函数命名返回值一块使用的情况, 当无法判断返回值的时候, 需要对函数进行变形.\nfunc f(result int) { result = 0 func () { result++ }() return } 结果: 1\nfunc g() (r int) { t := 5 r = t func () { t = t + 5 } return } 结果: 5\nfunc h() (r int) { r = 1 func (r int) { r = r + 5 }(r) return } 结果: 1, 在func(r int) {...}中, 由于r是以值传递的方式进行的, 所以r的值不会改变.\ndefer涉及到所有的代码, 点击这里查看\n关于defer实现原理, 留到后面出个专题\n二. panic用法 Panic is a built-in function that stops the ordinary flow of control and begins panicking. When the function F calls panic, execution of F stops, any deferred functions in F are executed normally, and then F returns to its caller. To the caller, F then behaves like a call to panic. The process continues up the stack until all functions in the current goroutine have returned, at which point the program crashes. Panics can be initiated by invoking panic directly. They can also be caused by runtime errors, such as out-of-bounds array accesses.\npanic用法挺简单的, 上面这段引用是golang的官方说法. panic其实就是c++中的throw exception\npanic 是内建函数.panic会中断函数F的正常执行流程, 从F函数中跳出来, 跳回到F函数的调用者. 对于调用者来说, F看起来就是一个panic, 所以调用者会继续向上跳出, 直到当前goroutine返回. 在跳出的过程中, 进程会保持这个函数栈. 当goroutine退出时, 程序会crash.\n要注意的是, F函数中的defered函数会正常执行, 按照上面defer的规则.\n同时引起panic除了我们主动调用panic之外, 其他的任何运行时错误, 例如数组越界都会造成panic\n看下面一个例子\npackage main import ( \"fmt\" ) func main() { defer_call() } func defer_call() { defer func() { fmt.Println(\"打印前\") }() defer func() { fmt.Println(\"打印中\") }() defer func() { fmt.Println(\"打印后\") }() panic(\"触发异常\") fmt.Println(\"test\") } 结果:\n打印后 打印中 打印前 panic: 触发异常 goroutine 1 [running]: main.defer_call() /Users/wuling/go/src/github.com/georgehao/test/panic.go:15 +0xc0 main.main() /Users/wuling/go/src/github.com/georgehao/test/panic.go:8 +0x20 由这个例子, 我们看到程序没有打印test, 这就说明触发panic的函数defer_call从panic(\"触发异常\")跳了出来. 先执行defered函数, 然后抛出panic异常信息. defered还是按照FILO的规则调用. (使用Gogland IDE的同学要注意了, Gogland返回的panic异常信息跟defered函数的打印是无顺序的, 可能是Gogland的BUG)\n下面对上面的例子做下稍微改动\npackage main import ( \"fmt\" ) func main() { go defer_call() } func defer_call() { defer func() { fmt.Println(\"打印前\") }() defer func() { fmt.Println(\"打印中\") }() defer func() { fmt.Println(\"打印后\") }() panic(\"触发异常\") fmt.Println(\"test\") } 我们看程序结果: 没有任何输出, 而且程序也没有crash, 那是不是我们说了那么多, 是错了呢. 不, 我们再仔细想想, 是这为什么呢?\n是由于main``goroutine没有等defer_call goroutine返回就程序就结束了,程序当然不会crash. 在go defer_call()下再加一行time.Sleep(time.Minute)是不是效果就不一样了.\n其实想说的不是这个, 想说的是panic只会让当前的goroutine返回. 如果当前的goroutine没有去捕获这个panic的话, 那么程序就会crash.\n三. recover 用法 Recover is a built-in function that regains control of a panicking goroutine. Recover is only useful inside deferred functions. During normal execution, a call to recover will return nil and have no other effect. If the current goroutine is panicking, a call to recover will capture the value given to panic and resume normal execution.\nrecover也是一个内建函数. recover就是c++中的catch.\n不过需要注意的是:\nrecover如果想起作用的话, 必须在defered函数中使用. 在正常函数执行过程中, 调用recover没有任何作用, 他会返回nil. 如这样:fmt.Println(recover()) // nil 如果当前的goroutine panic了, 那么recover将会捕获这个panic的值, 并且让程序正常执行下去, 不会让程序crash. 举个栗子:\npackage main import \"fmt\" func recoverPanic() { func () { if r := recover(); r != nil { fmt.Println(\"recover value is\", r) } }() panic(\"exception\") } func main() { recoverPanic() } 这段代码有什么问题吗? 其实要是这么写的, recover没有任何作用, 因为recover必须在defered函数中才有作用. 点击这里查看正确的代码\n四. 综合的例子 官方的一个例子, 基本就是defer, panic, recover的用法了\npackage main import \"fmt\" func main() { f() fmt.Println(\"Returned normally from f.\") } func f() { defer func() { if r := recover(); r != nil { fmt.Println(\"Recovered in f\", r) } }() fmt.Println(\"Calling g.\") g(0) fmt.Println(\"Returned normally from g.\") } func g(i int) { if i \u003e 3 { fmt.Println(\"Panicking!\") panic(fmt.Sprintf(\"%v\", i)) } defer fmt.Println(\"Defer in g\", i) fmt.Println(\"Printing in g\", i) g(i + 1) } 程序输出:\nCalling g. Printing in g 0 Printing in g 1 Printing in g 2 Printing in g 3 Panicking! Defer in g 3 Defer in g 2 Defer in g 1 Defer in g 0 Recovered in f 4 Returned normally from f. 这里有个问题, 为什么 fmt.Println(\"Returned normally from g.\")没有打印, 而fmt.Println(\"Returned normally from f.\")打印了呢?\n先看下面这个例子, 只是对上面的例子, 移动了defered recover函数的位置:\npackage main import \"fmt\" func main() { f() fmt.Println(\"Returned normally from f.\") } func f() { fmt.Println(\"Calling g.\") g(0) fmt.Println(\"Returned normally from g.\") } func g(i int) { defer func() { if r := recover(); r != nil { fmt.Println(\"Recovered in f\", r) } }() if i \u003e 3 { fmt.Println(\"Panicking!\") panic(fmt.Sprintf(\"%v\", i)) } defer fmt.Println(\"Defer in g\", i) fmt.Println(\"Printing in g\", i) g(i + 1) } 是不是输出结果不一样了.\nCalling g. Printing in g 0 Printing in g 1 Printing in g 2 Printing in g 3 Panicking! Recovered in f 4 Defer in g 3 Defer in g 2 Defer in g 1 Defer in g 0 Returned normally from g. Returned normally from f. 由此, 我们可以看出, 在当前goroutine的中, recover会捕获recover所在的函数产生的的panic, 由于panic会让当前函数返回, 但是对于其调用者来说, 这个panic已经不存在了, 所以程序还是会按照正常的执行流程执行下去. 所以这个例子会打印出来 fmt.Println(\"Returned normally from g.\"), 而上面的那个却不会.\n参考链接 golang面试题 Defer, Panic, and Recover' defer关键字 Golang中defer、return、返回值之间执行顺序的坑 build-web-application-with-golang ",
+  "wordCount" : "3007",
+  "inLanguage": "zh",
+  "datePublished": "2017-07-20T09:49:28Z",
+  "dateModified": "2017-07-20T09:49:28Z",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2017-07-20-golang_defer_panic_recover/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      golang中defer, panic, recover用法
+    </h1>
+    <div class="post-meta"><span title='2017-07-20 09:49:28 +0000 +0000'>2017年7月20日</span>&nbsp;·&nbsp;<span>7 分钟</span>&nbsp;·&nbsp;<span>3007 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#一-defer-用法">一. defer 用法</a></li>
+    <li><a href="#二-panic用法">二. panic用法</a></li>
+    <li><a href="#三-recover-用法">三. recover 用法</a></li>
+    <li><a href="#四-综合的例子">四. 综合的例子</a></li>
+    <li><a href="#参考链接">参考链接</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>昨天谢大在群里发了一个<a href="https://zhuanlan.zhihu.com/p/26972862">golang面试题</a>, 第一题就不会做了. 这题主要是考察<code>defer</code>, <code>panic</code>, 于是各种谷歌, 就写下了这篇文章, 由于本人水平有限, 有哪些理解不到的地方, 请在下面留言指出</p>
+<h2 id="一-defer-用法">一. defer 用法<a hidden class="anchor" aria-hidden="true" href="#一-defer-用法">#</a></h2>
+<p>为何会有defer这样的语法呢? 如果你之前是写C++的话这样的代码, 你会经常看到.</p>
+<pre tabindex="0"><code>class Demo {
+public:
+	Demo() {
+		p = new int(10);
+	}
+	
+	~Demo() {
+		if (p) { delete(p); }
+	}
+private:
+	int *p = nullptr;
+}
+</code></pre><p>本来就是想要简单使用某个变量(比如, <code>new出来的变量</code>,<code>文件句柄</code>, <code>mutex</code>等等), 如果程序写的简单的话, 我们一般都会记得去释放这些变量, 但是程序会越写越复杂, 再加上各种函数之间的传递, 如果稍微不注意去释放这些变量, 内存泄漏就出来了(一般c/c++的BUG都是由这个引起的). 这个时候我们就会利用<code>c++</code>的析构函数, 去自动释放这些变量.  在<code>c++11</code>, <code>boost</code>专门为了这玩意制定出了<code>智能指针</code>, 说实话, 这玩意真心么有那么好用.</p>
+<p>在初接触到<code>go</code>时, 就被<code>defer</code>吸引住了, 要是<code>c++</code>也能这么写, 那就太爽了!</p>
+<p><strong><code>defer</code>的特性: 在函数返回之前, 调用defer函数的操作, 简化函数的清理工作.</strong></p>
+<p>使用<code>defer</code>关键字的时候, 有下面这些注意点:</p>
+<p><strong>1. 在<code>defer</code>表达式确定的时候, <code>defer</code>修饰的函数(后面统称为defered函数)的参数也就确定了</strong></p>
+<pre tabindex="0"><code>func argument() {
+	i := 0
+	defer fmt.Println(i)
+	i++
+	return
+}
+</code></pre><p><strong>2. 函数内可以有多个<code>defered</code>函数, 但是这些defered函数在函数返回时遵守<code>后进先出</code>的原则</strong></p>
+<pre tabindex="0"><code>func LIFO() {
+	for i := 0; i&lt;4; i++ {
+		defer fmt.Print(i)
+	}
+}
+</code></pre><p><strong>3. 函数命名的返回值跟<code>defered</code>函数一起使用</strong>
+函数的返回值有可能被<code>defer</code>更改, 本质原因是<code>return xxx</code>语句并不是一条原子指令</p>
+<pre tabindex="0"><code>func f() (result int) {
+    defer func() {
+        result++
+    }()
+    return 0
+}
+</code></pre><pre tabindex="0"><code>func g() (r int) {
+     t := 5
+     defer func() {
+       t = t + 5
+     }()
+     return t
+}
+</code></pre><pre tabindex="0"><code>func h() (r int) {
+    defer func(r int) {
+          r = r + 5
+    }(r)
+    return 1
+}
+</code></pre><p>对于<code>defered</code>函数跟函数命名返回值一块使用的情况, 当无法判断返回值的时候, 需要对函数进行变形.</p>
+<pre tabindex="0"><code>func f(result int) {
+	result = 0
+	func () {
+		result++
+	}()
+	return
+} 
+</code></pre><p>结果: 1</p>
+<pre tabindex="0"><code>func g() (r int) {
+	t := 5
+	r = t
+	func () {
+		t = t + 5
+	}
+	return
+}
+</code></pre><p>结果: 5</p>
+<pre tabindex="0"><code>func h() (r int) {
+	r = 1
+	func (r int) {
+	 	r = r + 5
+	}(r)
+	return
+}
+</code></pre><p>结果: 1, 在<code>func(r int) {...}</code>中, 由于<code>r</code>是以<code>值传递</code>的方式进行的, 所以r的值不会改变.</p>
+<p>defer涉及到所有的代码, <a href="https://play.golang.org/p/VxSxBWyYnm">点击这里查看</a></p>
+<p>关于<code>defer</code>实现原理, 留到后面出个专题</p>
+<h2 id="二-panic用法">二. panic用法<a hidden class="anchor" aria-hidden="true" href="#二-panic用法">#</a></h2>
+<blockquote>
+<p>Panic is a built-in function that stops the ordinary flow of control and begins panicking. When the function F calls panic, execution of F stops, any deferred functions in F are executed normally, and then F returns to its caller. To the caller, F then behaves like a call to panic. The process continues up the stack until all functions in the current goroutine have returned, at which point the program crashes. Panics can be initiated by invoking panic directly. They can also be caused by runtime errors, such as out-of-bounds array accesses.</p>
+</blockquote>
+<p><code>panic</code>用法挺简单的, 上面这段引用是<a href="https://blog.golang.org/defer-panic-and-recover">golang</a>的官方说法. <code>panic</code>其实就是<code>c++</code>中的<code>throw exception</code></p>
+<p><code>panic </code>是内建函数.<code>panic</code>会中断函数<code>F</code>的正常执行流程, 从<code>F</code>函数中跳出来, 跳回到<code>F</code>函数的调用者. 对于调用者来说, <code>F</code>看起来就是一个<code>panic</code>, 所以调用者会继续向上跳出, 直到当前<code>goroutine</code>返回. 在跳出的过程中, 进程会保持这个函数栈. 当<code>goroutine</code>退出时, 程序会<code>crash</code>.</p>
+<p>要注意的是, <code>F</code>函数中的<code>defered</code>函数会正常执行, 按照上面<code>defer</code>的规则.</p>
+<p>同时引起<code>panic</code>除了我们主动调用<code>panic</code>之外, 其他的任何运行时错误, 例如数组越界都会造成<code>panic</code></p>
+<p>看下面一个例子</p>
+<pre tabindex="0"><code>package main
+
+import (
+	&#34;fmt&#34;
+)
+
+func main() {
+	defer_call()
+}
+
+func defer_call() {
+	defer func() { fmt.Println(&#34;打印前&#34;) }()
+	defer func() { fmt.Println(&#34;打印中&#34;) }()
+	defer func() { fmt.Println(&#34;打印后&#34;) }()
+	panic(&#34;触发异常&#34;)
+	fmt.Println(&#34;test&#34;)
+}
+</code></pre><blockquote>
+<p>结果:</p>
+</blockquote>
+<pre tabindex="0"><code>打印后
+打印中
+打印前
+panic: 触发异常
+goroutine 1 [running]:
+main.defer_call()
+	/Users/wuling/go/src/github.com/georgehao/test/panic.go:15 +0xc0
+main.main()
+	/Users/wuling/go/src/github.com/georgehao/test/panic.go:8 +0x20
+</code></pre><p>由这个例子, 我们看到程序没有打印<code>test</code>, 这就说明触发<code>panic</code>的函数<code>defer_call</code>从<code>panic(&quot;触发异常&quot;)</code>跳了出来. 先执行<code>defered</code>函数, 然后抛出<code>panic</code>异常信息. <code>defered</code>还是按照<code>FILO</code>的规则调用.  (使用<code>Gogland</code> IDE的同学要注意了, <code>Gogland</code>返回的<code>panic</code>异常信息跟<code>defered</code>函数的打印是无顺序的, 可能是<code>Gogland</code>的BUG)</p>
+<p>下面对上面的例子做下稍微改动</p>
+<pre tabindex="0"><code>package main
+
+import (
+	&#34;fmt&#34;
+)
+
+func main() {
+	go defer_call()
+}
+
+func defer_call() {
+	defer func() { fmt.Println(&#34;打印前&#34;) }()
+	defer func() { fmt.Println(&#34;打印中&#34;) }()
+	defer func() { fmt.Println(&#34;打印后&#34;) }()
+	panic(&#34;触发异常&#34;)
+	fmt.Println(&#34;test&#34;)
+}
+</code></pre><p>我们看程序结果: 没有任何输出, 而且程序也没有<code>crash</code>, 那是不是我们说了那么多, 是错了呢. 不, 我们再仔细想想, 是这为什么呢?</p>
+<p>是由于<code>main``goroutine</code>没有等<code>defer_call goroutine</code>返回就程序就结束了,程序当然不会<code>crash</code>. 在<code>go defer_call()</code>下再加一行<code>time.Sleep(time.Minute</code>)是不是效果就不一样了.</p>
+<p>其实想说的不是这个, 想说的是<code>panic</code>只会让当前的<code>goroutine</code>返回. 如果当前的<code>goroutine</code>没有去捕获这个<code>panic</code>的话, 那么程序就会<code>crash</code>.</p>
+<h2 id="三-recover-用法">三. recover 用法<a hidden class="anchor" aria-hidden="true" href="#三-recover-用法">#</a></h2>
+<blockquote>
+<p>Recover is a built-in function that regains control of a panicking goroutine. Recover is only useful inside deferred functions. During normal execution, a call to recover will return nil and have no other effect. If the current goroutine is panicking, a call to recover will capture the value given to panic and resume normal execution.</p>
+</blockquote>
+<p><code>recover</code>也是一个内建函数. <code>recover</code>就是<code>c++</code>中的<code>catch</code>.</p>
+<p>不过需要注意的是:</p>
+<ol>
+<li><code>recover</code>如果想起作用的话, 必须在<code>defered</code>函数中使用.</li>
+<li>在正常函数执行过程中, 调用<code>recover</code>没有任何作用, 他会返回<code>nil</code>. 如这样:<code>fmt.Println(recover()) // nil</code></li>
+<li>如果当前的<code>goroutine</code> <code>panic</code>了, 那么<code>recover</code>将会捕获这个<code>panic</code>的值, 并且让程序正常执行下去, 不会让程序<code>crash</code>.</li>
+</ol>
+<p><a href="https://play.golang.org/p/F5Kfl9TvaW">举个栗子</a>:</p>
+<pre tabindex="0"><code>package main
+
+import &#34;fmt&#34;
+
+func recoverPanic() {
+	func () {
+		if r := recover(); r != nil {
+			fmt.Println(&#34;recover value is&#34;, r)
+		}
+	}()
+
+	panic(&#34;exception&#34;)
+}
+
+func main()  {
+	recoverPanic()
+}
+</code></pre><p>这段代码有什么问题吗?
+其实要是这么写的, <code>recover</code>没有任何作用, 因为<code>recover</code>必须在<code>defered</code>函数中才有作用.
+<a href="https://play.golang.org/p/1n2PBJOKEt">点击这里查看正确的代码</a></p>
+<h2 id="四-综合的例子">四. 综合的例子<a hidden class="anchor" aria-hidden="true" href="#四-综合的例子">#</a></h2>
+<p>官方的一个例子, 基本就是<code>defer</code>, <code>panic</code>, <code>recover</code>的用法了</p>
+<pre tabindex="0"><code>package main
+
+import &#34;fmt&#34;
+
+func main() {
+    f()
+    fmt.Println(&#34;Returned normally from f.&#34;)
+}
+
+func f() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println(&#34;Recovered in f&#34;, r)
+        }
+    }()
+    fmt.Println(&#34;Calling g.&#34;)
+    g(0)
+    fmt.Println(&#34;Returned normally from g.&#34;)
+}
+
+func g(i int) {
+    if i &gt; 3 {
+        fmt.Println(&#34;Panicking!&#34;)
+        panic(fmt.Sprintf(&#34;%v&#34;, i))
+    }
+    defer fmt.Println(&#34;Defer in g&#34;, i)
+    fmt.Println(&#34;Printing in g&#34;, i)
+    g(i + 1)
+}
+</code></pre><blockquote>
+<p>程序输出:</p>
+</blockquote>
+<pre tabindex="0"><code>Calling g.
+Printing in g 0
+Printing in g 1
+Printing in g 2
+Printing in g 3
+Panicking!
+Defer in g 3
+Defer in g 2
+Defer in g 1
+Defer in g 0
+Recovered in f 4
+Returned normally from f.
+</code></pre><p><strong>这里有个问题, 为什么<code> fmt.Println(&quot;Returned normally from g.&quot;)</code>没有打印, 而<code>fmt.Println(&quot;Returned normally from f.&quot;)</code>打印了呢?</strong></p>
+<p>先看下面这个例子, 只是对上面的例子, 移动了<code>defered recover</code>函数的位置:</p>
+<pre tabindex="0"><code>package main
+
+import &#34;fmt&#34;
+
+func main() {
+    f()
+    fmt.Println(&#34;Returned normally from f.&#34;)
+}
+
+func f() {
+    fmt.Println(&#34;Calling g.&#34;)
+    g(0)
+    fmt.Println(&#34;Returned normally from g.&#34;)
+}
+
+func g(i int) {
+	defer func() {
+        if r := recover(); r != nil {
+            fmt.Println(&#34;Recovered in f&#34;, r)
+        }
+    }()
+    if i &gt; 3 {
+        fmt.Println(&#34;Panicking!&#34;)
+        panic(fmt.Sprintf(&#34;%v&#34;, i))
+    }
+    defer fmt.Println(&#34;Defer in g&#34;, i)
+    fmt.Println(&#34;Printing in g&#34;, i)
+    g(i + 1)
+}
+</code></pre><p>是不是输出结果不一样了.</p>
+<pre tabindex="0"><code>Calling g.
+Printing in g 0
+Printing in g 1
+Printing in g 2
+Printing in g 3
+Panicking!
+Recovered in f 4
+Defer in g 3
+Defer in g 2
+Defer in g 1
+Defer in g 0
+Returned normally from g.
+Returned normally from f.
+</code></pre><p>由此, 我们可以看出, 在当前<code>goroutine</code>的中, <code>recover</code>会捕获<code>recover</code>所在的函数产生的的<code>panic</code>, 由于<code>panic</code>会让当前函数返回, 但是对于其调用者来说, 这个<code>panic</code>已经不存在了, 所以程序还是会按照正常的执行流程执行下去. 所以这个例子会打印出来<code> fmt.Println(&quot;Returned normally from g.&quot;)</code>, 而上面的那个却不会.</p>
+<h2 id="参考链接">参考链接<a hidden class="anchor" aria-hidden="true" href="#参考链接">#</a></h2>
+<ol>
+<li><a href="https://zhuanlan.zhihu.com/p/26972862">golang面试题</a></li>
+<li><a href="https://blog.golang.org/defer-panic-and-recover">Defer, Panic, and Recover</a>'</li>
+<li><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/03.4.html">defer关键字</a></li>
+<li><a href="https://my.oschina.net/henrylee2cn/blog/505535">Golang中defer、return、返回值之间执行顺序的坑</a></li>
+<li><a href="https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/02.3.md">build-web-application-with-golang</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on x"
+            href="https://x.com/intent/tweet/?text=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f&amp;hashtags=">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f&amp;title=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95&amp;summary=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f&title=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on whatsapp"
+            href="https://api.whatsapp.com/send?text=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on telegram"
+            href="https://telegram.me/share/url?text=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share golang中defer, panic, recover用法 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=golang%e4%b8%addefer%2c%20panic%2c%20recover%e7%94%a8%e6%b3%95&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2017-07-20-golang_defer_panic_recover%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

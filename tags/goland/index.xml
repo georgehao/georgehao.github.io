@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Goland on HHFCodeRv</title>
+    <link>https://georgehao.github.io/tags/goland/</link>
+    <description>Recent content in Goland on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Sat, 02 Oct 2021 20:27:21 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/tags/goland/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>这些 Goland 技巧，学会开发效率翻倍</title>
+      <link>https://georgehao.github.io/posts/2021-10-02-goland2/</link>
+      <pubDate>Sat, 02 Oct 2021 20:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2021-10-02-goland2/</guid>
+      <description>&lt;p&gt;hi, 大家好，我是 hhf。&lt;/p&gt;
+&lt;p&gt;《Goland 这些实操技巧，你可能还不会！》介绍了日常开发中一些比较好用的技巧。本篇文章继续介绍一些其他比较好用的技巧。&lt;/p&gt;
+&lt;h2 id=&#34;自定义结构-tag&#34;&gt;自定义结构 tag&lt;/h2&gt;
+&lt;p&gt;Goland 一个很好用的功能：tag 自动补全。在 struct 结构里，可以在字段类型后敲入 json 或 xml 向结构添加标记。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/tag.gif&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Goland 默认的 json 都是下滑线格式的。但是有的时候会有特殊的需求。&lt;/p&gt;
+&lt;p&gt;举个例子：正常情况下，公司对接口返回值字段有统一的要求，大部分情况下 json 格式的返回值以下滑线居多，但是也有驼峰格式的。如果遇到这种情况下，该如何调整 tag 自动补全呢？&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Goland 这些实操技巧，你可能还不会！</title>
+      <link>https://georgehao.github.io/posts/2021-10-02-goland1/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2021-10-02-goland1/</guid>
+      <description>&lt;p&gt;工欲善其事必先利其器。对于开发工程师同样如此，一个合适的开发工具能够有效提升我们的开发效率和定位问题的能力。&lt;/p&gt;
+&lt;p&gt;Golang IDE 被 Gopher 接受的其实不太多，Goland 和 VSCode 应该是占比重最大的。vim-go 真心就不推荐了，入门曲线太过陡峭，太过华而不实（vim 党不要喷我），我们就写程序而已，何苦为难自己呢。&lt;/p&gt;
+&lt;p&gt;我日常开发中，Goland，Vscode 一般会配合使用。对于 VsCode 来说，我唯一觉得不方便的是 VSCode 的 Debug 功能，配置起来麻烦，而且总有种很卡的感觉。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>开发中的坑2：MQ 也能做 RPC 调用？</title>
+      <link>https://georgehao.github.io/posts/2021-10-01-mq-rpc/</link>
+      <pubDate>Fri, 01 Oct 2021 23:27:21 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2021-10-01-mq-rpc/</guid>
+      <description>&lt;p&gt;hi, 大家好，我是 haohongfan。&lt;/p&gt;
+&lt;p&gt;最近浏览 &lt;a href=&#34;https://www.toutiao.com/w/a1702697615869956/&#34; title=&#34;帖子&#34;&gt;帖子&lt;/a&gt; 的时候看到一个有意思的吐槽。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/mq_rpc100.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;大概意思是架构师没有选用 RPC 框架来做服务间调用，而选择用 MQ 来代替。是不是很意外？&lt;/p&gt;
+&lt;p&gt;当然不出意外的，评论区炸了！&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://cdn.jsdelivr.net/gh/georgehao/img/mq_rpc_haojiah.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;现在提出一些疑问：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;这个架构师的做法对吗 ？&lt;/li&gt;
+&lt;li&gt;MQ 是否能做 RPC 调用 ？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;rpc-框架的职责&#34;&gt;RPC 框架的职责&lt;/h2&gt;
+&lt;p&gt;回答上面问题之前，稍微捋一下 RPC 框架。目前市面上比较流行的 RPC 框架其实并不多。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Java: SpringCloud，Dubbo 等&lt;/li&gt;
+&lt;li&gt;Go: Dubbogo，go-micro，rpcx，go-zero 等&lt;/li&gt;
+&lt;li&gt;其他：Thrift，gRPC 等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当然还有其他的一些框架，这里就不再罗列。虽说 RPC 多如牛毛，但是大家干的事情基本都差不多，都是稳定，高效、准确的进行服务间远程调用。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Golang是否真的没有指针运算? | HHFCodeRv</title>
+<meta name="keywords" content="golang, unsafe">
+<meta name="description" content="答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)
+func main()  {
+	a1 := []int{1, 2, 3}
+	p1 := &amp;a1[0]
+	fmt.Println(reflect.TypeOf(p1)) // *int
+	fmt.Println(&#34;p1: &#34;, *p1) // 1
+	fmt.Printf(&#34;p1 address:%p\n&#34;, p1) // 0xc00009a000
+	p1 = p1 &#43; 1
+}
+invalid operation: p1 &#43; 1 (mismatched types *int and int)
+C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题)
+#include&lt;stdio.h&gt;
+void main()
+{
+　　int a[5]={1,2,3,4,5};  
+　　int *ptr=(int *)(&amp;a&#43;1);  
+　　printf(&#34;%d,%d&#34;,*(a&#43;1),*(ptr-1));  
+}
+这题的结果是: 2和5
+可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2019-07-22-golang-pointer/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2019-07-22-golang-pointer/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2019-07-22-golang-pointer/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Golang是否真的没有指针运算?">
+  <meta property="og:description" content="答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)
+func main() { a1 := []int{1, 2, 3} p1 := &amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(&#34;p1: &#34;, *p1) // 1 fmt.Printf(&#34;p1 address:%p\n&#34;, p1) // 0xc00009a000 p1 = p1 &#43; 1 } invalid operation: p1 &#43; 1 (mismatched types *int and int) C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题)
+#include&lt;stdio.h&gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(&amp;a&#43;1); printf(&#34;%d,%d&#34;,*(a&#43;1),*(ptr-1)); } 这题的结果是: 2和5
+可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-07-22T11:48:24+08:00">
+    <meta property="article:modified_time" content="2019-07-22T11:48:24+08:00">
+    <meta property="article:tag" content="Golang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang是否真的没有指针运算?">
+<meta name="twitter:description" content="答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)
+func main()  {
+	a1 := []int{1, 2, 3}
+	p1 := &amp;a1[0]
+	fmt.Println(reflect.TypeOf(p1)) // *int
+	fmt.Println(&#34;p1: &#34;, *p1) // 1
+	fmt.Printf(&#34;p1 address:%p\n&#34;, p1) // 0xc00009a000
+	p1 = p1 &#43; 1
+}
+invalid operation: p1 &#43; 1 (mismatched types *int and int)
+C或者C&#43;&#43;转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C&#43;&#43;的时候, 基本每家公司的笔试题上都会有这道题)
+#include&lt;stdio.h&gt;
+void main()
+{
+　　int a[5]={1,2,3,4,5};  
+　　int *ptr=(int *)(&amp;a&#43;1);  
+　　printf(&#34;%d,%d&#34;,*(a&#43;1),*(ptr-1));  
+}
+这题的结果是: 2和5
+可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Golang是否真的没有指针运算?",
+      "item": "https://georgehao.github.io/posts/2019-07-22-golang-pointer/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Golang是否真的没有指针运算?",
+  "name": "Golang是否真的没有指针运算?",
+  "description": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)\nfunc main() { a1 := []int{1, 2, 3} p1 := \u0026amp;a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(\u0026#34;p1: \u0026#34;, *p1) // 1 fmt.Printf(\u0026#34;p1 address:%p\\n\u0026#34;, p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题)\n#include\u0026lt;stdio.h\u0026gt; void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026amp;a+1); printf(\u0026#34;%d,%d\u0026#34;,*(a+1),*(ptr-1)); } 这题的结果是: 2和5\n可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能\n",
+  "keywords": [
+    "golang", "unsafe"
+  ],
+  "articleBody": "答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)\nfunc main() { a1 := []int{1, 2, 3} p1 := \u0026a1[0] fmt.Println(reflect.TypeOf(p1)) // *int fmt.Println(\"p1: \", *p1) // 1 fmt.Printf(\"p1 address:%p\\n\", p1) // 0xc00009a000 p1 = p1 + 1 } invalid operation: p1 + 1 (mismatched types *int and int) C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题)\n#include void main() { int a[5]={1,2,3,4,5}; int *ptr=(int *)(\u0026a+1); printf(\"%d,%d\",*(a+1),*(ptr-1)); } 这题的结果是: 2和5\n可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了unsafe包, 能够实现同样的功能\nUnsafe Pointer type ArbitraryType int type Pointer *ArbitraryType 这里特别要注意ArbitraryType在这里只起到文档作用, 不是代表是真正的int. 比如: Sizeof等相关的函数可以接受任意类型的变量, 假如按照int类型来解释, 基本就解释不通了. 官方文档特别提示这个\nArbitraryType is here for the purposes of documentation only and is not actually part of the unsafe package. It represents the type of an arbitrary Go expression. a1 := 3.6 fmt.Println(unsafe.Pointer(\u0026a1)) // 0xc000014078 a2 := 3 fmt.Println(unsafe.Pointer(\u0026a2)) // 0xc00007a008 从这里可以看到Pointer可以指向任意类型的变量(跟C的void*类似)\n使用Pointer要注意下面4条准则\n任何类型的指针值都可以转换为Pointer // unsafe.Pointer(\u0026a1) Pointer可以转换为任何类型的指针值 // (*float32)(unsafe.Pointer(numPointer)) uintptr可以转换为 Pointer // unsafe.Pointer(uintptr(nPointer) + + unsafe.Sizeof(\u0026a) * 3) Pointer可以转换为 uintptr // uintptr(unsafe.Pointer(numPointer)) uintptr type uintptr uintptr uintptr 是一个整数类型，它足够大，可以存储. 只有将Pointer转换成uintptr才能进行指针的相关操作\n但下面的代码要注意, 这种用法是错误的\ntmp := uintptr(unsafe.Pointer(\u0026x)) + unsafe.Offsetof(x.b) pb := (*int16)(unsafe.Pointer(tmp)) *pb = 42 uintptr是可以用于指针运算的，但是GC并不把uintptr当做指针，所以uintptr不能持有对象, 可能会被GC回收, 导致出现无法预知的错误. Pointer指向一个对象时, GC是不会回收这个内存的.\n相关函数 func Sizeof(x ArbitraryType) uintptr func Offsetof(x ArbitraryType) uintptr func Alignof(x ArbitraryType) uintptr Sizeof 返回类型x所占据的字节数, 但是却不包括x所引用的内存. 例如: 对于一个指针，函数返回的大小为8字节（64位机上），一个slice的大小则为slice header的大小\nvar a int32 = 10 t := unsafe.Sizeof(a) fmt.Println(t) var b string = \"test\" fmt.Println(unsafe.Sizeof(b)) type aa struct { B bool C uint64 } c := aa{} fmt.Println(unsafe.Sizeof(c)) type bb struct { B *bool } c1 := bb{} fmt.Println(unsafe.Sizeof(c1)) 4 // 这个没啥说的, int32在64位机器上占4个字节 16 // Sizeof(string)占计算string header的大小, struct string { uint8 *str; int len;} 16 // 这个涉及到内存对齐的问题(C, C++同学是不是又想到曾经虐我们千百遍的面试题了...). 内存对齐的问题下面再说 8 // 指针占8个字节(64位机器) Offsetof 返回结构体中某个字段的偏移量, 这个字段必须是structValue.field形式. 也就是返回结构体变量的开始位置到那个字段的开始位置之间字节数.\ntype aa struct { B bool C uint64 } c := aa{} fmt.Println(unsafe.Offsetof(c.B), unsafe.Offsetof(c.C)) B:0 C:8 注意这里C:8是不是结果错了? 其实不然, 这是因为涉及到内存对齐的问题\nAlignof 这个函数返回内存对齐时的对齐值, 这个跟内存对齐有关\ntype Part1 struct { a bool b int32 c int8 d int64 e byte } part1 := Part1{} fmt.Printf(\"part1 size: %d, align: %d\\n\", unsafe.Sizeof(part1), unsafe.Alignof(part1)) part1 size: 32, align: 8 内存对齐 关于为什么要内存对齐, 就是为了加快内存的存取速度, 用空间换时间的做法. 我们不需要太过关注这个, 就大概知道golang有这么一个性质.\n不同平台类型T内存大小和对齐值都是不一样的. 具体使用的时候要按照自己的本机实际情况为准. 不过大部分面试题或者我们讨论的时候都是按照64位进行的\nfmt.Printf(\"bool: %d\\n\", unsafe.Alignof(bool(true))) fmt.Printf(\"int32: %d\\n\", unsafe.Alignof(int32(0))) fmt.Printf(\"int8: %d\\n\", unsafe.Alignof(int8(0))) fmt.Printf(\"int64: %d\\n\", unsafe.Alignof(int64(0))) fmt.Printf(\"byte: %d\\n\", unsafe.Alignof(byte(0))) fmt.Printf(\"string: %d\\n\", unsafe.Alignof(\"xxx\")) fmt.Printf(\"map: %d\\n\", unsafe.Alignof(map[string]string{})) bool: 1 int32: 4 int8: 1 int64: 8 byte: 1 string: 8 map: 8 不只是unsafe.Alignof可以计算内存对齐值, reflect.TypeOf(bool(true)).Align())同样可以\n关于普通变量的对齐没啥说的, 就是上面代码那个样子. 但是涉及结构体就变得比较复杂了\ntype Part1 struct { a bool // 1 b int32 // 4 c int8 // 1 d int64 // 8 e byte // 1 } j part1 := Part1{} fmt.Printf(\"part1 size: %d\\n\", unsafe.Sizeof(part1)) 结果是多少呢? 是不是1+4+1+8+1 = 15, 结果并不是. 下面具体分析\n对齐规则 结构体的成员变量，第一个成员变量的偏移量为 0。往后的每个成员变量的对齐值必须为编译器默认对齐长度（#pragma pack(n)）或当前成员变量类型的长度（unsafe.Sizeof），取最小值作为当前类型的对齐值。其偏移量必须为对齐值的整数倍 结构体本身，对齐值必须为编译器默认对齐长度（#pragma pack(n)）或结构体的所有成员变量类型中的最大长度，取最大数的最小整数倍作为对齐值 结合以上两点，可得知若编译器默认对齐长度（#pragma pack(n)）超过结构体内成员变量的类型最大长度时，默认对齐长度是没有任何意义的 首先我们要知道struct, slice内存都是连续的\n成员 类型 默认对齐值 当前偏移量 解析 内存布局 a bool 1 0 第一个成员的偏移量是0, 占用1位 a b int32 4 1 根据规则1, 对齐值是当前成员类型的对齐值, 所以偏移量是4的整数倍, 所以需要先补3位(2-4), 再第5位开始填充 axxx|bbbb c int8 1 8 根据规则1, 偏移量是对齐值的整数倍, 8/1 = 8, 故不需要偏移, 从第9位开始填充1位 axxx|bbbb|c d int64 8 9 根据规则1, 偏移量是对齐值的整数倍, 故需要先补7位(9-16), 从17位开始填充8位 axxx|bbbb|cxxx|xxxx| dddd|dddd e byte 1 24 根据规则1, 24/1= 24, 不需要偏移, 从25位开始填充 axxx|bbbb|cxxx|xxxx| dddd|dddd|e 最终调整 struct 8 25 根据规则2, 结构体的的对齐值是8, 由于目前的偏移量是25, 不是8的整数倍, 故需要填充至8的最小整数倍, 同时比25大, 故是32 axxx|bbbb|cxxx|xxxx|dddd|dddd|exxx|xxxx 有的时候我们调整机构体字段的顺序是可以节省内存的\ntype Part1 struct { a bool b int32 c int8 d int64 e byte } type Part2 struct { e byte c int8 a bool b int32 d int64 } func main() { part1 := Part1{} part2 := Part2{} fmt.Printf(\"part1 size: %d, align: %d\\n\", unsafe.Sizeof(part1), unsafe.Alignof(part1)) fmt.Printf(\"part2 size: %d, align: %d\\n\", unsafe.Sizeof(part2), unsafe.Alignof(part2)) } part1 size: 32, align: 8 part2 size: 16, align: 8 看到这里, 基本就解释了Sizeof, Offsetof涉及到内存对齐的问题. 这里详细解释一下\ntype aa struct { B bool C uint64 } c := aa{} fmt.Println(unsafe.Sizeof(c)) fmt.Println(unsafe.Offsetof(c.B), unsafe.Offsetof(c.C)) 成员 类型 默认对齐值 偏移量 解析 内存布局 B bool 1 0 第一个成员的偏移量是0, 占用1位 B C uint64 8 1 由于偏移量必须是对齐值的整数倍, 所以需要补位(2-8), 从9位开始填充 Bxxx|xxxx|CCCC|CCCC 所以结果是: unsafe.Sizeof(c) = 16, unsafe.Offsetof(c.C) = 8\n关于更详细关于内存对齐, 请参考煎鱼博客\n实际使用场景 转换类型 func Float64bits(f float64) uint64 { return *(*uint64)(unsafe.Pointer(\u0026f)) } 计算偏移量 func main() { type aa struct { B bool C uint64 } c := aa{} fmt.Println(c) aac := (*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(\u0026c)) + unsafe.Offsetof(c.C))) *aac = 10 fmt.Println(c) } {false 0} {false 10} 验证slice子切片和母切片共享底层数组 总看到slice子切片和母切片共享底层数组, 下面我们用实际的代码验证一下\nfunc main() { var s1 = []int{1, 2, 3, 4, 5, 6, 7} var s2 = s1[2:5] s1SliceArrayPointer := unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(\u0026s1))) fmt.Println(\"s1[0]:\", *(*int)(s1SliceArrayPointer)) fmt.Println(\"s1 address:\", s1SliceArrayPointer) s2SliceArrayPointer := unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(\u0026s2))) fmt.Println(\"s2[0]:\", *(*int)(s2SliceArrayPointer)) fmt.Println(\"s2 address:\", s2SliceArrayPointer) offset2Pointer := unsafe.Pointer(uintptr(s1SliceArrayPointer) + unsafe.Sizeof(\u0026s1[0])*2) fmt.Println(\"offset s1[2]:\", *(*int)(offset2Pointer)) fmt.Println(\"offset s1 address:\", offset2Pointer) } s1[0]: 1 s1 address: 0xc00001a040 s2[0]: 3 s2 address: 0xc00001a050 offset s1[2]: 3 offset s1 address: 0xc00001a050 前提是要先知道slice的结构体\n// runtime/slice.go type slice struct { array unsafe.Pointer // 元素指针 len int // 长度 cap int // 容量 } unsafe.Pointer(\u0026s1) 取到s1的首地址的指针, 其实也就是s1 array位置的指针 unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(\u0026s1))) 将s1 array存放的值取出来, 也就是底层数组的首元素的地址 unsafe.Pointer(uintptr(s1SliceArrayPointer) + unsafe.Sizeof(\u0026s1[0])*2) 向后偏移2位, 也就是取到3的位置 我们看到s2的首元素的地址和s1偏移2个位置的地址都是0xc00001a050, 所以也就证明确实是同一个底层数组\n结论 golang指针不能参与计算, 但是unsafe包可以\nunsafe包绕过了Go的类型系统，达到直接操作内存的目的，使用它有一定的风险性, 正常事情下, 不建议开发的代码中大量引入这个. 但是我们需要知道有这样的黑科技存在!\n参考资料 官方文档 码农桃花源-深度解密Go语言之unsafe 煎鱼-有点不安全却又一亮的 Go unsafe.Pointer 煎鱼-在 Go 中恰到好处的内存对齐 ",
+  "wordCount" : "2841",
+  "inLanguage": "zh",
+  "datePublished": "2019-07-22T11:48:24+08:00",
+  "dateModified": "2019-07-22T11:48:24+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2019-07-22-golang-pointer/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Golang是否真的没有指针运算?
+    </h1>
+    <div class="post-meta"><span title='2019-07-22 11:48:24 +0800 CST'>2019年7月22日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2841 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#unsafe">Unsafe</a>
+      <ul>
+        <li><a href="#pointer">Pointer</a></li>
+        <li><a href="#uintptr">uintptr</a></li>
+        <li><a href="#相关函数">相关函数</a>
+          <ul>
+            <li><a href="#sizeof">Sizeof</a></li>
+            <li><a href="#offsetof">Offsetof</a></li>
+            <li><a href="#alignof">Alignof</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#内存对齐">内存对齐</a>
+      <ul>
+        <li><a href="#对齐规则">对齐规则</a></li>
+      </ul>
+    </li>
+    <li><a href="#实际使用场景">实际使用场景</a>
+      <ul>
+        <li><a href="#转换类型">转换类型</a></li>
+        <li><a href="#计算偏移量">计算偏移量</a></li>
+        <li><a href="#验证slice子切片和母切片共享底层数组">验证slice子切片和母切片共享底层数组</a></li>
+      </ul>
+    </li>
+    <li><a href="#结论">结论</a>
+      <ul>
+        <li><a href="#参考资料">参考资料</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>答案是肯定的: 没有指针运算(哈哈, 别着急慢慢往后面看)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w">  </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">a1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">p1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">a1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">reflect</span><span class="p">.</span><span class="nf">TypeOf</span><span class="p">(</span><span class="nx">p1</span><span class="p">))</span><span class="w"> </span><span class="c1">// *int</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;p1: &#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="nx">p1</span><span class="p">)</span><span class="w"> </span><span class="c1">// 1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;p1 address:%p\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">p1</span><span class="p">)</span><span class="w"> </span><span class="c1">// 0xc00009a000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">p1</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">p1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>invalid operation: p1 + 1 (mismatched types *int and int)
+</code></pre><p>C或者C++转golang同学就高兴了, 再也不用面试的时候去面对下面这道题了(面试C++的时候, 基本每家公司的笔试题上都会有这道题)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span><span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">　　<span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">};</span>  
+</span></span><span class="line"><span class="cl">　　<span class="kt">int</span> <span class="o">*</span><span class="n">ptr</span><span class="o">=</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)(</span><span class="o">&amp;</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>  
+</span></span><span class="line"><span class="cl">　　<span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%d,%d&#34;</span><span class="p">,</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="o">*</span><span class="p">(</span><span class="n">ptr</span><span class="o">-</span><span class="mi">1</span><span class="p">));</span>  
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这题的结果是: 2和5</p>
+<p>可惜高兴的太早了. golang虽说指针变量不能直接参与指针运算, 但是却提供了<code>unsafe</code>包, 能够实现同样的功能</p>
+<h2 id="unsafe">Unsafe<a hidden class="anchor" aria-hidden="true" href="#unsafe">#</a></h2>
+<h3 id="pointer">Pointer<a hidden class="anchor" aria-hidden="true" href="#pointer">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">ArbitraryType</span><span class="w"> </span><span class="kt">int</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">Pointer</span><span class="w"> </span><span class="o">*</span><span class="nx">ArbitraryType</span><span class="w">
+</span></span></span></code></pre></div><p><strong>这里特别要注意ArbitraryType在这里只起到文档作用, 不是代表是真正的int</strong>. 比如: <code>Sizeof</code>等相关的函数可以接受任意类型的变量, 假如按照int类型来解释, 基本就解释不通了. 官方文档特别提示这个</p>
+<pre tabindex="0"><code>ArbitraryType is here for the purposes of documentation only and is not actually part of the unsafe package.
+It represents the type of an arbitrary Go expression.
+</code></pre><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="nx">a1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">3.6</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">a1</span><span class="p">))</span><span class="w"> </span><span class="c1">// 0xc000014078</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">a2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">a2</span><span class="p">))</span><span class="w"> </span><span class="c1">// 0xc00007a008</span><span class="w">
+</span></span></span></code></pre></div><p>从这里可以看到Pointer可以指向任意类型的变量(跟C的void*类似)</p>
+<p>使用Pointer要注意下面4条准则</p>
+<ul>
+<li>任何类型的指针值都可以转换为Pointer // unsafe.Pointer(&amp;a1)</li>
+<li>Pointer可以转换为任何类型的指针值   // (*float32)(unsafe.Pointer(numPointer))</li>
+<li>uintptr可以转换为 Pointer        // unsafe.Pointer(uintptr(nPointer) + + unsafe.Sizeof(&amp;a) * 3)</li>
+<li>Pointer可以转换为 uintptr        // uintptr(unsafe.Pointer(numPointer))</li>
+</ul>
+<h3 id="uintptr">uintptr<a hidden class="anchor" aria-hidden="true" href="#uintptr">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="kt">uintptr</span><span class="w"> </span><span class="kt">uintptr</span><span class="w">
+</span></span></span></code></pre></div><p>uintptr 是一个整数类型，它足够大，可以存储. 只有将Pointer转换成uintptr才能进行指针的相关操作</p>
+<p>但下面的代码要注意, 这种用法是错误的</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="nx">tmp</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uintptr</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">x</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">x</span><span class="p">.</span><span class="nx">b</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">pb</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="kt">int16</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">tmp</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">*</span><span class="nx">pb</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">42</span><span class="w">
+</span></span></span></code></pre></div><p>uintptr是可以用于指针运算的，但是GC并不把uintptr当做指针，所以uintptr不能持有对象, 可能会被GC回收, 导致出现无法预知的错误. Pointer指向一个对象时, GC是不会回收这个内存的.</p>
+<h3 id="相关函数">相关函数<a hidden class="anchor" aria-hidden="true" href="#相关函数">#</a></h3>
+<ul>
+<li>func Sizeof(x ArbitraryType) uintptr</li>
+<li>func Offsetof(x ArbitraryType) uintptr</li>
+<li>func Alignof(x ArbitraryType) uintptr</li>
+</ul>
+<h4 id="sizeof">Sizeof<a hidden class="anchor" aria-hidden="true" href="#sizeof">#</a></h4>
+<p>返回类型x所占据的字节数, 但是却不包括x所引用的内存. 例如: 对于一个指针，函数返回的大小为8字节（64位机上），一个slice的大小则为slice header的大小</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="kt">int32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">t</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#34;test&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">type</span><span class="w"> </span><span class="nx">aa</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">B</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">C</span><span class="w"> </span><span class="kt">uint64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">aa</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">c</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">type</span><span class="w"> </span><span class="nx">bb</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">B</span><span class="w"> </span><span class="o">*</span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bb</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">c1</span><span class="p">))</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>4  // 这个没啥说的, int32在64位机器上占4个字节
+16 // Sizeof(string)占计算string header的大小, struct string { uint8 *str; int len;}
+16 // 这个涉及到内存对齐的问题(C, C++同学是不是又想到曾经虐我们千百遍的面试题了...). 内存对齐的问题下面再说
+8  // 指针占8个字节(64位机器)
+</code></pre><h4 id="offsetof">Offsetof<a hidden class="anchor" aria-hidden="true" href="#offsetof">#</a></h4>
+<p>返回结构体中某个字段的偏移量, 这个字段必须是structValue.field形式. 也就是返回结构体变量的开始位置到那个字段的开始位置之间字节数.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">aa</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">B</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">C</span><span class="w"> </span><span class="kt">uint64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">aa</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">B</span><span class="p">),</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">C</span><span class="p">))</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>B:0
+C:8
+</code></pre><p>注意这里<code>C:8</code>是不是结果错了? 其实不然, 这是因为涉及到内存对齐的问题</p>
+<h4 id="alignof">Alignof<a hidden class="anchor" aria-hidden="true" href="#alignof">#</a></h4>
+<p>这个函数返回内存对齐时的对齐值, 这个跟内存对齐有关</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Part1</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">a</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">b</span><span class="w"> </span><span class="kt">int32</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c</span><span class="w"> </span><span class="kt">int8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">d</span><span class="w"> </span><span class="kt">int64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">e</span><span class="w"> </span><span class="kt">byte</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">part1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Part1</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;part1 size: %d, align: %d\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">part1</span><span class="p">),</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Alignof</span><span class="p">(</span><span class="nx">part1</span><span class="p">))</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>part1 size: 32, align: 8
+</code></pre><h2 id="内存对齐">内存对齐<a hidden class="anchor" aria-hidden="true" href="#内存对齐">#</a></h2>
+<p>关于为什么要内存对齐, 就是为了加快内存的存取速度, 用空间换时间的做法. 我们不需要太过关注这个, 就大概知道golang有这么一个性质.</p>
+<p>不同平台类型T内存大小和对齐值都是不一样的. 具体使用的时候要按照自己的本机实际情况为准. 不过大部分面试题或者我们讨论的时候都是按照64位进行的</p>
+<pre tabindex="0"><code class="language-goalng" data-lang="goalng">fmt.Printf(&#34;bool: %d\n&#34;, unsafe.Alignof(bool(true)))
+fmt.Printf(&#34;int32: %d\n&#34;, unsafe.Alignof(int32(0)))
+fmt.Printf(&#34;int8: %d\n&#34;, unsafe.Alignof(int8(0)))
+fmt.Printf(&#34;int64: %d\n&#34;, unsafe.Alignof(int64(0)))
+fmt.Printf(&#34;byte: %d\n&#34;, unsafe.Alignof(byte(0)))
+fmt.Printf(&#34;string: %d\n&#34;, unsafe.Alignof(&#34;xxx&#34;))
+fmt.Printf(&#34;map: %d\n&#34;, unsafe.Alignof(map[string]string{}))
+</code></pre><pre tabindex="0"><code>bool: 1
+int32: 4
+int8: 1
+int64: 8
+byte: 1
+string: 8
+map: 8
+</code></pre><p>不只是unsafe.Alignof可以计算内存对齐值, <code>reflect.TypeOf(bool(true)).Align())</code>同样可以</p>
+<p>关于普通变量的对齐没啥说的, 就是上面代码那个样子. 但是涉及结构体就变得比较复杂了</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Part1</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">a</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="c1">// 1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">b</span><span class="w"> </span><span class="kt">int32</span><span class="w"> </span><span class="c1">// 4</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c</span><span class="w"> </span><span class="kt">int8</span><span class="w">  </span><span class="c1">// 1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">d</span><span class="w"> </span><span class="kt">int64</span><span class="w"> </span><span class="c1">// 8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">e</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="c1">// 1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">j</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">part1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Part1</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;part1 size: %d\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">part1</span><span class="p">))</span><span class="w">
+</span></span></span></code></pre></div><p>结果是多少呢? 是不是<code>1+4+1+8+1 = 15</code>, 结果并不是. 下面具体分析</p>
+<h3 id="对齐规则">对齐规则<a hidden class="anchor" aria-hidden="true" href="#对齐规则">#</a></h3>
+<ol>
+<li>结构体的成员变量，第一个成员变量的偏移量为 0。往后的每个成员变量的对齐值必须为编译器默认对齐长度（#pragma pack(n)）或当前成员变量类型的长度（unsafe.Sizeof），取最小值作为当前类型的对齐值。其偏移量必须为对齐值的整数倍</li>
+<li>结构体本身，对齐值必须为编译器默认对齐长度（#pragma pack(n)）或结构体的所有成员变量类型中的最大长度，取最大数的最小整数倍作为对齐值</li>
+<li>结合以上两点，可得知若编译器默认对齐长度（#pragma pack(n)）超过结构体内成员变量的类型最大长度时，默认对齐长度是没有任何意义的</li>
+</ol>
+<p>首先我们要知道struct, slice内存都是连续的</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">成员</th>
+          <th style="text-align: center">类型</th>
+          <th style="text-align: center">默认对齐值</th>
+          <th style="text-align: center">当前偏移量</th>
+          <th style="text-align: left">解析</th>
+          <th style="text-align: left">内存布局</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">a</td>
+          <td style="text-align: center">bool</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: center">0</td>
+          <td style="text-align: left">第一个成员的偏移量是0, 占用1位</td>
+          <td style="text-align: left">a</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">b</td>
+          <td style="text-align: center">int32</td>
+          <td style="text-align: center">4</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: left">根据规则1, 对齐值是当前成员类型的对齐值, 所以偏移量是4的整数倍, 所以需要先补3位(2-4), 再第5位开始填充</td>
+          <td style="text-align: left">axxx|bbbb</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">c</td>
+          <td style="text-align: center">int8</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: center">8</td>
+          <td style="text-align: left">根据规则1, 偏移量是对齐值的整数倍, 8/1 = 8, 故不需要偏移, 从第9位开始填充1位</td>
+          <td style="text-align: left">axxx|bbbb|c</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">d</td>
+          <td style="text-align: center">int64</td>
+          <td style="text-align: center">8</td>
+          <td style="text-align: center">9</td>
+          <td style="text-align: left">根据规则1, 偏移量是对齐值的整数倍, 故需要先补7位(9-16), 从17位开始填充8位</td>
+          <td style="text-align: left">axxx|bbbb|cxxx|xxxx| dddd|dddd</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">e</td>
+          <td style="text-align: center">byte</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: center">24</td>
+          <td style="text-align: left">根据规则1, 24/1= 24, 不需要偏移, 从25位开始填充</td>
+          <td style="text-align: left">axxx|bbbb|cxxx|xxxx| dddd|dddd|e</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">最终调整</td>
+          <td style="text-align: center">struct</td>
+          <td style="text-align: center">8</td>
+          <td style="text-align: center">25</td>
+          <td style="text-align: left">根据规则2, 结构体的的对齐值是8, 由于目前的偏移量是25, 不是8的整数倍, 故需要填充至8的最小整数倍, 同时比25大, 故是32</td>
+          <td style="text-align: left">axxx|bbbb|cxxx|xxxx|dddd|dddd|exxx|xxxx</td>
+      </tr>
+  </tbody>
+</table>
+<p>有的时候我们调整机构体字段的顺序是可以节省内存的</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Part1</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">a</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">b</span><span class="w"> </span><span class="kt">int32</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">c</span><span class="w"> </span><span class="kt">int8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">d</span><span class="w"> </span><span class="kt">int64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">e</span><span class="w"> </span><span class="kt">byte</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">Part2</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">e</span><span class="w"> </span><span class="kt">byte</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">c</span><span class="w"> </span><span class="kt">int8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">a</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">b</span><span class="w"> </span><span class="kt">int32</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">d</span><span class="w"> </span><span class="kt">int64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">part1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Part1</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">part2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Part2</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;part1 size: %d, align: %d\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">part1</span><span class="p">),</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Alignof</span><span class="p">(</span><span class="nx">part1</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;part2 size: %d, align: %d\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">part2</span><span class="p">),</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Alignof</span><span class="p">(</span><span class="nx">part2</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>part1 size: 32, align: 8
+part2 size: 16, align: 8
+</code></pre><p>看到这里, 基本就解释了<code>Sizeof</code>, <code>Offsetof</code>涉及到内存对齐的问题. 这里详细解释一下</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">aa</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">B</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">C</span><span class="w"> </span><span class="kt">uint64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">aa</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="nx">c</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">B</span><span class="p">),</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">C</span><span class="p">))</span><span class="w">
+</span></span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">成员</th>
+          <th style="text-align: center">类型</th>
+          <th style="text-align: center">默认对齐值</th>
+          <th style="text-align: center">偏移量</th>
+          <th style="text-align: left">解析</th>
+          <th style="text-align: left">内存布局</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">B</td>
+          <td style="text-align: center">bool</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: center">0</td>
+          <td style="text-align: left">第一个成员的偏移量是0, 占用1位</td>
+          <td style="text-align: left">B</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">C</td>
+          <td style="text-align: center">uint64</td>
+          <td style="text-align: center">8</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: left">由于偏移量必须是对齐值的整数倍, 所以需要补位(2-8), 从9位开始填充</td>
+          <td style="text-align: left">Bxxx|xxxx|CCCC|CCCC</td>
+      </tr>
+  </tbody>
+</table>
+<p>所以结果是: <code>unsafe.Sizeof(c) = 16, unsafe.Offsetof(c.C) = 8</code></p>
+<p>关于更详细关于内存对齐, 请参考<a href="https://book.eddycjy.com/golang/talk/go-memory-align.html">煎鱼</a>博客</p>
+<h2 id="实际使用场景">实际使用场景<a hidden class="anchor" aria-hidden="true" href="#实际使用场景">#</a></h2>
+<h3 id="转换类型">转换类型<a hidden class="anchor" aria-hidden="true" href="#转换类型">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">Float64bits</span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="kt">uint64</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kt">uint64</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">f</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="计算偏移量">计算偏移量<a hidden class="anchor" aria-hidden="true" href="#计算偏移量">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">type</span><span class="w"> </span><span class="nx">aa</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">B</span><span class="w"> </span><span class="kt">bool</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">C</span><span class="w"> </span><span class="kt">uint64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">aa</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">aac</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="kt">uint64</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nb">uintptr</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">c</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">C</span><span class="p">)))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">*</span><span class="nx">aac</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>{false 0}
+{false 10}
+</code></pre><h3 id="验证slice子切片和母切片共享底层数组">验证slice子切片和母切片共享底层数组<a hidden class="anchor" aria-hidden="true" href="#验证slice子切片和母切片共享底层数组">#</a></h3>
+<p>总看到slice子切片和母切片共享底层数组, 下面我们用实际的代码验证一下</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">s1</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">s2</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">s1</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">s1SliceArrayPointer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s1</span><span class="p">)))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;s1[0]:&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kt">int</span><span class="p">)(</span><span class="nx">s1SliceArrayPointer</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;s1 address:&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">s1SliceArrayPointer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">s2SliceArrayPointer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s2</span><span class="p">)))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;s2[0]:&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kt">int</span><span class="p">)(</span><span class="nx">s2SliceArrayPointer</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;s2 address:&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">s2SliceArrayPointer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">offset2Pointer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nb">uintptr</span><span class="p">(</span><span class="nx">s1SliceArrayPointer</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Sizeof</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;offset s1[2]:&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kt">int</span><span class="p">)(</span><span class="nx">offset2Pointer</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;offset s1 address:&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">offset2Pointer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><pre tabindex="0"><code>s1[0]: 1
+s1 address: 0xc00001a040
+s2[0]: 3
+s2 address: 0xc00001a050
+offset s1[2]: 3
+offset s1 address: 0xc00001a050
+</code></pre><p>前提是要先知道slice的结构体</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="c1">// runtime/slice.go</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">slice</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">array</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="w"> </span><span class="c1">// 元素指针</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">len</span><span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="c1">// 长度 </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">cap</span><span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="c1">// 容量</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><img alt="slice" loading="lazy" src="https://images.haohongfan.com/slice.png"></p>
+<ol>
+<li>unsafe.Pointer(&amp;s1) 取到s1的首地址的指针, 其实也就是s1 array位置的指针</li>
+<li>unsafe.Pointer(*(*unsafe.Pointer)(unsafe.Pointer(&amp;s1))) 将s1 array存放的值取出来, 也就是底层数组的首元素的地址</li>
+<li>unsafe.Pointer(uintptr(s1SliceArrayPointer) + unsafe.Sizeof(&amp;s1[0])*2) 向后偏移2位, 也就是取到3的位置</li>
+</ol>
+<p>我们看到s2的首元素的地址和s1偏移2个位置的地址都是0xc00001a050, 所以也就证明确实是同一个底层数组</p>
+<h2 id="结论">结论<a hidden class="anchor" aria-hidden="true" href="#结论">#</a></h2>
+<p>golang指针不能参与计算, 但是unsafe包可以</p>
+<p>unsafe包绕过了Go的类型系统，达到直接操作内存的目的，使用它有一定的风险性, 正常事情下, 不建议开发的代码中大量引入这个. 但是我们需要知道有这样的黑科技存在!</p>
+<h3 id="参考资料">参考资料<a hidden class="anchor" aria-hidden="true" href="#参考资料">#</a></h3>
+<ol>
+<li><a href="https://golang.org/pkg/unsafe/">官方文档</a></li>
+<li><a href="https://mp.weixin.qq.com/s/OO-kwB4Fp_FnCaNXwGJoEw">码农桃花源-深度解密Go语言之unsafe</a></li>
+<li><a href="https://book.eddycjy.com/golang/pkg/unsafe.html">煎鱼-有点不安全却又一亮的 Go unsafe.Pointer</a></li>
+<li><a href="https://book.eddycjy.com/golang/talk/go-memory-align.html">煎鱼-在 Go 中恰到好处的内存对齐</a></li>
+</ol>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/golang/">Golang</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Logrus源码阅读(2)--logrus生命周期</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2019-06-11-logurs-1/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Logrus源码阅读(1)--基本用法</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on x"
+            href="https://x.com/intent/tweet/?text=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f&amp;hashtags=golang">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f&amp;title=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f&amp;summary=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f&title=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on whatsapp"
+            href="https://api.whatsapp.com/send?text=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on telegram"
+            href="https://telegram.me/share/url?text=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Golang是否真的没有指针运算? on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Golang%e6%98%af%e5%90%a6%e7%9c%9f%e7%9a%84%e6%b2%a1%e6%9c%89%e6%8c%87%e9%92%88%e8%bf%90%e7%ae%97%3f&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-07-22-golang-pointer%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

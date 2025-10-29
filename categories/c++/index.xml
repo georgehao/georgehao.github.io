@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>C&#43;&#43; on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/c&#43;&#43;/</link>
+    <description>Recent content in C&#43;&#43; on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Fri, 25 Aug 2017 12:02:07 +0000</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/c++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;实现ping</title>
+      <link>https://georgehao.github.io/posts/2017-08-25-cping/</link>
+      <pubDate>Fri, 25 Aug 2017 12:02:07 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-08-25-cping/</guid>
+      <description>&lt;p&gt;&lt;img alt=&#34;ping&#34; loading=&#34;lazy&#34; src=&#34;https://upload-images.jianshu.io/upload_images/1595110-a8358c1ec302e72e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240&#34;&gt;&lt;/p&gt;
+&lt;p&gt;最近手头有点工作跟这个有段, 就实现一个简单ping. 就实现如图功能就行.&lt;/p&gt;
+&lt;p&gt;先说下原理:&lt;/p&gt;
+&lt;h2 id=&#34;使用icmp协议-组织icmp包&#34;&gt;使用&lt;code&gt;ICMP&lt;/code&gt;协议, 组织&lt;code&gt;ICMP&lt;/code&gt;包&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;socket_id = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;告诉host我们要使用发送的报文是ICMP, 至于怎么发, 以及TCP通信的就是不是我们这里要关心的了&lt;/p&gt;
+&lt;p&gt;##组织&lt;code&gt;ICMP&lt;/code&gt;标示&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;p_icmp = (struct icmp *)buffer;
+p_icmp-&amp;gt;icmp_type = ICMP_ECHO;
+p_icmp-&amp;gt;icmp_code = 0;
+p_icmp-&amp;gt;icmp_cksum = 0;
+p_icmp-&amp;gt;icmp_seq = 12345;
+p_icmp-&amp;gt;icmp_id = getpid();
+p_icmp-&amp;gt;icmp_cksum = checkSum((uint16_t*)p_icmp, 64);
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这里组织我们需要的ICMP的一些标示&lt;/p&gt;
+&lt;p&gt;3.发送ICMP给host&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;int send_chars = sendto(socket_id, (char *)buffer, 64, 0, (struct sockaddr*) &amp;amp;to, (socklen_t)  sizeof(struct sockaddr_in));
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;发送ICMP包给你host&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LD_LIBRARY_PATH与-L的关系以及延伸</title>
+      <link>https://georgehao.github.io/posts/2017-08-25-ld_library_path/</link>
+      <pubDate>Fri, 25 Aug 2017 11:56:24 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-08-25-ld_library_path/</guid>
+      <description>&lt;p&gt;最近跟同学讨论c++在编译时g++ -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。
+ 
+我遇到的问题：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;g++ multiple.cpp -L/usr/local/lib -lboost_program_options&lt;/code&gt;编译完后，&lt;code&gt;ldd ./a.out&lt;/code&gt;发现&lt;code&gt;libboost_program_options.so.1.55.0 =&amp;gt; not found&lt;/code&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>有关LD_LIBRARY_PATH与ld.so.conf</title>
+      <link>https://georgehao.github.io/posts/2017-08-25-id_library_path_ld_so_conf/</link>
+      <pubDate>Fri, 25 Aug 2017 11:55:53 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-08-25-id_library_path_ld_so_conf/</guid>
+      <description>&lt;p&gt;我之前写过一篇关于&lt;a href=&#34;http://www.jianshu.com/p/f0f4700d5611&#34;&gt;LD_LIBRARY_PATH与gcc/g++ -L的关系的文章&lt;/a&gt;. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export &lt;code&gt;LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH&lt;/code&gt;, 这个不够优美, 经过一番寻找终于找到了&amp;mdash;ld.so.conf可以完美解决这个问题。
+ &lt;/p&gt;
+&lt;h3 id=&#34;为什么ld_library_path不行&#34;&gt;为什么LD_LIBRARY_PATH不行？&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;http://xahlee.info/UnixResource_dir/_/ldpath.html&#34;&gt;可以看看老外是怎么说的&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;升级共享库时，替换之前先测试一下类似的，升级后的某个程序可能依赖于一些动态链接库，如果你将某个链接库替换了，程序可能就无法工作了。这时候，你可以使用LD_LIBRARY_PATH指向存有备份的一个目录，然后，你可以没有顾忌地替换系统版本了。万一出错，拷贝回去就是了&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>使用System V信号量同步引起的Interrupted system call坑</title>
+      <link>https://georgehao.github.io/index.php/2017/08/25/ipc_interrupted_system_call/</link>
+      <pubDate>Fri, 25 Aug 2017 11:54:11 +0000</pubDate>
+      <guid>https://georgehao.github.io/index.php/2017/08/25/ipc_interrupted_system_call/</guid>
+      <description>&lt;p&gt;使用System V信号量不是那么熟练. 写了一个Monitor监测线程, 一个实际执行的Product线程.&lt;/p&gt;
+&lt;p&gt;本来的想法两个线程一个一个的调, 但是我忘了把另外一个线程注释掉了.然后&lt;strong&gt;坑&lt;/strong&gt;就这么产生了.&lt;/p&gt;
+&lt;p&gt;先看Monitor代码:&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-3a9524f1f428ae78.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;然后gdb去调试的时候, 总是出现&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;error&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-f1ac6dee7f647d67.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我一开始以为我的程序出错了, 因为我System V信号量用的不是很熟练, 但是我发现我写的没有错呀, 都是这样用的呀. 一番查找下, 我就确定我这样用是没错的, 就去Google了一下, 发现了真相.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>修改系统时间导致的坑</title>
+      <link>https://georgehao.github.io/index.php/2017/08/25/system_time/</link>
+      <pubDate>Fri, 25 Aug 2017 11:53:30 +0000</pubDate>
+      <guid>https://georgehao.github.io/index.php/2017/08/25/system_time/</guid>
+      <description>&lt;p&gt;有一天测试人员对我说, 我怎么测试&lt;code&gt;10点开站会&lt;/code&gt;这个功能呢? 当时也没有经过脑子, 直接对她说, 你把系统时间修改一下吧.&lt;/p&gt;
+&lt;p&gt;好嘛, 麻烦来了. 测试对我说, 你新开发的程序有BUG, 程序没反应了. 我晕, 哥已经测过的, 怎么会有问题呢? 然后我就做在那开发排地雷. 后来经过仔细排查, 排查到一个别人封装的接口, 我把那个程序大致的样子写出来.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;sleep_for.png&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-357257f58ddb1a40.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;程序总是在这个函数中阻塞住. 为什么会阻塞呢? 然后我就在这段代码中到处加log打印&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>记一次线程不同步的坑</title>
+      <link>https://georgehao.github.io/index.php/2017/08/25/thread_error/</link>
+      <pubDate>Fri, 25 Aug 2017 11:52:58 +0000</pubDate>
+      <guid>https://georgehao.github.io/index.php/2017/08/25/thread_error/</guid>
+      <description>&lt;p&gt;&lt;img alt=&#34;memcpy_Image.png&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-8031dcc84055fd0b.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;这段简单的代码, 总是在某些时候, 就会出现&lt;code&gt;p_cur_ctx-&amp;gt;GetCallbackContent()&lt;/code&gt;不为空, 但是总是memcpy失败的问题. 这下无语了, 系统库有问题了吗 ?! WTF, 遇见鬼了, 从来没有见过如此诡异的问题.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;gdb p_cur_ctx-&amp;gt;GetCallbackContent()&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-541975b74d377fe7.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;gdb tmp&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-b16483b7c352bb02.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;h4 id=&#34;怎么看-这都是不可能发生的事情-为什么memcpy会失败呢&#34;&gt;&lt;em&gt;怎么看, 这都是不可能发生的事情!!!&lt;/em&gt;, 为什么memcpy会失败呢?&lt;/h4&gt;
+&lt;p&gt;再看GetCallbackContent()的代码实现&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;GetCallbackContent实现&#34; loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/1595110-a0a318ab6fad4285.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;感觉上没有什么问题, 这个问题就诡异了.为什么以前程序跑的好好的, 突然间连memcpy都不靠谱了.这个世界是怎么了.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

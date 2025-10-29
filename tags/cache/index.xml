@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Cache on HHFCodeRv</title>
+    <link>https://georgehao.github.io/tags/cache/</link>
+    <description>Recent content in Cache on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Wed, 11 Mar 2020 16:30:35 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/tags/cache/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>一次错误使用 go-cache 导致出现的线上问题</title>
+      <link>https://georgehao.github.io/posts/2020-03-11-go-cache/</link>
+      <pubDate>Wed, 11 Mar 2020 16:30:35 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2020-03-11-go-cache/</guid>
+      <description>&lt;p&gt;话说一个美滋滋的上午, 突然就出现大量报警, 接口大量请求都响应超时了.&lt;/p&gt;
+&lt;h2 id=&#34;排查过程&#34;&gt;排查过程&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;查看服务器的监控系统, CPU, 内存, 负载等指标正常&lt;/li&gt;
+&lt;li&gt;排查日志, 日志能够响应的结果也正常. request.log 中响应时长高达数秒&lt;/li&gt;
+&lt;li&gt;查看数据库, codis 监控, 各项指标正常&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;不得已, 只能打开线上 pprof 查看 Go 相关参数是否正常. 果真一下子就找到问题发生的原因&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;go-cache&#34; loading=&#34;lazy&#34; src=&#34;https://images.haohongfan.com/go-cache.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;这是当时线上 pprof 的截图, 发现 40 多万 goroutine 都阻塞在 go-cache 的 Set 函数上. 更准确的说 40 多万 goroutine 在发生很严重的锁竞争. 这就让人觉得很意外了.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

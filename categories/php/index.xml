@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Php on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/php/</link>
+    <description>Recent content in Php on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Mon, 12 Nov 2018 18:43:15 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/php/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>GraphQL N&#43;1 问题解决方案</title>
+      <link>https://georgehao.github.io/posts/hugo-integrated-gitment-plugin/</link>
+      <pubDate>Mon, 12 Nov 2018 18:43:15 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/hugo-integrated-gitment-plugin/</guid>
+      <description>&lt;h1 id=&#34;什么是n1问题&#34;&gt;什么是N+1问题&lt;/h1&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;{
+  topStories(limit: 10) {
+    title
+    author {
+      name
+      email
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这个简单的查询, 在&lt;code&gt;Query&lt;/code&gt;resolve里面会查询到top10 story, 但是&lt;code&gt;StoryType&lt;/code&gt;却会调用10次&lt;code&gt;author&lt;/code&gt;查询.&lt;/p&gt;
+&lt;p&gt;大概的SQL查询:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;select * from stories limit 10
+select * from author where stories.author_id = x
+select * from author where stories.author_id = x
+select * from author where stories.author_id = x
+...
+select * from author where stories.author_id = x
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这个简单的Query就会查询11次数据库.&lt;/p&gt;
+&lt;p&gt;我们要知道Graphql的图形结构可能是个闭环结构, 例如, stories-&amp;gt;authors-&amp;gt;&amp;hellip;-&amp;gt;stories(这个树形图, 可以使用voyager来查看), 所以如果不解决&lt;code&gt;N+1&lt;/code&gt;问题, 那么&lt;code&gt;Graphql&lt;/code&gt;接口将会严重拖慢的&lt;code&gt;Server&lt;/code&gt;的性能.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

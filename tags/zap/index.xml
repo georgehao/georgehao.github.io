@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Zap on HHFCodeRv</title>
+    <link>http://localhost:1313/tags/zap/</link>
+    <description>Recent content in Zap on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan 京ICP备17041575号</copyright>
+    <lastBuildDate>Tue, 22 Oct 2019 19:11:23 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/zap/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zap使用方式介绍</title>
+      <link>http://localhost:1313/posts/2019-10-06-zap-usage/</link>
+      <pubDate>Tue, 22 Oct 2019 19:11:23 +0800</pubDate>
+      <guid>http://localhost:1313/posts/2019-10-06-zap-usage/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

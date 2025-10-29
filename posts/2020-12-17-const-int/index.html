@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>疑惑: Go const 会导致程序结果错乱 ? | HHFCodeRv</title>
+<meta name="keywords" content="go">
+<meta name="description" content="
+const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果
+场景模拟
+某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.
+这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2020-12-17-const-int/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2020-12-17-const-int/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2020-12-17-const-int/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="疑惑: Go const 会导致程序结果错乱 ?">
+  <meta property="og:description" content="
+const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果
+场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.
+这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-12-17T23:32:12+08:00">
+    <meta property="article:modified_time" content="2020-12-17T23:32:12+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="疑惑: Go const 会导致程序结果错乱 ?">
+<meta name="twitter:description" content="
+const 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果
+场景模拟
+某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.
+这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "疑惑: Go const 会导致程序结果错乱 ?",
+      "item": "https://georgehao.github.io/posts/2020-12-17-const-int/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "疑惑: Go const 会导致程序结果错乱 ?",
+  "name": "疑惑: Go const 会导致程序结果错乱 ?",
+  "description": "\nconst 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果\n场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.\n这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:\n",
+  "keywords": [
+    "go"
+  ],
+  "articleBody": "\nconst 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 const 会出现你意想不到的结果\n场景模拟 某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.\n这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:\nfunc main() { var totalPrice uint32 = 500 const couponPrice = 550 fmt.Println(\"用户需要支付金额: \", totalPrice-couponPrice) } 先别运行程序, 你觉得应该返回的结果是多少?\nA. 程序无法编译 B. -50 C. 50 D. 4294967246 结果是 D, 你会不会觉得很意外?\n一些疑问:\n500 - 550 的结果为什么不是 -50 ? 你是否注意过 const 的类型 ? 如果你注意过 const 类型, 为什么程序能正常编译 ? 500 - 550 的结果为什么不是 -50 ? 重写再写一段新的代码, 我们把数值缩小一点, 方便后面的阐述\nfunc main() { var totalPrice uint8 = 1 var couponPrice uint8 = 2 fmt.Println(\"用户需要支付金额: \", totalPrice-couponPrice) } 结果: 用户需要支付金额: 255\n你是否听说过 原码, 反码, 补码 这三个概念? 如果不知道的话, 请继续往下看马上就能揭开天文数字的真相.\n原码 使用二进制如何标识 1 和 -1 呢?\n1 : 0000 0001 -1 : 1000 0001 我们通过对比能很快发现第一位是符号位, 这其实是易于人来理解和计算的一种表示方式, 这个表示方式叫: 原码. 计算机本身就只识别 0(低电位) 和 1(高电位), 说的再彻底点 0 和 1 其实就是 CPU 逻辑运算单元里面的二极管的导通和阻断. 这么看来, 如果让一个 1 来代表符号位, 能让计算机能识别出来, 并且还让这一位不参与计算, 这基本是不现实的.\n这怎么办呢? 有人曾经说过: 计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决? 同样对于 原码 也可以转换成计算机能够识别二进制编码.\n反码 接下来我们看另外一种表示方式, 使用 1 - 1 = 0 来解释. 假如我们符号位也参与计算, 同时让正数的二进制保持不变. 负数的二进制符号位保持不变, 其他位按位取反.\n1 - 1 =\u003e 0000 0001 + 1111 1110 = 1111 1111 这其实就是反码. 我们将1111 1111转换成我们能识别的原码就是1000 0000, 其实也就是 -0. 于是就出现另外一个问题, 0000 0000也代表 0. 于是就出现了 1000 0000 和 0000 0000 的原码都代表 0. 这是不行的.\n补码 终极奥义出场. 同样让符号位参与计算, 我们让正数的二进制保持不变, 负数的二进制的符号位保持不变, 其余各位取反, 最后+1, 其实负数的补码就是这个先找个数的反码, 然后反码加 1.\n于是 1 - 1 就可以标识为:\n1 - 1 =\u003e 0000 0001 + 1111 1110 =\u003e 0000 0001 + 1111 1111 =\u003e 0000 0000(补码) --------- --------- --------- --------- 反码 反码 补码 补码 补码 0000 0000 其实也是原码, 也就是 0. 这下就没问题了.\n1 - 2 的问题 我们使用补码来解释下 1 - 2的结果:\n1 - 2 =\u003e [0000 0001]反 + [1111 1101]反 =\u003e [0000 0001]补 + [1111 1110]补 = 1111 1111(补码) 将补码 1111 1111 转换成原码 1000 0001 =\u003e -1\n看到这里你是不是又奇怪了? 结果明明是: 4294967295.\n对于写 Java 同学来说, 他们绝大多数场景下 int 代表一个整数就足够了. 对于 Php 那就更放肆了, 不仅不关心数字的大小, 有可能传给你一个 “2” 来当整数 2 用. 但你是否注意到 golang 里面分有符号和无符号类型的数, 如 int8 和 uint8 ?\n所以, 我们能看出来, 有符号数的减法基本在我们认知范围之内. 那无符号数为何就如何神奇呢?\n无符号数 func main() { var totalPrice uint8 = 1 var couponPrice uint8 = 2 fmt.Println(\"用户需要支付金额: \", totalPrice-couponPrice) } 还是这段代码, 我们看到 totalPrice, couponPrice 都是 uint32 类型的整数, 他们都是无符号类型的整数. 所以当看到程序用uintx来定义变量的, 这个变量就是无符号类型的.\n为什么 Go 不像 Java 那样一个 int 类型吃遍天呢, 搞出无符号类型的目的何在?\n有符号数是可以表示负数的. 如 int8 的范围区间是[-128, 127]. 而有些场景下我们只想要正数, 那么就可以用无符号数来表示, 同样 uint8 就可以代表 [0, 255] 其实我觉得更大的可能性是由于 Go 是那帮写 C 的人写的, 他们继续沿用了 C 里面这个传统的数值表示方式. 无符号的数的减法来说, 我们要把 1 - 2 同样也看成 1 + (-2), 于是同样需要将 -2 转换成补码形式.\n1 - 2 =\u003e [0000 0001]反 + [1111 1101]反 =\u003e [0000 0001]补 + [1111 1110]补 = 1111 1111(补码) 由于无符号数的加减结果仍然是无符号数, 那么 1111 1111 就是一个无符号的数, 所以最高位不是符号位, 正数的补码和原码一样, 于是 1 - 2 的结果就是 255.\n我们现在用的是 uint8 类型的数, 如果换成 uint16, uint32, uint64 会怎么样呢? 同样的 1-2 对于 uint64 结果就会变成 18446744073709551615. 是不是很夸张???\n我们上面都说的减法, 那加法会不会出现这个情况呢? 这个我就不在展开了, 聪明的你可以试试下面的代码, 然后思考下为啥?\nfunc main() { var totalPrice uint8 = 255 var couponPrice uint8 = 1 fmt.Println(\"用户需要支付金额: \", totalPrice+couponPrice) } 终于说完了 Go 的无符号类型的计算过程, 我们由此可以看出, Go 在做加减预算时要注意下面几点:\n选择不同的类型的变量时, 要特别注意该类型的取值范围, 防止数值越界 节省计算机资源. 声明同一个变量, 使用 int8 占一个字节, uint32 就占用 4 个字节 在使用 uint 家族的类型的变量做减法时, 一定要判断变量的大小, 不然开篇我说的场景就是你们线上将要发生的事情. 你是否注意过 const 的类型 ? func main() { var totalPrice uint8 = 1 var couponPrice int8 = 2 fmt.Println(\"用户需要支付金额: \", totalPrice+couponPrice) } 这段代码你觉得结果是什么?\nA. 程序无法编译 B. -1 C. 255 D. 4294967246 结果是 A, 你是不是又很意外. 其实你应该不意外才对, Go 不支持隐式类型转换, 不同种类型的变量之间不能直接做相互转换, 必须做类型的强转. 上面的代码是编译不过的.\n其实类型直接做强转有的时候也是会有问题的. 我这里就不详细展开了, 不然就越扯越多了. 请自行执行下面这段代码的结果, 然后分析一下吧, 原因还是还是上面说的, 一定要注意类型的取值范围.\nfunc main() { var a int64 = 922372037 fmt.Println(\"a:\", a) var b int8 = int8(a) fmt.Println(\"b:\", b) } 结果:\na: 922372037 b: -59 继续回到 const 的类型上面, 我猜大部分人其实没关注过 const 的类型吧\nfunc main() { const a = 10 fmt.Println(\"type:\", reflect.TypeOf(a)) } 结果: type: int\n再回到开篇的那段代码, 为啥就可以正常编译过而且能输出一个不正确的结果呢?\nfunc main() { var totalPrice uint32 = 500 const couponPrice = 550 fmt.Println(\"用户需要支付金额: \", totalPrice-couponPrice) } const 仍然和普通变量的默认类型保持一致. 整数常量的默认类型是 int, 浮点数常量的默认类型是 float64, 字符串常量的默认类型是 string\n这里就要到说到 Go 的特殊法则:\nGo 里没有默认类型是无符号类型的整数变量, 但是为了灵活, 可以使用 untyped const 类型的变量给无符号类型变量赋值(这是官方博客里的话). 这也就是意味着 untyped const 的变量打破了 Go 里面不同类型之间不能做隐式类型转换的规定. 于是 const 变量可以给同族类型之间的变量做任意的加减乘除. 这就造成了一个 uint32 类型数减一个 unsigned const int 类型的数搞出来一个天文数字出来. 这里要注意的是: constant 分为 typed 和 untyped，只有untyped才能隐式转换.\n一些总结吧 Go 里面提供了多种多样的类型的变量, 使用对了固然可以让程序节省更多的资源, 但是使用时要特别注意选择适当的类型, 避免造成一些莫名其妙的问题. 推荐大家程序里尽量使用 int 类型, 其实 int 就是 int32 类型, 与 Java 的 int 的数值范围是一样的 [-2147483648, 2147483647]. 我们现在的服务器真的不缺这点资源. 除非你真的特别能把握这个变量的大小. 做无符号类型的加法时, 要特别注意, 一定要先去判断做减法的变量的大小. 本篇题目是 const 导致程序结果错乱 ?, 其实也并不全是 const 造成的, 归根到底是无符号类型的数在做减法运算时的坑. 我们写 Go 的时候要注意这一点. 当然 const 的类型大家也可以留心下, 说不定就是你下次的面试题.\n看完本篇文章, 你是不是对 Go 的类型有了新的认识, 欢迎关注我的公众号: HHFCodeRv 交流\n",
+  "wordCount" : "2967",
+  "inLanguage": "zh",
+  "datePublished": "2020-12-17T23:32:12+08:00",
+  "dateModified": "2020-12-17T23:32:12+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2020-12-17-const-int/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      疑惑: Go const 会导致程序结果错乱 ?
+    </h1>
+    <div class="post-meta"><span title='2020-12-17 23:32:12 +0800 CST'>2020年12月17日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2967 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#场景模拟">场景模拟</a></li>
+    <li><a href="#500---550-的结果为什么不是--50-">500 - 550 的结果为什么不是 -50 ?</a>
+      <ul>
+        <li><a href="#原码">原码</a></li>
+        <li><a href="#反码">反码</a></li>
+        <li><a href="#补码">补码</a></li>
+        <li><a href="#1---2-的问题">1 - 2 的问题</a></li>
+        <li><a href="#无符号数">无符号数</a></li>
+      </ul>
+    </li>
+    <li><a href="#你是否注意过-const-的类型-">你是否注意过 const 的类型 ?</a></li>
+    <li><a href="#一些总结吧">一些总结吧</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://images.haohongfan.com/what-const1.png"></p>
+<p><code>const</code> 是 Go 里面我们经常使用的关键字, 基本上很难玩出花来. 不过某些特殊情况下 <code>const</code> 会出现你意想不到的结果</p>
+<h2 id="场景模拟">场景模拟<a hidden class="anchor" aria-hidden="true" href="#场景模拟">#</a></h2>
+<p>某公司某次营销活动中, 会根据用户 VIP 级别送用户一些优惠券, 最大面值520. 某用户发现自己购买的 500 元钱的商品, 使用 520 的优惠券来支付, 理论上能 0 元购买的商品, 最后却需要支付一个天文数字.</p>
+<p>这个场景是我自己随便想的, 如果过于夸张, 请原谅我. ^^ 下面我们用代码大概模拟下这个场景:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">totalPrice</span><span class="w"> </span><span class="kt">uint32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">500</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">const</span><span class="w"> </span><span class="nx">couponPrice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">550</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;用户需要支付金额: &#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">totalPrice</span><span class="o">-</span><span class="nx">couponPrice</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>先别运行程序, 你觉得应该返回的结果是多少?</p>
+<pre tabindex="0"><code>A. 程序无法编译
+B. -50
+C. 50
+D. 4294967246
+</code></pre><p>结果是 <code>D</code>, 你会不会觉得很意外?</p>
+<p>一些疑问:</p>
+<ol>
+<li>500 - 550 的结果为什么不是 -50 ?</li>
+<li>你是否注意过 const 的类型 ?</li>
+<li>如果你注意过 const 类型, 为什么程序能正常编译 ?</li>
+</ol>
+<h2 id="500---550-的结果为什么不是--50-">500 - 550 的结果为什么不是 -50 ?<a hidden class="anchor" aria-hidden="true" href="#500---550-的结果为什么不是--50-">#</a></h2>
+<p>重写再写一段新的代码, 我们把数值缩小一点, 方便后面的阐述</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">totalPrice</span><span class="w"> </span><span class="kt">uint8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">couponPrice</span><span class="w"> </span><span class="kt">uint8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;用户需要支付金额: &#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">totalPrice</span><span class="o">-</span><span class="nx">couponPrice</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>结果: <code>用户需要支付金额:  255</code></p>
+<p>你是否听说过 <code>原码</code>, <code>反码</code>, <code>补码</code> 这三个概念? 如果不知道的话, 请继续往下看马上就能揭开天文数字的真相.</p>
+<h3 id="原码">原码<a hidden class="anchor" aria-hidden="true" href="#原码">#</a></h3>
+<p>使用二进制如何标识 1 和 -1 呢?</p>
+<pre tabindex="0"><code> 1  :  0000 0001
+-1  :  1000 0001
+</code></pre><p>我们通过对比能很快发现第一位是符号位, 这其实是易于人来理解和计算的一种表示方式, 这个表示方式叫: <code>原码</code>. 计算机本身就只识别 0(低电位) 和 1(高电位), 说的再彻底点 0 和 1 其实就是 CPU 逻辑运算单元里面的二极管的导通和阻断. 这么看来, 如果让一个 <code>1</code> 来代表符号位, 能让计算机能识别出来, 并且还让这一位不参与计算, 这基本是不现实的.</p>
+<p>这怎么办呢? 有人曾经说过: 计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决? 同样对于 <code>原码</code> 也可以转换成计算机能够识别二进制编码.</p>
+<h3 id="反码">反码<a hidden class="anchor" aria-hidden="true" href="#反码">#</a></h3>
+<p>接下来我们看另外一种表示方式, 使用 <code>1 - 1 = 0</code> 来解释. 假如我们符号位也参与计算, 同时让<code>正数</code>的二进制保持不变. <code>负数</code>的二进制符号位保持不变, 其他位按位取反.</p>
+<pre tabindex="0"><code>1 - 1 =&gt; 0000 0001 + 1111 1110 = 1111 1111  
+</code></pre><p>这其实就是反码. 我们将<code>1111 1111</code>转换成我们能识别的原码就是<code>1000 0000</code>, 其实也就是 -0. 于是就出现另外一个问题, <code>0000 0000</code>也代表 0. 于是就出现了 <code>1000 0000</code> 和 <code>0000 0000</code> 的原码都代表 0. 这是不行的.</p>
+<h3 id="补码">补码<a hidden class="anchor" aria-hidden="true" href="#补码">#</a></h3>
+<p>终极奥义出场. 同样让符号位参与计算, 我们让正数的二进制保持不变, 负数的二进制的符号位保持不变, 其余各位取反, 最后+1, 其实负数的补码就是这个先找个数的反码, 然后反码加 1.</p>
+<p>于是 1 - 1 就可以标识为:</p>
+<pre tabindex="0"><code>1 - 1 =&gt; 0000 0001 + 1111 1110  =&gt;  0000 0001 + 1111 1111  =&gt; 0000 0000(补码)
+         ---------   ---------      ---------   ---------
+		    反码         反码           补码         补码
+</code></pre><p>补码 <code>0000 0000</code> 其实也是原码, 也就是 0. 这下就没问题了.</p>
+<h3 id="1---2-的问题">1 - 2 的问题<a hidden class="anchor" aria-hidden="true" href="#1---2-的问题">#</a></h3>
+<p>我们使用补码来解释下 <code>1 - 2</code>的结果:</p>
+<pre tabindex="0"><code>1 - 2 =&gt; [0000 0001]反 + [1111 1101]反 =&gt; [0000 0001]补 + [1111 1110]补 = 1111 1111(补码)
+</code></pre><p>将补码 1111 1111 转换成原码 1000 0001 =&gt; -1</p>
+<p>看到这里你是不是又奇怪了? 结果明明是: 4294967295.</p>
+<p>对于写 Java 同学来说, 他们绝大多数场景下 int 代表一个整数就足够了. 对于 Php 那就更放肆了, 不仅不关心数字的大小, 有可能传给你一个 &ldquo;2&rdquo; 来当整数 2 用. 但你是否注意到 golang 里面分有符号和无符号类型的数, 如 int8 和 uint8 ?</p>
+<p>所以, 我们能看出来, 有符号数的减法基本在我们认知范围之内. 那无符号数为何就如何神奇呢?</p>
+<h3 id="无符号数">无符号数<a hidden class="anchor" aria-hidden="true" href="#无符号数">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">totalPrice</span><span class="w"> </span><span class="kt">uint8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">couponPrice</span><span class="w"> </span><span class="kt">uint8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;用户需要支付金额: &#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">totalPrice</span><span class="o">-</span><span class="nx">couponPrice</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>还是这段代码, 我们看到 totalPrice, couponPrice 都是 uint32 类型的整数, 他们都是无符号类型的整数. 所以当看到程序用<code>uintx</code>来定义变量的, 这个变量就是无符号类型的.</p>
+<p>为什么 Go 不像 Java 那样一个 int 类型吃遍天呢, 搞出无符号类型的目的何在?</p>
+<ol>
+<li>有符号数是可以表示负数的. 如 int8 的范围区间是[-128, 127]. 而有些场景下我们只想要正数, 那么就可以用无符号数来表示, 同样 uint8 就可以代表 [0, 255]</li>
+<li>其实我觉得更大的可能性是由于 Go 是那帮写 C 的人写的, 他们继续沿用了 C 里面这个传统的数值表示方式.</li>
+</ol>
+<p>无符号的数的减法来说, 我们要把 1 - 2 同样也看成 1 + (-2), 于是同样需要将 -2 转换成补码形式.</p>
+<pre tabindex="0"><code> 1 - 2 =&gt; [0000 0001]反 + [1111 1101]反 =&gt; [0000 0001]补 + [1111 1110]补 = 1111 1111(补码)
+</code></pre><p>由于无符号数的加减结果仍然是无符号数, 那么 1111 1111 就是一个无符号的数, 所以最高位不是符号位, 正数的补码和原码一样, 于是 1 - 2 的结果就是 255.</p>
+<p>我们现在用的是 <code>uint8</code> 类型的数, 如果换成 <code>uint16</code>, <code>uint32</code>, <code>uint64</code> 会怎么样呢? 同样的 1-2 对于 <code>uint64</code> 结果就会变成 18446744073709551615. 是不是很夸张???</p>
+<p>我们上面都说的减法, 那加法会不会出现这个情况呢? 这个我就不在展开了, 聪明的你可以试试下面的代码, 然后思考下为啥?</p>
+<pre tabindex="0"><code>func main() {
+	var totalPrice uint8 = 255
+	var couponPrice uint8 = 1
+	fmt.Println(&#34;用户需要支付金额: &#34;, totalPrice+couponPrice)
+}
+</code></pre><p>终于说完了 Go 的无符号类型的计算过程, 我们由此可以看出, Go 在做加减预算时要注意下面几点:</p>
+<ol>
+<li>选择不同的类型的变量时, 要特别注意该类型的取值范围, 防止数值越界</li>
+<li>节省计算机资源. 声明同一个变量, 使用 int8 占一个字节, uint32 就占用 4 个字节</li>
+<li>在使用 uint 家族的类型的变量做减法时, 一定要判断变量的大小, 不然开篇我说的场景就是你们线上将要发生的事情.</li>
+</ol>
+<h2 id="你是否注意过-const-的类型-">你是否注意过 const 的类型 ?<a hidden class="anchor" aria-hidden="true" href="#你是否注意过-const-的类型-">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">totalPrice</span><span class="w"> </span><span class="kt">uint8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">couponPrice</span><span class="w"> </span><span class="kt">int8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;用户需要支付金额: &#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">totalPrice</span><span class="o">+</span><span class="nx">couponPrice</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>这段代码你觉得结果是什么?</p>
+<pre tabindex="0"><code>A. 程序无法编译
+B. -1
+C. 255
+D. 4294967246
+</code></pre><p>结果是 <code>A</code>, 你是不是又很意外. 其实你应该不意外才对, Go 不支持隐式类型转换, 不同种类型的变量之间不能直接做相互转换, 必须做类型的强转. 上面的代码是编译不过的.</p>
+<p>其实类型直接做强转有的时候也是会有问题的. 我这里就不详细展开了, 不然就越扯越多了. 请自行执行下面这段代码的结果, 然后分析一下吧, 原因还是还是上面说的, 一定要注意类型的取值范围.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="kt">int64</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">922372037</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;a:&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int8</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">int8</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;b:&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>结果:</p>
+<pre tabindex="0"><code>a: 922372037
+b: -59
+</code></pre><p>继续回到 const 的类型上面, 我猜大部分人其实没关注过 const 的类型吧</p>
+<pre tabindex="0"><code>func main() {
+	const a = 10
+	fmt.Println(&#34;type:&#34;, reflect.TypeOf(a))
+}
+</code></pre><p>结果: type: int</p>
+<p>再回到开篇的那段代码, 为啥就可以正常编译过而且能输出一个不正确的结果呢?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">totalPrice</span><span class="w"> </span><span class="kt">uint32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">500</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">const</span><span class="w"> </span><span class="nx">couponPrice</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">550</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;用户需要支付金额: &#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">totalPrice</span><span class="o">-</span><span class="nx">couponPrice</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>const 仍然和普通变量的默认类型保持一致. 整数常量的默认类型是 int, 浮点数常量的默认类型是 float64, 字符串常量的默认类型是 string</p>
+<p>这里就要到说到 Go 的特殊法则:</p>
+<p>Go 里没有默认类型是无符号类型的整数变量, 但是为了灵活, 可以使用 untyped const 类型的变量给无符号类型变量赋值(这是官方博客里的话). 这也就是意味着 untyped const 的变量打破了 Go 里面不同类型之间不能做隐式类型转换的规定. 于是 const 变量可以给同族类型之间的变量做任意的加减乘除. 这就造成了一个 uint32 类型数减一个 unsigned const int 类型的数搞出来一个天文数字出来. 这里要注意的是: constant 分为 typed 和 untyped，只有untyped才能隐式转换.</p>
+<h2 id="一些总结吧">一些总结吧<a hidden class="anchor" aria-hidden="true" href="#一些总结吧">#</a></h2>
+<ol>
+<li>Go 里面提供了多种多样的类型的变量, 使用对了固然可以让程序节省更多的资源, 但是使用时要特别注意选择适当的类型, 避免造成一些莫名其妙的问题. 推荐大家程序里尽量使用 int 类型, 其实 int 就是 int32 类型, 与 Java 的 int 的数值范围是一样的 [-2147483648, 2147483647]. 我们现在的服务器真的不缺这点资源. 除非你真的特别能把握这个变量的大小.</li>
+<li>做无符号类型的加法时, 要特别注意, 一定要先去判断做减法的变量的大小.</li>
+</ol>
+<p>本篇题目是 <code>const 导致程序结果错乱 ?</code>, 其实也并不全是 const 造成的, 归根到底是无符号类型的数在做减法运算时的坑. 我们写 Go 的时候要注意这一点. 当然 const 的类型大家也可以留心下, 说不定就是你下次的面试题.</p>
+<p>看完本篇文章, 你是不是对 Go 的类型有了新的认识, 欢迎关注我的公众号: <code>HHFCodeRv</code> 交流</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2020-12-22-struct-sync/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>当 Go struct 遇上 sync</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2020-10-20-golang-slice/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>你真的懂 golang reslice 吗</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on x"
+            href="https://x.com/intent/tweet/?text=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f&amp;hashtags=">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f&amp;title=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f&amp;summary=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f&title=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on telegram"
+            href="https://telegram.me/share/url?text=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 疑惑: Go const 会导致程序结果错乱 ? on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e7%96%91%e6%83%91%3a%20Go%20const%20%e4%bc%9a%e5%af%bc%e8%87%b4%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%9c%e9%94%99%e4%b9%b1%20%3f&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-12-17-const-int%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

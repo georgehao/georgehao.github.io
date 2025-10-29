@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Go | HHFCodeRv</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/tags/go/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://georgehao.github.io/tags/go/index.xml" title="rss">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/tags/go/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/tags/go/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Go">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go">
+<meta name="twitter:description" content="">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/tags/">Tags</a></div>
+  <h1>
+    Go
+    <a href="/tags/go/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go runtime.KeepAlive
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在 Go 编程中，你是否注意过临时变量是什么时候被回收的？比如下面这段程序, 变量 a 会在什么时间被 GC 回收掉的？
+func f2() { // do something } func f1() int { var a int = 10 a &#43;= f2() b := a // do something return b } A. f1() 函数结束后的 GC 周期内 B. 当 a 复制给 b 后的 GC 周期内 很多同学稍微不注意，会觉得是 A 是正确的。其实正确答案应该是 B，因为 a 复制给 b 后，a 已经没有被引用了，如果 GC 发生时 a 变量是白色对象，就会被清除掉。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-04-18 21:27:21 +0800 CST'>2023年4月18日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>822 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Go runtime.KeepAlive" href="https://georgehao.github.io/posts/2023-04-19-go-runtime-keepalive/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go1.18 Go workspace 初体验
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>hi，大家好，我是好久没有更新的 haohongfan。
+Go 1.18 终于正式发布了，本次版本更新中 Go mod 有个很实用的功能 “multi-module workspaces”. 本篇文章简单介绍下 workspace 的使用方式以及使用场景。
+更新 go 1.18 版本，推荐使用 goup，做多版本管理很方便。
+Go work 使用方式 1. 创建一个工作空间 mkdir workspace cd workspace 2. 初始化一个项目 mkdir hello_work cd hello go mod init example.com/hello_work output：go: creating new go.mod: module example.com/hello_work
+接着执行：go get github.com/georgehao/gomodtestc
+在 workspace/hello_work 文件夹下，创建 hello_work.go
+package main import ( &#34;fmt&#34; &#34;github.com/georgehao/gomodtestc&#34; ) func main() { fmt.Println(gomodtestc.PrintStr(&#34;Hello&#34;, 100)) } output:
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-04-17 21:27:21 +0800 CST'>2023年4月17日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>757 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Go1.18 Go workspace 初体验" href="https://georgehao.github.io/posts/2023-04-19-go-workspace/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">聊聊我对多云多活方案的看法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>互联网公司发展到一定的规模，系统的高可用就变得极其重要。为了应对那些随时可能发生的意外，“多活”在如今互联网公司好像变得是必备的手段了。甚至一些公司发生一些 P0 事故之后，多活也会出现在 case study 的列表之内。
+在云原生比较流行的今天，很多公司都会选择某云服务厂商来部署公司的相关服务。当公司规模较小时，一般情况下公司的架构会像下图所示。
+虽说每个云服务商都号称自己的稳定性能达到 N 个 9，但是如果一旦该云服务商出现比较严重的问题时，我们只能祈祷该服务商能赶紧恢复，事后云服务商发优惠券补偿。但是对我们业务的客户却造成了很大的伤害，甚者还会造成数据的永久丢失。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-04-16 21:27:21 +0800 CST'>2023年4月16日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2411 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 聊聊我对多云多活方案的看法" href="https://georgehao.github.io/posts/2023-04-19-mulit-cloud/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">性能优化 | Go Ballast 让内存控制更加丝滑
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>关于 Go GC 优化的手段你知道的有哪些？比较常见的是通过调整 GC 的步调，以调整 GC 的触发频率。
+设置 GOGC 设置 debug.SetGCPercent() 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍。
+我们都知道 GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收仅仅是标记内存可以返回给操作系统，并不是立即回收，这就是你看到 Go 应用 RSS 一直居高不下的原因。在整个垃圾回收过程中会暂停整个 Go 程序（STW），Go 垃圾回收的耗时还是主要取决于标记花费的时间的长短，清除过程是非常快的。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-04-15 21:27:21 +0800 CST'>2023年4月15日</span>&nbsp;·&nbsp;<span>4 分钟</span>&nbsp;·&nbsp;<span>1621 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 性能优化 | Go Ballast 让内存控制更加丝滑" href="https://georgehao.github.io/posts/2023-04-19-go-ballest/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>hi，大家好，我是 haohongfan。
+对于 Go CURD-Boy 来说，相信 github.com/go-sql-driver/mysql 这个库都不会陌生。或许有些人可能没太留意，直接就复制粘贴了 import。比如我们使用 gorm 的时候，如果不加 _ &#34;github.com/go-sql-driver/mysql&#34; 的话，就会报：panic: sql: unknown driver &#34;mysql&#34; (forgotten import?)。基本上 Go 的 CURD 都离不开这个特别重要的库。
+不过最近在使用 go-sql-driver/mysql 查询 mysql 的时候，就出现一个很有意思的 bug, 这里分享出来给大家看看。
+Demo 准备 数据库准备 CREATE TABLE `Test1` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT, `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 丛这个 sql 语句中可以看出来， create_time 是 timestamp 类型，这里要特别留意 timestamp 这个类型。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2022-12-08 21:27:21 +0800 CST'>2022年12月8日</span>&nbsp;·&nbsp;<span>3 分钟</span>&nbsp;·&nbsp;<span>1365 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 当 go-sql-driver/mysql 遇到 mysql timestamp 的离奇 bug" href="https://georgehao.github.io/posts/2022-12-08-go-mysql-driver-bug/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 网络库 getty 的那些事
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>个人从事互联网基础架构系统研发十年余，包括我自己在内的很多朋友都是轮子党。
+2011 年我在某大厂干活时，很多使用 C 语言进行开发的同事都有一个自己的私人 SDK 库，尤其是网络通信库。个人刚融入这个环境时，觉得不能写一个基于 epoll/iocp/kqueue 接口封装一个异步网络通信库，会在同事面前矮人三分。现在想起来当时很多同事很大胆，把自己封装的通信库直接在测试生产环境上线使用，据说那时候整个公司投入生产环境运行的 RPC 通信库就有 197 个之多。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-10-07 23:27:21 +0800 CST'>2021年10月7日</span>&nbsp;·&nbsp;<span>17 分钟</span>&nbsp;·&nbsp;<span>8422 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to Go 网络库 getty 的那些事" href="https://georgehao.github.io/posts/2021-10-07-getty/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">聊聊我对 GraphQL 的一些认知
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>
+每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。
+因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-10-06 21:27:21 +0800 CST'>2021年10月6日</span>&nbsp;·&nbsp;<span>9 分钟</span>&nbsp;·&nbsp;<span>4136 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to 聊聊我对 GraphQL 的一些认知" href="https://georgehao.github.io/posts/2021-10-06-graphql/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">gin 源码阅读(3) - gin 路由的实现剖析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>hi, 大家好，我是 hhf。
+往期回顾：
+gin 源码阅读(1) - gin 与 net/http 的关系 gin 源码阅读(2) - http请求是如何流入gin的? 上面两篇文章基本讲清楚了 Web Server 如何接收客户端请求，以及如何将请求流转到 gin 的逻辑。建议没有看过的同学先从第一篇阅读。
+gin 原理剖析说到这里，就完全进入 gin 的逻辑里面了。gin 已经拿到 http 请求了，第一件重要的事情肯定就是重写路由了，所以本节内容主要是分析 gin 的路由相关的内容。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-10-05 23:47:21 +0800 CST'>2021年10月5日</span>&nbsp;·&nbsp;<span>6 分钟</span>&nbsp;·&nbsp;<span>2530 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to gin 源码阅读(3) - gin 路由的实现剖析" href="https://georgehao.github.io/posts/2021-10-05-gin3/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">gin 源码阅读(2) - http请求是如何流入gin的?
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>本篇文章是 gin 源码分析系列的第二篇，这篇文章我们主要弄清一个问题：一个请求通过 net/http 的 socket 接收到请求后, 是如何回到 gin 中处理逻辑的？
+我们仍然以 net/http 的例子开始
+func main() { http.HandleFunc(&#34;/&#34;, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(&#34;Hello World&#34;)) }) if err := http.ListenAndServe(&#34;:8000&#34;, nil); err != nil { fmt.Println(&#34;start http server fail:&#34;, err) } } 这个例子中 http.HandleFunc 通过看源码，可以看到 URI “/” 被注册到了 DefaultServeMux 上。
+func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) { DefaultServeMux.HandleFunc(pattern, handler) } net/http ServeHTTP 的作用 net/http 里面有个非常重要的 Handler interface。只有实现了这个方法才能请求的处理逻辑引入自己的处理流程中。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-10-05 23:27:21 +0800 CST'>2021年10月5日</span>&nbsp;·&nbsp;<span>2 分钟</span>&nbsp;·&nbsp;<span>993 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to gin 源码阅读(2) - http请求是如何流入gin的?" href="https://georgehao.github.io/posts/2021-10-05-gin2/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">gin 源码阅读(1) - gin 与 net/http 的关系
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>gin 是目前 Go 里面使用最广泛的框架之一了，弄清楚 gin 框架的原理，有助于我们更好的使用 gin. 这个系列 gin 源码阅读会逐步讲明白 gin 的原理。
+gin 概览 想弄清楚 gin, 需要弄明白以下几个问题:
+request数据是如何流转的 gin框架到底扮演了什么角色 请求从gin流入net/http, 最后又是如何回到gin中 gin的context为何能承担起来复杂的需求 gin的路由算法 gin的中间件是什么 gin的Engine具体是个什么东西 net/http的requeset, response都提供了哪些有用的东西 从gin的官方第一个demo入手.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-10-05 22:27:21 +0800 CST'>2021年10月5日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2217 字</span>&nbsp;·&nbsp;<span>haohongfan</span></footer>
+  <a class="entry-link" aria-label="post link to gin 源码阅读(1) - gin 与 net/http 的关系" href="https://georgehao.github.io/posts/2021-10-05-gin1/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="https://georgehao.github.io/tags/go/page/2/">下一页&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

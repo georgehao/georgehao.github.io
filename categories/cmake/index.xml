@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Cmake on HHFCodeRv</title>
+    <link>https://georgehao.github.io/categories/cmake/</link>
+    <description>Recent content in Cmake on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Fri, 25 Aug 2017 11:56:24 +0000</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/categories/cmake/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LD_LIBRARY_PATH与-L的关系以及延伸</title>
+      <link>https://georgehao.github.io/posts/2017-08-25-ld_library_path/</link>
+      <pubDate>Fri, 25 Aug 2017 11:56:24 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-08-25-ld_library_path/</guid>
+      <description>&lt;p&gt;最近跟同学讨论c++在编译时g++ -L.. 和LD_LIBRARY_PATH的问题，今天在做一个东西的时候发现，我对这两个东西的理解是错误的，经过一番研究，写下我对这些东西的想法，如果有不对的地方，欢迎指正。
+ 
+我遇到的问题：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;g++ multiple.cpp -L/usr/local/lib -lboost_program_options&lt;/code&gt;编译完后，&lt;code&gt;ldd ./a.out&lt;/code&gt;发现&lt;code&gt;libboost_program_options.so.1.55.0 =&amp;gt; not found&lt;/code&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>有关LD_LIBRARY_PATH与ld.so.conf</title>
+      <link>https://georgehao.github.io/posts/2017-08-25-id_library_path_ld_so_conf/</link>
+      <pubDate>Fri, 25 Aug 2017 11:55:53 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-08-25-id_library_path_ld_so_conf/</guid>
+      <description>&lt;p&gt;我之前写过一篇关于&lt;a href=&#34;http://www.jianshu.com/p/f0f4700d5611&#34;&gt;LD_LIBRARY_PATH与gcc/g++ -L的关系的文章&lt;/a&gt;. 在用CPACK制作了一个Debian安装包，然后我在/home/.bashrc里添加了export &lt;code&gt;LD_LIBRARY_PATH=/usr/loca/lib:$LD_LIBRARY_PATH&lt;/code&gt;, 这个不够优美, 经过一番寻找终于找到了&amp;mdash;ld.so.conf可以完美解决这个问题。
+ &lt;/p&gt;
+&lt;h3 id=&#34;为什么ld_library_path不行&#34;&gt;为什么LD_LIBRARY_PATH不行？&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;http://xahlee.info/UnixResource_dir/_/ldpath.html&#34;&gt;可以看看老外是怎么说的&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;升级共享库时，替换之前先测试一下类似的，升级后的某个程序可能依赖于一些动态链接库，如果你将某个链接库替换了，程序可能就无法工作了。这时候，你可以使用LD_LIBRARY_PATH指向存有备份的一个目录，然后，你可以没有顾忌地替换系统版本了。万一出错，拷贝回去就是了&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

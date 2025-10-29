@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Logrus源码阅读(2)--logrus生命周期 | HHFCodeRv</title>
+<meta name="keywords" content="logrus">
+<meta name="description" content="Logrus源码阅读(2)--logrus生命周期 - HHFCodeRv">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Logrus源码阅读(2)--logrus生命周期">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2019-10-05T11:21:24+08:00">
+    <meta property="article:modified_time" content="2019-10-05T11:21:24+08:00">
+    <meta property="article:tag" content="Golang">
+    <meta property="article:tag" content="Logrus">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Logrus源码阅读(2)--logrus生命周期">
+<meta name="twitter:description" content="">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Logrus源码阅读(2)--logrus生命周期",
+      "item": "https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Logrus源码阅读(2)--logrus生命周期",
+  "name": "Logrus源码阅读(2)--logrus生命周期",
+  "description": "",
+  "keywords": [
+    "logrus"
+  ],
+  "articleBody": "上一篇介绍logrus的基本用法, 本篇文章介绍logrus的整个生命周期\nfunc main() { log.Info(\"hello logrus\") } 从上面这个简单的例子, 追踪logrus的整个生命周期\n初始化 // exported.go:L108 func Info(args ...interface{}) { std.Info(args...) } Info函数的参数是一个可变参数, 接收任意类型的参数\n// exported.go:L11 var ( // std is the name of the standard logger in stdlib `log` std = New() ) func StandardLogger() *Logger { return std } std是一个全局变量, 是一个logrus.Logger类型. 由于std是包外面无法访问的, 所以还提供StandardLogger()函数获取到std\nlogrus就是初始化一个全局变量std, 所有的使用方式都是围绕着这个std来的\n上一篇关于logrus的三种使用方式: logrus.Info, logrus.WithField, Entry(ctx *gin.Context) *logrus.Entry本质就是调用全局变量std\n这里留个思考题, 您是否知道golang的初始化流程呢? std全局变量是什么时候被初始化完成的?\n这里还要引申出另外一个问题: 由于我们维护一个全局变量, 但是我们程序是多goroutine的, 当程序多个地方打印日志或者写入文件时, 如何保证日志顺序的正确性, 也就是并发是如何实现的?\nNew 从初始化那里可以看到std是由New函数创建出来的\nfunc New() *Logger { return \u0026Logger{ Out: os.Stderr, Formatter: new(TextFormatter), Hooks: make(LevelHooks), Level: InfoLevel, ExitFunc: os.Exit, ReportCaller: false, } } logrus由Out, Formatter, Hooks, Level, ExitFunc, ReportCaller组成. 关于组件的详细作用, 下面再具体介绍剖析\n其实还有两个重要的字段\nMutexWrap: 用来解决并发. // Used to sync writing to the log. Locking is enabled by Default entryPool: 用来解决Entry gc压力. // Reusable empty entry 调用流程 回到log.Info(\"hello logrus\")这个最简单的使用的例子, 追踪下具体的调用过程\n// exported.go:L107 // Info logs a message at level Info on the standard logger. func Info(args ...interface{}) { std.Info(args...) // \u003c-- 看这里 } // logger.go:L205 func (logger *Logger) Info(args ...interface{}) { logger.Log(InfoLevel, args...) // \u003c-- 看这里 } // logger.go:L189 func (logger *Logger) Log(level Level, args ...interface{}) { if logger.IsLevelEnabled(level) { entry := logger.newEntry() entry.Log(level, args...) // \u003c-- 看这里 logger.releaseEntry(entry) } } // entry.go:L266 func (entry *Entry) Log(level Level, args ...interface{}) { if entry.Logger.IsLevelEnabled(level) { entry.log(level, fmt.Sprint(args...)) // \u003c-- 看这里 } } // entry.go:L206 func (entry Entry) log(level Level, msg string) { ... buffer = bufferPool.Get().(*bytes.Buffer) buffer.Reset() defer bufferPool.Put(buffer) entry.Buffer = buffer entry.write() // \u003c-- 看这里 .... } // entry.go:L252 func (entry *Entry) write() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() serialized, err := entry.Logger.Formatter.Format(entry) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to obtain reader, %v\\n\", err) } else { _, err = entry.Logger.Out.Write(serialized) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to write to log, %v\\n\", err) } } } 虽说初始化的时候, New出来的是Logger类型, 但logrus真正执行者却是Entry. Logger有两个比较重要的函数newEntry, releaseEntry, logrus所有的log函数, 比如: Info, Error…. 最终都会调用这两个函数\nnewEntry \u0026\u0026 releaseEntry // logger.go:L90-101 func (logger *Logger) newEntry() *Entry { entry, ok := logger.entryPool.Get().(*Entry) if ok { return entry } return NewEntry(logger) } func (logger *Logger) releaseEntry(entry *Entry) { entry.Data = map[string]interface{}{} logger.entryPool.Put(entry) } Logger使用到了sync.Pool, 用来解决频繁创建/释放Entry对象造成的gc的压力. 具体位置就是logger.go:L189\n当我们使用logrus log相关函数时, 必定会调用到logger.Log()函数, 该函数会调用newEntry()来申请Pool内存, 调用完成后会再调用releaseEntry()返还给Pool\n注意点:\n初始化Logger时, New函数没有初始化entryPool, 所以entryPool默认返回的是nil entry, ok := logger.entryPool.Get().(*Entry), 这段代码是先从Pool获取内存, 然后判断获取到的值是否是*Entry类型 在第一次调用时由于获取到的值肯定是nil, 故调用了NewEntry函数获取了一块内存 不过在调用releaseEntry函数时将这块内存Put到entryPool里, 后面所有调用都是从Pool里面获取 newEntry, releaseEntry这是Sync.Pool的另外一种用法, 可以看这里一个具体的简单的例子\nEntry type Entry struct { Logger *Logger // 其实就是std指针, 后面再说具体的作用 Data Fields // 就是各种WithXXX所带的参数 Time time.Time // 提供给logrus.WithTime, logrus.WithContext使用 Level Level // 日志级别 Caller *runtime.Frame // 当设置SetReportCaller时使用, 具体后面再说 Message string // 真正打印的日志内容 Buffer *bytes.Buffer // 提供给各种Formatter使用, 其实就是真正要打印的日志的内存地址 Context context.Context // 提供给logrus.WithTime, logrus.WithContext使用 err string // 提供一个能够包含错误信息的字段 } // entry.go:L80-86 func NewEntry(logger *Logger) *Entry { return \u0026Entry{ Logger: logger, // Default is three fields, plus one optional. Give a little extra room. Data: make(Fields, 6), } } 注意到到Data其实就是map[string]interface{}, 其预先分配了6个空间(预先给make函数⼀一个合理元素数量参数，有助于提升性能。因为事先申请⼀一⼤大块内存， 可避免后续操作时频繁扩张 – Go 学习笔记 第四版. 引申: map是否能用cap函数计算其容量? 为什么?)\nWithXXX 几个比较重要的With函数\nWithContext WithField WithFields WithTime WithError 考虑到篇幅过长, 这个几个函数具体实现, 下篇介绍logurs高级用法再说\nlog 不管程序是否调用WithXXX函数, 最终都会调用Entry.log函数. 这是logrus最重要的函数, Hook机制也就是在这里实现的\nfunc (entry Entry) log(level Level, msg string) { var buffer *bytes.Buffer // 判断时间是否为空, 如果是空的话, 就设置entry.Time为当前时间 if entry.Time.IsZero() { entry.Time = time.Now() } entry.Level = level entry.Message = msg // 设置调用者 if entry.Logger.ReportCaller { entry.Caller = getCaller() } // 调用Hook entry.fireHooks() buffer = bufferPool.Get().(*bytes.Buffer) buffer.Reset() defer bufferPool.Put(buffer) entry.Buffer = buffer entry.write() entry.Buffer = nil // 当日志级别是PanicLevel时, 让程序直接panic if level \u003c= PanicLevel { panic(\u0026entry) } } Hook logrus提供了一个很方便的插件功能就是Hook, 其实现原理很简单. 流程调用的地方就是entry.fireHooks()\nfunc (entry *Entry) fireHooks() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() err := entry.Logger.Hooks.Fire(entry.Level, entry) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to fire hook: %v\\n\", err) } } 我们可以根据自己的需求自定义Hook, 但需要实现Hook的interface\ntype Hook interface { Levels() []Level // 用来确定哪些级别的日志, 去调用Hook Fire(*Entry) error // 真正执行自定义Hook } Hook的使用方法\n实现Levels, Fire函数 调用全局AddHook, 将Hook注册, ok 以github.com/rifflock/lfshook举例\npackage main import ( rotatelogs \"github.com/lestrrat-go/file-rotatelogs\" \"github.com/rifflock/lfshook\" ) func newLfsHook(fileName string, maxRemainCnt uint) log.Hook { writer, err := rotatelogs.New( fileName+\".%Y%m%d%H%M\", rotatelogs.WithLinkName(\"ling_nest_log\"), rotatelogs.WithRotationTime(time.Hour*time.Duration(config.Config.GetInt(\"log.time\"))), rotatelogs.WithRotationCount(maxRemainCnt), ) if err != nil { log.Errorf(\"config local file system for logger error: %v\", err) } lfsHook := lfshook.NewHook(lfshook.WriterMap{ log.DebugLevel: writer, log.InfoLevel: writer, log.WarnLevel: writer, log.ErrorLevel: writer, log.FatalLevel: writer, log.PanicLevel: writer, }, \u0026log.JSONFormatter{}) return lfsHook } func main() { fileName := \"log.txt\" logrus.AddHook(newLfsHook(fileName, 100)) logrus.Info(\"xxxx\") } 值得注意的是: 由于logrus本身并不提供写文件, 并且按照日期自动分割, 删除过期日志文件的功能. 一般情况下大家都是使用github.com/rifflock/lfshook配合github.com/lestrrat-go/file-rotatelogs来实现相关的功能\n原理:\ntype Logger struct { ... Hooks LevelHooks ... } type LevelHooks map[Level][]Hook func (hooks LevelHooks) Add(hook Hook) { for _, level := range hook.Levels() { hooks[level] = append(hooks[level], hook) } } func (hooks LevelHooks) Fire(level Level, entry *Entry) error { for _, hook := range hooks[level] { if err := hook.Fire(entry); err != nil { return err } } return nil } 调用AddHook时, 将Hook加入到LevelHooks map中 程序打印log, 会最终执行到Entry.log() Entry.log()会调用fireHooks() fireHooks又会调用LevelHooks Fire()函数, 该函数会遍历所有的Hook, 从而执行相应的Hook ReportCaller import ( log \"github.com/sirupsen/logrus\" ) func main() { log.SetReportCaller(true) log.Info(\"hello logrus\") } 输出:\nINFO[0000]/Users/haohongfan/goproject/test/logrus_test/main.go:37 main.main() hello logrus\n对比不开启ReportCaller的日志, 多了下面字段:\n日志打印的文件名字 日志打印的行号 日志打印的函数名字 关于如何实现的, 推荐先看鸟窝博客- «如何在Go的函数中得到调用者函数名?»\n其实ReportCaller主要是提供给Formatter使用的, 例如: JSONFormatter\n// json_formatter.go:L91-103 if entry.HasCaller() { funcVal := entry.Caller.Function fileVal := fmt.Sprintf(\"%s:%d\", entry.Caller.File, entry.Caller.Line) if f.CallerPrettyfier != nil { funcVal, fileVal = f.CallerPrettyfier(entry.Caller) } if funcVal != \"\" { data[f.FieldMap.resolve(FieldKeyFunc)] = funcVal } if fileVal != \"\" { data[f.FieldMap.resolve(FieldKeyFile)] = fileVal } } 由于打算结合logrus的实现, 出一篇介绍golang如何获取调用者的文件名/函数名/行号等等, 及其实现的原理的文章, 就不在继续扩展了\n这里简单说下logrus的实现过程.\n规则:\n当设置SetReportCaller(true)时, 会最终在Entry.log()函数调用entry.Caller = getCaller() getCaller()函数有个callerInitOnce sync.Once变量, 在第一次被调用时会获取logrus的包名字是github.com/sirupsen/logrus 紧接着调用runtime.CallersFrames获取到所有函数调用栈 然后比对函数栈的package名字, 与github.com/sirupsen/logrus相比, 如果不相等, 则是去掉logrus包的第一个调用者; 否则continue 比如:\nfunc main() { log.SetReportCaller(true) log.Info(\"hello logrus\") } 函数调用栈的顺序是:\ngithub.com/sirupsen/logrus.(*Logger).Log github.com/sirupsen/logrus.(*Logger).Info github.com/sirupsen/logrus.Info main.main 按照上面的规则, 由于1,2,3获取到的package包名都是github.com/sirupsen/logrus, 故continue, 最终获取到的第一个函数是main.main的*runtime.Frame. Frame包含着文件名, 函数名, 行号等等\n我们回过头看logrus获取调用者的这个实现. 是靠着完全遍历匹配package名来获取调用者的. 先抛去runtime.Caller等相关的函数是否慢的问题, 单说这个完全匹配的过程已经浪费了大量时间处理这个事情. 所以我们日志在release版本下还是尽量不要开启这个选项, logrus也不建议使用这开启这个选项\nwrite logrus另外一个非常重要的函数\n// entry.go:L252-264 func (entry *Entry) write() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() serialized, err := entry.Logger.Formatter.Format(entry) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to obtain reader, %v\\n\", err) } else { _, err = entry.Logger.Out.Write(serialized) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to write to log, %v\\n\", err) } } } 看着很简单, 其实包含的内容还是挺多的: Formatter, Out\nFormatter type Formatter interface { Format(*Entry) ([]byte, error) } 由于Formatter是个接口类型, 故可以根据自己的需求, 实现自己的Formatter, 只需要实现对应的Format函数即可\n继续查看Formatter的具体调用过程(暂且不管Mutex的问题)\n// 执行Formatter的地方 func (entry *Entry) write() { ... entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() serialized, err := entry.Logger.Formatter.Format(entry) ... } // 设置Formatter的地方 // SetFormatter sets the standard logger formatter. func SetFormatter(formatter Formatter) { std.SetFormatter(formatter) } 在调用logrus.SetFormatter()函数后, Logger的Formatter字段就被设置为你想使用的XXXFormatter了, 如果没有设置那么就是默认的TextFormatter\n程序执行到entry.Logger.Formatter.Format(entry)时, 就会执行具体的XXXFormatter的Format函数, 从而执行具体的序列化过程\n这里由于篇幅限制只解析比较简单的JSONFormatter, 这个其实经常被用到的Formatter.\nJSONFormatter // json_formatter.go:L24-54 type JSONFormatter struct { TimestampFormat string // 设置Formatter时间格式 DisableTimestamp bool // 控制序列化时是否显示时间 DataKey string // 配合主要是配合WithFields使用 FieldMap FieldMap // 其实用处很小, 就是让用户自定义序列化字段的名字 CallerPrettyfier func(*runtime.Frame) (function string, file string) // 配合SetReportCaller, 不需要太关注 PrettyPrint bool // 让Json格式化输出 } 主要字段介绍\n1.TimestampFormat Time的时间格式, 设置JSONFormatter TimestampFormat字段时就可以选择下面这些常量. 默认值:time.RFC3339\nANSIC = \"Mon Jan _2 15:04:05 2006\" UnixDate = \"Mon Jan _2 15:04:05 MST 2006\" RubyDate = \"Mon Jan 02 15:04:05 -0700 2006\" RFC822 = \"02 Jan 06 15:04 MST\" RFC822Z = \"02 Jan 06 15:04 -0700\" // RFC822 with numeric zone RFC850 = \"Monday, 02-Jan-06 15:04:05 MST\" RFC1123 = \"Mon, 02 Jan 2006 15:04:05 MST\" RFC1123Z = \"Mon, 02 Jan 2006 15:04:05 -0700\" // RFC1123 with numeric zone RFC3339 = \"2006-01-02T15:04:05Z07:00\" RFC3339Nano = \"2006-01-02T15:04:05.999999999Z07:00\" Kitchen = \"3:04PM\" // Handy time stamps. Stamp = \"Jan _2 15:04:05\" StampMilli = \"Jan _2 15:04:05.000\" StampMicro = \"Jan _2 15:04:05.000000\" StampNano = \"Jan _2 15:04:05.000000000 2.DataKey func main() { log.SetFormatter(\u0026log.JSONFormatter{ DataKey: \"hhf\", }) log.WithFields(log.Fields{\"k1\": \"v1\"}).Info(\"hello logrus\") } 输出:\n{\"hhf\":{\"k1\":\"v1\"},\"level\":\"info\",\"msg\":\"hello logrus\",\"time\":\"2019-10-09T13:31:05+08:00\"}\n当没有注释掉DataKey: \"hhf\"时, 输出就会变成下面\n{\"k1\":\"v1\",\"level\":\"info\",\"msg\":\"hello logrus\",\"time\":\"2019-10-09T13:32:26+08:00\"}\n其实就是用DataKey来包装一下WithFields的k-v字段\n3.FieldMap func main() { log.SetFormatter(\u0026log.JSONFormatter{ FieldMap: log.FieldMap{ log.FieldKeyTime: \"@timestamphhf\", log.FieldKeyLevel: \"@levelhhf\", log.FieldKeyMsg: \"@messagehhf\", log.FieldKeyFunc: \"@callerhhf\", }, }) log.WithFields(log.Fields{\"k1\": \"v1\"}).Info(\"hello logrus\" } 输出:\n{\"@levelhhf\":\"info\",\"@messagehhf\":\"hello logrus\",\"@timestamphhf\":\"2019-10-09T13:42:09+08:00\",\"k1\":\"v1\"} 主要的key有下面这几种类型\nFieldKeyMsg = \"msg\" FieldKeyLevel = \"level\" FieldKeyTime = \"time\" FieldKeyLogrusError = \"logrus_error\" FieldKeyFunc = \"func\" FieldKeyFile = \"file 4.PrettyPrint func main() { log.SetFormatter(\u0026log.JSONFormatter{PrettyPrint: true}) log.WithFields(log.Fields{\"k1\": \"v1\"}).Info(\"hello logrus\") } 输出结果:\n{ \"k1\": \"v1\", \"level\": \"info\", \"msg\": \"hello logrus\", \"time\": \"2019-10-09T13:52:18+08:00\" } Format // json_formatter.go:L57-121 func (f *JSONFormatter) Format(entry *Entry) ([]byte, error) { // 将Entry的WithFields的kv值遍历放入到map[string]interface{}类型的data中 data := make(Fields, len(entry.Data)+4) for k, v := range entry.Data { switch v := v.(type) { case error: // Otherwise errors are ignored by `encoding/json` // https://github.com/sirupsen/logrus/issues/137 data[k] = v.Error() default: data[k] = v } } // 判断是否存在DataKey, 如果是就用DataKey包装一下data if f.DataKey != \"\" { newData := make(Fields, 4) newData[f.DataKey] = data data = newData } // 该函数判断调用WithFields时, 当用户自定义的Key与logrus内置的key相同时, // 用户自定义的key会转换成fields.xx. 例如:logrus.WithField(\"level\", 1).Info(\"hello\"), // 由于level跟内置的FieldKeyLevel冲突了, 那么输出就会变成 // {\"level\": \"info\", \"fields.level\": 1, \"msg\": \"hello\", \"time\": \"...\"} prefixFieldClashes(data, f.FieldMap, entry.HasCaller()) // 设置时间的序列化方式 timestampFormat := f.TimestampFormat if timestampFormat == \"\" { timestampFormat = defaultTimestampFormat } // 判断entry的error是否有值, 进行相关的序列化 if entry.err != \"\" { data[f.FieldMap.resolve(FieldKeyLogrusError)] = entry.err } // 判断是否禁用Timestamp, 如果不禁用, 就将时间戳按照相应的格式序列化. entry.Time在entry.log()函数里进行了初始化 // if entry.Time.IsZero() { // entry.Time = time.Now() // } if !f.DisableTimestamp { data[f.FieldMap.resolve(FieldKeyTime)] = entry.Time.Format(timestampFormat) } // 设置日志的具体内容 data[f.FieldMap.resolve(FieldKeyMsg)] = entry.Message // 设置日志级别 data[f.FieldMap.resolve(FieldKeyLevel)] = entry.Level.String() // 序列化调用位置 if entry.HasCaller() { funcVal := entry.Caller.Function fileVal := fmt.Sprintf(\"%s:%d\", entry.Caller.File, entry.Caller.Line) if f.CallerPrettyfier != nil { funcVal, fileVal = f.CallerPrettyfier(entry.Caller) } if funcVal != \"\" { data[f.FieldMap.resolve(FieldKeyFunc)] = funcVal } if fileVal != \"\" { data[f.FieldMap.resolve(FieldKeyFile)] = fileVal } } // entry.Buffer是在entry.log()函数里(entry.go:L226-229)从sync.Pool里获取到一块内容空间 // 目的是: 防止JSONFormatter每次调用都会去申请空间, 减小GC压力 var b *bytes.Buffer if entry.Buffer != nil { b = entry.Buffer } else { b = \u0026bytes.Buffer{} } // 将Buffer提供给json encoder使用 encoder := json.NewEncoder(b) if f.PrettyPrint { encoder.SetIndent(\"\", \" \") } if err := encoder.Encode(data); err != nil { return nil, fmt.Errorf(\"failed to marshal fields to JSON, %v\", err) } // 序列化完成, 将序列化的内容返回 return b.Bytes(), nil } Out Formatter介绍完了, 回到上面write()函数继续剖析Out相关\n// entry.go:L252-264 func (entry *Entry) write() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() serialized, err := entry.Logger.Formatter.Format(entry) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to obtain reader, %v\\n\", err) } else { _, err = entry.Logger.Out.Write(serialized) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to write to log, %v\\n\", err) } } } 在没有调用SetOutput时, 默认的Out是os.Stderr, 所以默认情况下基本都打印到终端里, 没有存入文件\n即使logrus可以提供io.Writter, 但是还是不建议在这里将日志落盘, 还是使用lfsHook来做这个事情\n在这里也回答上面一个问题, 为什么在Entry结构体里面会有Logger指针存在?\n答: 以Out举例, 由于我们在调用logrus.SetOutput()函数时, Out是设置给Logger的, 但是真正的使用者却是Entry. 故需要将Logger传给Entry一份\nlogrus如何保证并发的正确性 logrus的并发控制的正确性是靠着Logger.Mutex来实现的. 程序中调用Logger.Mutex地方有几处:\nfireHooks() entry.go:L243 write() entry.go:L252 AddHook() logger.go:L313 ReplaceHook() logger.go:L345 SetFormatter() logger.go:L235 SetNoLock() logger.go:L294 SetOutput() logger.go:L332 SetReportCaller() logger.go:338 最重要的两处就是fireHooks(), write()\nfunc (entry *Entry) fireHooks() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() err := entry.Logger.Hooks.Fire(entry.Level, entry) if err != nil { fmt.Fprintf(os.Stderr, \"Failed to fire hook: %v\\n\", err) } } func (entry *Entry) write() { entry.Logger.mu.Lock() defer entry.Logger.mu.Unlock() serialized, err := entry.Logger.Formatter.Format(entry) .... } 可以观察到, 不管有多少goroutine在调用logrus, 都是靠着资源竞争来保证顺序的正确性\n查看整个logrus的源码, logrus只有一个goroutine顺序处理日志数据, 并且没有相关的buffer来保存日志信息, 这就造成logrus的整体效率是不高的\n后面一篇文章会专门对比zap之间的差别, 敬请期待\n总结 至此, logrus的主体源码已经解析完毕\n一句话总结其生命周期就是: logrus是在编译期就确定的一个全局变量, 伴随着我们程序的整个生命周期而存在. 最重要的组件是: Formatter, Hook. 良好的序列化机制, 方便的插件开发是我们选择logrus的原因\n参考文档 鸟窝博客 - 如何在Go的函数中得到调用者函数名? https://colobu.com/2018/11/03/get-function-name-in-go/ logrus https://github.com/sirupsen/logrus file-rotatelogs https://github.com/lestrrat-go/file-rotatelogs lfshook https://github.com/rifflock/lfshook dingrus https://github.com/dandans-dan/dingrus ",
+  "wordCount" : "5984",
+  "inLanguage": "zh",
+  "datePublished": "2019-10-05T11:21:24+08:00",
+  "dateModified": "2019-10-05T11:21:24+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2019-10-05-logrus-life-cycle/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Logrus源码阅读(2)--logrus生命周期
+    </h1>
+    <div class="post-meta"><span title='2019-10-05 11:21:24 +0800 CST'>2019年10月5日</span>&nbsp;·&nbsp;<span>12 分钟</span>&nbsp;·&nbsp;<span>5984 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#初始化">初始化</a>
+      <ul>
+        <li><a href="#new">New</a></li>
+      </ul>
+    </li>
+    <li><a href="#调用流程">调用流程</a>
+      <ul>
+        <li><a href="#newentry--releaseentry">newEntry &amp;&amp; releaseEntry</a></li>
+      </ul>
+    </li>
+    <li><a href="#entry">Entry</a>
+      <ul>
+        <li><a href="#withxxx">WithXXX</a></li>
+        <li><a href="#log">log</a></li>
+      </ul>
+    </li>
+    <li><a href="#hook">Hook</a></li>
+    <li><a href="#reportcaller">ReportCaller</a></li>
+    <li><a href="#write">write</a>
+      <ul>
+        <li><a href="#formatter">Formatter</a>
+          <ul>
+            <li><a href="#jsonformatter">JSONFormatter</a>
+              <ul>
+                <li><a href="#1timestampformat">1.TimestampFormat</a></li>
+                <li><a href="#2datakey">2.DataKey</a></li>
+                <li><a href="#3fieldmap">3.FieldMap</a></li>
+                <li><a href="#4prettyprint">4.PrettyPrint</a></li>
+              </ul>
+            </li>
+            <li><a href="#format">Format</a></li>
+          </ul>
+        </li>
+        <li><a href="#out">Out</a></li>
+      </ul>
+    </li>
+    <li><a href="#logrus如何保证并发的正确性">logrus如何保证并发的正确性</a></li>
+    <li><a href="#总结">总结</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><a href="https://georgehao.github.io/post/2019-06-11-logurs-1/">上一篇</a>介绍logrus的基本用法, 本篇文章介绍logrus的整个生命周期</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>从上面这个简单的例子, 追踪logrus的整个生命周期</p>
+<h2 id="初始化">初始化<a hidden class="anchor" aria-hidden="true" href="#初始化">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="c1">// exported.go:L108</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">Info</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="o">...</span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">std</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="nx">args</span><span class="o">...</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Info函数的参数是一个可变参数, 接收任意类型的参数</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-golang" data-lang="golang"><span class="line"><span class="cl"><span class="c1">// exported.go:L11</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">var</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// std is the name of the standard logger in stdlib `log`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">std</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">New</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">StandardLogger</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">std</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>std是一个全局变量, 是一个<code>logrus.Logger</code>类型. 由于std是包外面无法访问的, 所以还提供StandardLogger()函数获取到std</p>
+<p>logrus就是初始化一个全局变量<code>std</code>, 所有的使用方式都是围绕着这个std来的</p>
+<p>上一篇关于logrus的三种使用方式: <code>logrus.Info</code>, <code>logrus.WithField</code>, <code>Entry(ctx *gin.Context) *logrus.Entry</code>本质就是调用全局变量std</p>
+<p><strong>这里留个思考题, 您是否知道golang的初始化流程呢? std全局变量是什么时候被初始化完成的?</strong></p>
+<p>这里还要引申出另外一个问题: 由于我们维护一个全局变量, 但是我们程序是多goroutine的, 当程序多个地方打印日志或者写入文件时, 如何保证日志顺序的正确性, 也就是并发是如何实现的?</p>
+<h3 id="new">New<a hidden class="anchor" aria-hidden="true" href="#new">#</a></h3>
+<p>从<code>初始化</code>那里可以看到std是由<code>New</code>函数创建出来的</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">New</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Logger</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Out</span><span class="p">:</span><span class="w">          </span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Formatter</span><span class="p">:</span><span class="w">    </span><span class="nb">new</span><span class="p">(</span><span class="nx">TextFormatter</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Hooks</span><span class="p">:</span><span class="w">        </span><span class="nb">make</span><span class="p">(</span><span class="nx">LevelHooks</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Level</span><span class="p">:</span><span class="w">        </span><span class="nx">InfoLevel</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">ExitFunc</span><span class="p">:</span><span class="w">     </span><span class="nx">os</span><span class="p">.</span><span class="nx">Exit</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">ReportCaller</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>logrus由<code>Out</code>, <code>Formatter</code>, <code>Hooks</code>, <code>Level</code>, <code>ExitFunc</code>, <code>ReportCaller</code>组成. 关于组件的详细作用, 下面再具体介绍剖析</p>
+<p>其实还有两个重要的字段</p>
+<ul>
+<li>MutexWrap: 用来解决并发. // Used to sync writing to the log. Locking is enabled by Default</li>
+<li>entryPool: 用来解决Entry gc压力. // Reusable empty entry</li>
+</ul>
+<h2 id="调用流程">调用流程<a hidden class="anchor" aria-hidden="true" href="#调用流程">#</a></h2>
+<p>回到<code>log.Info(&quot;hello logrus&quot;)</code>这个最简单的使用的例子, 追踪下具体的调用过程</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/logrus-liucheng2.png"></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// exported.go:L107</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// Info logs a message at level Info on the standard logger.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">Info</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="o">...</span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">std</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="nx">args</span><span class="o">...</span><span class="p">)</span><span class="w"> </span><span class="c1">// &lt;-- 看这里</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// logger.go:L205</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="nf">Info</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="o">...</span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">logger</span><span class="p">.</span><span class="nf">Log</span><span class="p">(</span><span class="nx">InfoLevel</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">...</span><span class="p">)</span><span class="w"> </span><span class="c1">// &lt;-- 看这里</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// logger.go:L189</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="nf">Log</span><span class="p">(</span><span class="nx">level</span><span class="w"> </span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="o">...</span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">logger</span><span class="p">.</span><span class="nf">IsLevelEnabled</span><span class="p">(</span><span class="nx">level</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">entry</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">logger</span><span class="p">.</span><span class="nf">newEntry</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">entry</span><span class="p">.</span><span class="nf">Log</span><span class="p">(</span><span class="nx">level</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">...</span><span class="p">)</span><span class="w"> </span><span class="c1">// &lt;-- 看这里</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">logger</span><span class="p">.</span><span class="nf">releaseEntry</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// entry.go:L266</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">Log</span><span class="p">(</span><span class="nx">level</span><span class="w"> </span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="o">...</span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nf">IsLevelEnabled</span><span class="p">(</span><span class="nx">level</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">entry</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">level</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprint</span><span class="p">(</span><span class="nx">args</span><span class="o">...</span><span class="p">))</span><span class="w"> </span><span class="c1">// &lt;-- 看这里</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// entry.go:L206</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="nx">level</span><span class="w"> </span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">msg</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">bufferPool</span><span class="p">.</span><span class="nf">Get</span><span class="p">().(</span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">buffer</span><span class="p">.</span><span class="nf">Reset</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">bufferPool</span><span class="p">.</span><span class="nf">Put</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">buffer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="c1">// &lt;-- 看这里</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="p">.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// entry.go:L252</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">serialized</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Formatter</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to obtain reader, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Out</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to write to log, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>虽说初始化的时候, New出来的是<code>Logger</code>类型, 但logrus真正执行者却是<code>Entry</code>. <code>Logger</code>有两个比较重要的函数<code>newEntry</code>, <code>releaseEntry</code>, logrus所有的log函数, 比如: <code>Info</code>, <code>Error</code>&hellip;. 最终都会调用这两个函数</p>
+<h3 id="newentry--releaseentry">newEntry &amp;&amp; releaseEntry<a hidden class="anchor" aria-hidden="true" href="#newentry--releaseentry">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// logger.go:L90-101</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="nf">newEntry</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">logger</span><span class="p">.</span><span class="nx">entryPool</span><span class="p">.</span><span class="nf">Get</span><span class="p">().(</span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nx">entry</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nf">NewEntry</span><span class="p">(</span><span class="nx">logger</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="nf">releaseEntry</span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">logger</span><span class="p">.</span><span class="nx">entryPool</span><span class="p">.</span><span class="nf">Put</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Logger使用到了<code>sync.Pool</code>, 用来解决频繁创建/释放Entry对象造成的gc的压力. 具体位置就是<code>logger.go:L189</code></p>
+<p>当我们使用logrus log相关函数时, 必定会调用到<code>logger.Log()</code>函数, 该函数会调用<code>newEntry()</code>来申请Pool内存, 调用完成后会再调用<code>releaseEntry()</code>返还给Pool</p>
+<p>注意点:</p>
+<ol>
+<li>初始化Logger时, <code>New</code>函数没有初始化entryPool, 所以entryPool默认返回的是nil</li>
+<li>entry, ok := logger.entryPool.Get().(*Entry), 这段代码是先从Pool获取内存, 然后判断获取到的值是否是<code>*Entry</code>类型</li>
+<li>在第一次调用时由于获取到的值肯定是nil, 故调用了<code>NewEntry</code>函数获取了一块内存</li>
+<li>不过在调用releaseEntry函数时将这块内存Put到entryPool里, 后面所有调用都是从Pool里面获取</li>
+</ol>
+<p>newEntry, releaseEntry这是<code>Sync.Pool</code>的另外一种用法, 可以看这里一个具体的简单的<a href="https://play.golang.org/p/74gWnH37-zr">例子</a></p>
+<h2 id="entry">Entry<a hidden class="anchor" aria-hidden="true" href="#entry">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Entry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="w"> </span><span class="c1">// 其实就是std指针, 后面再说具体的作用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Data</span><span class="w"> </span><span class="nx">Fields</span><span class="w">    </span><span class="c1">// 就是各种WithXXX所带的参数</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Time</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="c1">// 提供给logrus.WithTime, logrus.WithContext使用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Level</span><span class="w"> </span><span class="nx">Level</span><span class="w">    </span><span class="c1">// 日志级别</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Caller</span><span class="w"> </span><span class="o">*</span><span class="nx">runtime</span><span class="p">.</span><span class="nx">Frame</span><span class="w">  </span><span class="c1">// 当设置SetReportCaller时使用, 具体后面再说</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Message</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 真正打印的日志内容</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Buffer</span><span class="w"> </span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="w"> </span><span class="c1">// 提供给各种Formatter使用, 其实就是真正要打印的日志的内存地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Context</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="w"> </span><span class="c1">// 提供给logrus.WithTime, logrus.WithContext使用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">err</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 提供一个能够包含错误信息的字段</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// entry.go:L80-86</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">NewEntry</span><span class="p">(</span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Entry</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Logger</span><span class="p">:</span><span class="w"> </span><span class="nx">logger</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// Default is three fields, plus one optional.  Give a little extra room.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Data</span><span class="p">:</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">Fields</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>注意到到Data其实就是<code>map[string]interface{}</code>, 其预先分配了6个空间(预先给make函数⼀一个合理元素数量参数，有助于提升性能。因为事先申请⼀一⼤大块内存， 可避免后续操作时频繁扩张 &ndash; Go 学习笔记 第四版. 引申: map是否能用cap函数计算其容量? 为什么?)</p>
+<h3 id="withxxx">WithXXX<a hidden class="anchor" aria-hidden="true" href="#withxxx">#</a></h3>
+<p>几个比较重要的With函数</p>
+<ul>
+<li>WithContext</li>
+<li>WithField</li>
+<li>WithFields</li>
+<li>WithTime</li>
+<li>WithError</li>
+</ul>
+<p>考虑到篇幅过长, 这个几个函数具体实现, 下篇介绍logurs高级用法再说</p>
+<h3 id="log">log<a hidden class="anchor" aria-hidden="true" href="#log">#</a></h3>
+<p>不管程序是否调用WithXXX函数, 最终都会调用Entry.log函数. 这是logrus最重要的函数, Hook机制也就是在这里实现的</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="nx">level</span><span class="w"> </span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">msg</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">buffer</span><span class="w"> </span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 判断时间是否为空, 如果是空的话, 就设置entry.Time为当前时间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Time</span><span class="p">.</span><span class="nf">IsZero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Level</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">level</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Message</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">msg</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 设置调用者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">ReportCaller</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">getCaller</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 调用Hook</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nf">fireHooks</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">bufferPool</span><span class="p">.</span><span class="nf">Get</span><span class="p">().(</span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">buffer</span><span class="p">.</span><span class="nf">Reset</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">bufferPool</span><span class="p">.</span><span class="nf">Put</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">buffer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nf">write</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Buffer</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 当日志级别是PanicLevel时, 让程序直接panic</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">level</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">PanicLevel</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nb">panic</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h2 id="hook">Hook<a hidden class="anchor" aria-hidden="true" href="#hook">#</a></h2>
+<p>logrus提供了一个很方便的插件功能就是Hook, 其实现原理很简单. 流程调用的地方就是<code>entry.fireHooks()</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">fireHooks</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Hooks</span><span class="p">.</span><span class="nf">Fire</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to fire hook: %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>我们可以根据自己的需求自定义Hook, 但需要实现Hook的interface</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Hook</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nf">Levels</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="nx">Level</span><span class="w"> </span><span class="c1">// 用来确定哪些级别的日志, 去调用Hook</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nf">Fire</span><span class="p">(</span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="c1">// 真正执行自定义Hook</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Hook的使用方法</strong></p>
+<ol>
+<li>实现Levels, Fire函数</li>
+<li>调用全局AddHook, 将Hook注册, ok</li>
+</ol>
+<p>以<code>github.com/rifflock/lfshook</code>举例</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rotatelogs</span><span class="w"> </span><span class="s">&#34;github.com/lestrrat-go/file-rotatelogs&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;github.com/rifflock/lfshook&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">newLfsHook</span><span class="p">(</span><span class="nx">fileName</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">maxRemainCnt</span><span class="w"> </span><span class="kt">uint</span><span class="p">)</span><span class="w"> </span><span class="nx">log</span><span class="p">.</span><span class="nx">Hook</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">writer</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rotatelogs</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fileName</span><span class="o">+</span><span class="s">&#34;.%Y%m%d%H%M&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rotatelogs</span><span class="p">.</span><span class="nf">WithLinkName</span><span class="p">(</span><span class="s">&#34;ling_nest_log&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rotatelogs</span><span class="p">.</span><span class="nf">WithRotationTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">Config</span><span class="p">.</span><span class="nf">GetInt</span><span class="p">(</span><span class="s">&#34;log.time&#34;</span><span class="p">))),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rotatelogs</span><span class="p">.</span><span class="nf">WithRotationCount</span><span class="p">(</span><span class="nx">maxRemainCnt</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;config local file system for logger error: %v&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">lfsHook</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">lfshook</span><span class="p">.</span><span class="nf">NewHook</span><span class="p">(</span><span class="nx">lfshook</span><span class="p">.</span><span class="nx">WriterMap</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">DebugLevel</span><span class="p">:</span><span class="w"> </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">InfoLevel</span><span class="p">:</span><span class="w">  </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">WarnLevel</span><span class="p">:</span><span class="w">  </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">ErrorLevel</span><span class="p">:</span><span class="w"> </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">FatalLevel</span><span class="p">:</span><span class="w"> </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">log</span><span class="p">.</span><span class="nx">PanicLevel</span><span class="p">:</span><span class="w"> </span><span class="nx">writer</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">},</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">log</span><span class="p">.</span><span class="nx">JSONFormatter</span><span class="p">{})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">lfsHook</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fileName</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&#34;log.txt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">logrus</span><span class="p">.</span><span class="nf">AddHook</span><span class="p">(</span><span class="nf">newLfsHook</span><span class="p">(</span><span class="nx">fileName</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">logrus</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;xxxx&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>值得注意的是: <strong>由于logrus本身并不提供写文件, 并且按照日期自动分割, 删除过期日志文件的功能. 一般情况下大家都是使用<code>github.com/rifflock/lfshook</code>配合<code>github.com/lestrrat-go/file-rotatelogs</code>来实现相关的功能</strong></p>
+<p>原理:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Logger</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Hooks</span><span class="w"> </span><span class="nx">LevelHooks</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">LevelHooks</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="nx">Level</span><span class="p">][]</span><span class="nx">Hook</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">hooks</span><span class="w"> </span><span class="nx">LevelHooks</span><span class="p">)</span><span class="w"> </span><span class="nf">Add</span><span class="p">(</span><span class="nx">hook</span><span class="w"> </span><span class="nx">Hook</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">level</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">hook</span><span class="p">.</span><span class="nf">Levels</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">hooks</span><span class="p">[</span><span class="nx">level</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">hooks</span><span class="p">[</span><span class="nx">level</span><span class="p">],</span><span class="w"> </span><span class="nx">hook</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">hooks</span><span class="w"> </span><span class="nx">LevelHooks</span><span class="p">)</span><span class="w"> </span><span class="nf">Fire</span><span class="p">(</span><span class="nx">level</span><span class="w"> </span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">hook</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">hooks</span><span class="p">[</span><span class="nx">level</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">hook</span><span class="p">.</span><span class="nf">Fire</span><span class="p">(</span><span class="nx">entry</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><ol>
+<li>调用AddHook时, 将Hook加入到LevelHooks map中</li>
+<li>程序打印log, 会最终执行到<code>Entry.log()</code></li>
+<li>Entry.log()会调用<code>fireHooks()</code></li>
+<li>fireHooks又会调用LevelHooks Fire()函数, 该函数会遍历所有的Hook, 从而执行相应的Hook</li>
+</ol>
+<h2 id="reportcaller">ReportCaller<a hidden class="anchor" aria-hidden="true" href="#reportcaller">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="w"> </span><span class="s">&#34;github.com/sirupsen/logrus&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">SetReportCaller</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>输出:</p>
+<p><code>INFO[0000]/Users/haohongfan/goproject/test/logrus_test/main.go:37 main.main() hello logrus</code></p>
+<p>对比不开启<code>ReportCaller</code>的日志, 多了下面字段:</p>
+<ol>
+<li>日志打印的文件名字</li>
+<li>日志打印的行号</li>
+<li>日志打印的函数名字</li>
+</ol>
+<p>关于如何实现的, 推荐先看鸟窝博客- &laquo;如何在Go的函数中得到调用者函数名?&raquo;</p>
+<p>其实ReportCaller主要是提供给Formatter使用的, 例如: JSONFormatter</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// json_formatter.go:L91-103</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nf">HasCaller</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">funcVal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">Function</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fileVal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%s:%d&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">File</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">Line</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">CallerPrettyfier</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">funcVal</span><span class="p">,</span><span class="w"> </span><span class="nx">fileVal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nf">CallerPrettyfier</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">funcVal</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyFunc</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">funcVal</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">fileVal</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyFile</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">fileVal</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>由于打算结合logrus的实现, 出一篇介绍golang如何获取调用者的文件名/函数名/行号等等, 及其实现的原理的文章, 就不在继续扩展了</p>
+<p>这里简单说下logrus的实现过程.</p>
+<p>规则:</p>
+<ol>
+<li>当设置SetReportCaller(true)时, 会最终在Entry.log()函数调用<code>entry.Caller = getCaller()</code></li>
+<li><code>getCaller()</code>函数有个<code>callerInitOnce</code> sync.Once变量, 在第一次被调用时会获取logrus的包名字是<code>github.com/sirupsen/logrus</code></li>
+<li>紧接着调用<code>runtime.CallersFrames</code>获取到所有函数调用栈</li>
+<li>然后比对函数栈的package名字, 与<code>github.com/sirupsen/logrus</code>相比, 如果不相等, 则是去掉logrus包的第一个调用者; 否则continue</li>
+</ol>
+<p>比如:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">SetReportCaller</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>函数调用栈的顺序是:</p>
+<ol>
+<li>github.com/sirupsen/logrus.(*Logger).Log</li>
+<li>github.com/sirupsen/logrus.(*Logger).Info</li>
+<li>github.com/sirupsen/logrus.Info</li>
+<li>main.main</li>
+</ol>
+<p>按照上面的规则, 由于1,2,3获取到的package包名都是github.com/sirupsen/logrus, 故continue, 最终获取到的第一个函数是main.main的<code>*runtime.Frame</code>. Frame包含着文件名, 函数名, 行号等等</p>
+<p>我们回过头看logrus获取调用者的这个实现. 是靠着完全遍历匹配package名来获取调用者的. 先抛去runtime.Caller等相关的函数是否慢的问题, 单说这个完全匹配的过程已经浪费了大量时间处理这个事情. <strong>所以我们日志在release版本下还是尽量不要开启这个选项, logrus也不建议使用这开启这个选项</strong></p>
+<h2 id="write">write<a hidden class="anchor" aria-hidden="true" href="#write">#</a></h2>
+<p>logrus另外一个非常重要的函数</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// entry.go:L252-264</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">serialized</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Formatter</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to obtain reader, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Out</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to write to log, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>看着很简单, 其实包含的内容还是挺多的: <code>Formatter</code>, <code>Out</code></p>
+<h3 id="formatter">Formatter<a hidden class="anchor" aria-hidden="true" href="#formatter">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Formatter</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nf">Format</span><span class="p">(</span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>由于Formatter是个接口类型, 故可以根据自己的需求, 实现自己的Formatter, 只需要实现对应的Format函数即可</p>
+<p>继续查看Formatter的具体调用过程(暂且不管Mutex的问题)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 执行Formatter的地方</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">serialized</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Formatter</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 设置Formatter的地方</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// SetFormatter sets the standard logger formatter.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">SetFormatter</span><span class="p">(</span><span class="nx">formatter</span><span class="w"> </span><span class="nx">Formatter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">std</span><span class="p">.</span><span class="nf">SetFormatter</span><span class="p">(</span><span class="nx">formatter</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在调用logrus.SetFormatter()函数后, <code>Logger</code>的<code>Formatter</code>字段就被设置为你想使用的<code>XXXFormatter</code>了, 如果没有设置那么就是默认的<code>TextFormatter</code></p>
+<p>程序执行到<code>entry.Logger.Formatter.Format(entry)</code>时, 就会执行具体的XXXFormatter的Format函数, 从而执行具体的序列化过程</p>
+<p>这里由于篇幅限制只解析比较简单的<code>JSONFormatter</code>, 这个其实经常被用到的Formatter.</p>
+<h4 id="jsonformatter">JSONFormatter<a hidden class="anchor" aria-hidden="true" href="#jsonformatter">#</a></h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// json_formatter.go:L24-54</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">JSONFormatter</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">TimestampFormat</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 设置Formatter时间格式</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">DisableTimestamp</span><span class="w"> </span><span class="kt">bool</span><span class="w">  </span><span class="c1">// 控制序列化时是否显示时间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">DataKey</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 配合主要是配合WithFields使用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">FieldMap</span><span class="w"> </span><span class="nx">FieldMap</span><span class="w"> </span><span class="c1">// 其实用处很小, 就是让用户自定义序列化字段的名字</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">CallerPrettyfier</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">runtime</span><span class="p">.</span><span class="nx">Frame</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">function</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">file</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="c1">// 配合SetReportCaller, 不需要太关注</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">PrettyPrint</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="c1">// 让Json格式化输出</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>主要字段介绍</strong></p>
+<h5 id="1timestampformat">1.TimestampFormat<a hidden class="anchor" aria-hidden="true" href="#1timestampformat">#</a></h5>
+<p>Time的时间格式, 设置JSONFormatter TimestampFormat字段时就可以选择下面这些常量. 默认值:time.RFC3339</p>
+<pre tabindex="0"><code>ANSIC       = &#34;Mon Jan _2 15:04:05 2006&#34;
+UnixDate    = &#34;Mon Jan _2 15:04:05 MST 2006&#34;
+RubyDate    = &#34;Mon Jan 02 15:04:05 -0700 2006&#34;
+RFC822      = &#34;02 Jan 06 15:04 MST&#34;
+RFC822Z     = &#34;02 Jan 06 15:04 -0700&#34; // RFC822 with numeric zone
+RFC850      = &#34;Monday, 02-Jan-06 15:04:05 MST&#34;
+RFC1123     = &#34;Mon, 02 Jan 2006 15:04:05 MST&#34;
+RFC1123Z    = &#34;Mon, 02 Jan 2006 15:04:05 -0700&#34; // RFC1123 with numeric zone
+RFC3339     = &#34;2006-01-02T15:04:05Z07:00&#34;
+RFC3339Nano = &#34;2006-01-02T15:04:05.999999999Z07:00&#34;
+Kitchen     = &#34;3:04PM&#34;
+// Handy time stamps.
+Stamp      = &#34;Jan _2 15:04:05&#34;
+StampMilli = &#34;Jan _2 15:04:05.000&#34;
+StampMicro = &#34;Jan _2 15:04:05.000000&#34;
+StampNano  = &#34;Jan _2 15:04:05.000000000
+</code></pre><h5 id="2datakey">2.DataKey<a hidden class="anchor" aria-hidden="true" href="#2datakey">#</a></h5>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">SetFormatter</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">log</span><span class="p">.</span><span class="nx">JSONFormatter</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">DataKey</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;hhf&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">WithFields</span><span class="p">(</span><span class="nx">log</span><span class="p">.</span><span class="nx">Fields</span><span class="p">{</span><span class="s">&#34;k1&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;v1&#34;</span><span class="p">}).</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>输出:</p>
+<p><code>{&quot;hhf&quot;:{&quot;k1&quot;:&quot;v1&quot;},&quot;level&quot;:&quot;info&quot;,&quot;msg&quot;:&quot;hello logrus&quot;,&quot;time&quot;:&quot;2019-10-09T13:31:05+08:00&quot;}</code></p>
+<p>当没有注释掉<code>DataKey: &quot;hhf&quot;</code>时, 输出就会变成下面</p>
+<p><code>{&quot;k1&quot;:&quot;v1&quot;,&quot;level&quot;:&quot;info&quot;,&quot;msg&quot;:&quot;hello logrus&quot;,&quot;time&quot;:&quot;2019-10-09T13:32:26+08:00&quot;}</code></p>
+<p>其实就是用<code>DataKey</code>来包装一下WithFields的k-v字段</p>
+<h5 id="3fieldmap">3.FieldMap<a hidden class="anchor" aria-hidden="true" href="#3fieldmap">#</a></h5>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">SetFormatter</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">log</span><span class="p">.</span><span class="nx">JSONFormatter</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">FieldMap</span><span class="p">:</span><span class="w"> </span><span class="nx">log</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">log</span><span class="p">.</span><span class="nx">FieldKeyTime</span><span class="p">:</span><span class="w">  </span><span class="s">&#34;@timestamphhf&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">log</span><span class="p">.</span><span class="nx">FieldKeyLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;@levelhhf&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">log</span><span class="p">.</span><span class="nx">FieldKeyMsg</span><span class="p">:</span><span class="w">   </span><span class="s">&#34;@messagehhf&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">log</span><span class="p">.</span><span class="nx">FieldKeyFunc</span><span class="p">:</span><span class="w">  </span><span class="s">&#34;@callerhhf&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">WithFields</span><span class="p">(</span><span class="nx">log</span><span class="p">.</span><span class="nx">Fields</span><span class="p">{</span><span class="s">&#34;k1&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;v1&#34;</span><span class="p">}).</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>输出:</p>
+<pre tabindex="0"><code>{&#34;@levelhhf&#34;:&#34;info&#34;,&#34;@messagehhf&#34;:&#34;hello logrus&#34;,&#34;@timestamphhf&#34;:&#34;2019-10-09T13:42:09+08:00&#34;,&#34;k1&#34;:&#34;v1&#34;}
+</code></pre><p>主要的key有下面这几种类型</p>
+<pre tabindex="0"><code>FieldKeyMsg            = &#34;msg&#34;
+FieldKeyLevel          = &#34;level&#34;
+FieldKeyTime           = &#34;time&#34;
+FieldKeyLogrusError    = &#34;logrus_error&#34;
+FieldKeyFunc           = &#34;func&#34;
+FieldKeyFile           = &#34;file
+</code></pre><h5 id="4prettyprint">4.PrettyPrint<a hidden class="anchor" aria-hidden="true" href="#4prettyprint">#</a></h5>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">SetFormatter</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">log</span><span class="p">.</span><span class="nx">JSONFormatter</span><span class="p">{</span><span class="nx">PrettyPrint</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">WithFields</span><span class="p">(</span><span class="nx">log</span><span class="p">.</span><span class="nx">Fields</span><span class="p">{</span><span class="s">&#34;k1&#34;</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;v1&#34;</span><span class="p">}).</span><span class="nf">Info</span><span class="p">(</span><span class="s">&#34;hello logrus&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>输出结果:</p>
+<pre tabindex="0"><code>{
+  &#34;k1&#34;: &#34;v1&#34;,
+  &#34;level&#34;: &#34;info&#34;,
+  &#34;msg&#34;: &#34;hello logrus&#34;,
+  &#34;time&#34;: &#34;2019-10-09T13:52:18+08:00&#34;
+}
+</code></pre><h4 id="format">Format<a hidden class="anchor" aria-hidden="true" href="#format">#</a></h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// json_formatter.go:L57-121</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="o">*</span><span class="nx">JSONFormatter</span><span class="p">)</span><span class="w"> </span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 将Entry的WithFields的kv值遍历放入到map[string]interface{}类型的data中</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">data</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">Fields</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Data</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Data</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">switch</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">v</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">case</span><span class="w"> </span><span class="kt">error</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// Otherwise errors are ignored by `encoding/json`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// https://github.com/sirupsen/logrus/issues/137</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">data</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nf">Error</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">default</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">data</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">v</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 判断是否存在DataKey, 如果是就用DataKey包装一下data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">DataKey</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">newData</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">Fields</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">newData</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">DataKey</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">newData</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 该函数判断调用WithFields时, 当用户自定义的Key与logrus内置的key相同时, </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 用户自定义的key会转换成fields.xx. 例如:logrus.WithField(&#34;level&#34;, 1).Info(&#34;hello&#34;), </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 由于level跟内置的FieldKeyLevel冲突了, 那么输出就会变成</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// {&#34;level&#34;: &#34;info&#34;, &#34;fields.level&#34;: 1, &#34;msg&#34;: &#34;hello&#34;, &#34;time&#34;: &#34;...&#34;}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nf">prefixFieldClashes</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nf">HasCaller</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 设置时间的序列化方式</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">timestampFormat</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">TimestampFormat</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">timestampFormat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">timestampFormat</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">defaultTimestampFormat</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 判断entry的error是否有值, 进行相关的序列化</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyLogrusError</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 判断是否禁用Timestamp, 如果不禁用, 就将时间戳按照相应的格式序列化. entry.Time在entry.log()函数里进行了初始化</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// if entry.Time.IsZero() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 	entry.Time = time.Now()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">f</span><span class="p">.</span><span class="nx">DisableTimestamp</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyTime</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Time</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">timestampFormat</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 设置日志的具体内容</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyMsg</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Message</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 设置日志级别</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyLevel</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Level</span><span class="p">.</span><span class="nf">String</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 序列化调用位置</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nf">HasCaller</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">funcVal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">Function</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fileVal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%s:%d&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">File</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">.</span><span class="nx">Line</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">CallerPrettyfier</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">funcVal</span><span class="p">,</span><span class="w"> </span><span class="nx">fileVal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nf">CallerPrettyfier</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Caller</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">funcVal</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyFunc</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">funcVal</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">fileVal</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">data</span><span class="p">[</span><span class="nx">f</span><span class="p">.</span><span class="nx">FieldMap</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span><span class="nx">FieldKeyFile</span><span class="p">)]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">fileVal</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// entry.Buffer是在entry.log()函数里(entry.go:L226-229)从sync.Pool里获取到一块内容空间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 目的是: 防止JSONFormatter每次调用都会去申请空间, 减小GC压力</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Buffer</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Buffer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 将Buffer提供给json encoder使用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">encoder</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nf">NewEncoder</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">PrettyPrint</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">encoder</span><span class="p">.</span><span class="nf">SetIndent</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;  &#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">encoder</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;failed to marshal fields to JSON, %v&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 序列化完成, 将序列化的内容返回</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(),</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="out">Out<a hidden class="anchor" aria-hidden="true" href="#out">#</a></h3>
+<p>Formatter介绍完了, 回到上面write()函数继续剖析Out相关</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// entry.go:L252-264</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">serialized</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Formatter</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to obtain reader, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Out</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">serialized</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to write to log, %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在没有调用SetOutput时, 默认的Out是<code>os.Stderr</code>, 所以默认情况下基本都打印到终端里, 没有存入文件</p>
+<p>即使logrus可以提供io.Writter, 但是还是不建议在这里将日志落盘, 还是使用<code>lfsHook</code>来做这个事情</p>
+<p>在这里也回答上面一个问题, <strong>为什么在<code>Entry</code>结构体里面会有<code>Logger</code>指针存在?</strong></p>
+<p>答: 以Out举例, 由于我们在调用logrus.SetOutput()函数时, Out是设置给Logger的, 但是真正的使用者却是<code>Entry</code>. 故需要将Logger传给Entry一份</p>
+<h2 id="logrus如何保证并发的正确性">logrus如何保证并发的正确性<a hidden class="anchor" aria-hidden="true" href="#logrus如何保证并发的正确性">#</a></h2>
+<p>logrus的并发控制的正确性是靠着Logger.Mutex来实现的. 程序中调用Logger.Mutex地方有几处:</p>
+<ol>
+<li>fireHooks() entry.go:L243</li>
+<li>write() entry.go:L252</li>
+<li>AddHook() logger.go:L313</li>
+<li>ReplaceHook() logger.go:L345</li>
+<li>SetFormatter() logger.go:L235</li>
+<li>SetNoLock() logger.go:L294</li>
+<li>SetOutput() logger.go:L332</li>
+<li>SetReportCaller() logger.go:338</li>
+</ol>
+<p>最重要的两处就是fireHooks(), write()</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">fireHooks</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Hooks</span><span class="p">.</span><span class="nf">Fire</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Level</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Failed to fire hook: %v\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">Entry</span><span class="p">)</span><span class="w"> </span><span class="nf">write</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">serialized</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">Formatter</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="p">.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>可以观察到, 不管有多少goroutine在调用logrus, 都是靠着资源竞争来保证顺序的正确性</p>
+<p>查看整个logrus的源码, logrus只有一个goroutine顺序处理日志数据, 并且没有相关的buffer来保存日志信息, 这就造成logrus的整体效率是不高的</p>
+<p>后面一篇文章会专门对比<code>zap</code>之间的差别, 敬请期待</p>
+<h2 id="总结">总结<a hidden class="anchor" aria-hidden="true" href="#总结">#</a></h2>
+<p>至此, logrus的主体源码已经解析完毕</p>
+<p>一句话总结其生命周期就是: logrus是在编译期就确定的一个全局变量, 伴随着我们程序的整个生命周期而存在. 最重要的组件是: Formatter, Hook. 良好的序列化机制, 方便的插件开发是我们选择logrus的原因</p>
+<h2 id="参考文档">参考文档<a hidden class="anchor" aria-hidden="true" href="#参考文档">#</a></h2>
+<ol>
+<li>鸟窝博客 - 如何在Go的函数中得到调用者函数名? <a href="https://colobu.com/2018/11/03/get-function-name-in-go/">https://colobu.com/2018/11/03/get-function-name-in-go/</a></li>
+<li>logrus <a href="https://github.com/sirupsen/logrus">https://github.com/sirupsen/logrus</a></li>
+<li>file-rotatelogs <a href="https://github.com/lestrrat-go/file-rotatelogs">https://github.com/lestrrat-go/file-rotatelogs</a></li>
+<li>lfshook <a href="https://github.com/rifflock/lfshook">https://github.com/rifflock/lfshook</a></li>
+<li>dingrus <a href="https://github.com/dandans-dan/dingrus">https://github.com/dandans-dan/dingrus</a></li>
+</ol>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/golang/">Golang</a></li>
+      <li><a href="https://georgehao.github.io/tags/logrus/">Logrus</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2019-12-15-zap-common-logger/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>打造 Zap 开箱即用日志组件</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2019-07-22-golang-pointer/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Golang是否真的没有指针运算?</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on x"
+            href="https://x.com/intent/tweet/?text=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f&amp;hashtags=golang%2clogrus">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f&amp;title=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f&amp;summary=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f&title=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on whatsapp"
+            href="https://api.whatsapp.com/send?text=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on telegram"
+            href="https://telegram.me/share/url?text=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Logrus源码阅读(2)--logrus生命周期 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Logrus%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%282%29--logrus%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2019-10-05-logrus-life-cycle%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

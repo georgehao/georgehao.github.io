@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>聊聊我对 GraphQL 的一些认知 | HHFCodeRv</title>
+<meta name="keywords" content="Go, graphql, bff">
+<meta name="description" content="
+每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。
+因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2021-10-06-graphql/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2021-10-06-graphql/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2021-10-06-graphql/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="聊聊我对 GraphQL 的一些认知">
+  <meta property="og:description" content="
+每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。
+因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-10-06T21:27:21+08:00">
+    <meta property="article:modified_time" content="2021-10-06T21:27:21+08:00">
+    <meta property="article:tag" content="Go">
+    <meta property="article:tag" content="Graphql">
+    <meta property="article:tag" content="Bff">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊我对 GraphQL 的一些认知">
+<meta name="twitter:description" content="
+每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。
+因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "聊聊我对 GraphQL 的一些认知",
+      "item": "https://georgehao.github.io/posts/2021-10-06-graphql/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "聊聊我对 GraphQL 的一些认知",
+  "name": "聊聊我对 GraphQL 的一些认知",
+  "description": "\n每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。\n因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。\n",
+  "keywords": [
+    "Go", "graphql", "bff"
+  ],
+  "articleBody": "\n每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。\n因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。\nGraphQL 优势 不知道大家有没有遇到过这样的一些场景，某个服务有几十个接口，更有甚者上百个也是有可能的。APP 或者其他下游要封装一个功能，需要调用 10 个接口左右，可能这些接口还涉及到不同的团队。不管开发，联调，测试，还是对于调用方，整个链条功能太多了。随着这些功能经过多个版本的迭代升级后，新+旧版本的接口谁也不敢大规模改动了，只能在原来的基础上做代码拼接，这基本就是祖传代码的由来。大部分同学基本的代码素养是有的，但是也只能任由这些祖传代码慢慢腐烂，原因为很简单，谁也不敢保证改动之后功能是不是有遗漏的地方。\n有没有这样一个功能，将这些接口做一下聚合，然后将结果的集合返回给前端呢？在目前比较流行微服务架构体系下，有一个专门的中间层专门来处理这个事情，这个中间层叫 BFF（Backend For Frontend）。我曾经工作过的某公司想要将某业务的售卖相关功能给公司其他业务使用，但是接入方一看那么多接口，瞬间就决定不接了，逼不得已该业务平台紧急开发了 BFF 相关功能让其他业务方接入。\n有些同学在稍微大点规模的公司做的工作就是合并各种接口，然后返回给调用方，这基本上就是 BFF 的主要工作内容了。除了类似 BFF 组建接入平台的方式，是否还有其他的方式能够只发出一个请求就能获取到一系列的接口返回值呢？\n我在京东 APP 上随便截图了一个商品\n类似这个页面，当用户打开这个页面的时候，按照目前比较流行的 REST 接口，需要 APP 至少发起下面这些请求：\n获取商品详情接口 获取商品价格、优惠相关的接口 获取评价接口 获取种草秀接口 获取问答接口 这些接口一般来说都比较重，里面有很多当前页面并不需要的字段，那有没有一种可能：APP 端发一次请求就能获取这个页面需要的所有字段，同时 APP 还能根据自己的需求只请求自己需要的字段呢？\n答案是肯定的，那就是 GraphQL。\nquery jdGoodsQuery { goods { detail { id pictures(first: 10) { pic_id thumb } spec { name size weight } } price { price origin_price market_price } comment(first: 10) { comment_id topic_id content from_uid } self_show(first: 10) { id pic_id } } } 对于上面京东商品详情的截图，类似这样的一个 Query 就可以把这个页面需要的所有的字段都获取到。\n对于 REST 接口还有另外一个比较棘手的问题。当业务升级的时候，接口不可避免的需要升级，一个比较常见的问题，某个字段在新版本升级后不需要了，如何优雅的处理旧接口以及旧字段呢？\n可能有些同学说，可以强行推动下游去升级，限定期限进行升级，如果下游不升级概不负责，这种方式基本只能自己欺骗自己了，因为当你接口下线导致业务方报错，这个责任只能你自己负责了。特别的，当某些接口是直接面对消费者时，这个问题会变得更加棘手。\n2016 年那会就职过的一家做 AI 产品的公司，上市了一款智能读书的儿童产品，其基本功能就是绘本图书翻一页读一页，这也算是 HomeAI 落地比较成功的产品了，这个产品在天猫、京东的销量还可以。在 AI 风口的那会，最开始的定位的功能就是读书，随着市场的拓展，功能也逐渐变得复杂起来，当时最痛苦的事情莫过于短短 3 个月内，接口版本号从 v1 增加到 v12。由于当时产品的理念认为强制升级是不优美的，不符合产品设计美学，导致这款产品是没有强制升级功能的，于是导致的结果是 v1 到 v12 的接口总是有用户在使用的。你可能会说发公告、短信通知用户在某个期限内升级，如果不升级，出现产品无法使用情况概不负责，这也是行不通的，特别那些用户付费的产品，如果万一不能使用的话，那 12315 是会找上门的。\n就在我们被无法下线的 API 接口折磨的时候，经过调研之后发现 GraphQL 正好有一个功能，“API 演进无需划分版本”，这不是瞌睡来了就有枕头吗，于是在技术负责人带领下（GraphQL 改造项目还没上线，他去了 Microsoft），我们开始推进 GraphQL 的改造工作。\n说到这里基本上就把 GraphQL 的最容易吸引人的优点介绍完了。我们要知道没有任何技术是“银弹”，当某些人给你狂吹某个技术的优点，而没有说这项技术的缺点限制，或者简略的一笔带过的时候，你就需要小心了，说不定你就是那个小白鼠。\n下面就进入我经历的 GraphQL 项目遇到的问题，也许我的处理方式是不正确，以下观点仅供参考。\nGraphQL 难题 社区活跃度问题 GraphQL 是由 Facebook 开发，Facebook 也成立了 GraphQL 基金会，但是 Facebook 官方只提供了 JS 版本的开源实现，其他语言的实现都是 GraphQL 对应语言的非官方社区实现的，这就造成不同语言的理解和实现是有差异的。比如 Graphql schema 的合并工具，只有 JS 官方实现有对应的实现。\nGraphQL 属于那种大家都觉得很不错，但是经过近 10 年的发展，依然是不温不火。\n上面这个图是 GraphQL 官方的 landscape，你仔细看上面公司图标，一眼能看出来的大的公司只有 Github 了。Facebook 虽说是推出了 GraphQL 的规范以及 JS 的相关实现，但是他自己都没有放出有关 GraphQL 的实际接口，让人对这个技术的信任度都大打折扣。\n当你遇到 GraphQL 问题的时候，要么搜出来全是 JS 的相关实现，要么干脆就没有人回答，总之 GraphQL 相关社区看着文档很丰富，其实遇到问题时能搜到解决问题的有用的资料并不多。\n缓存问题 缓存对于 REST 接口来说是很容解决的，但是在 GraphQL 中却变得非常复杂。由于 GraphQL 的特性，即便它操作的是同一个实体，每次查询可能都各不相同。\n举个例子，由于客户端可以自定义其需要的字段，如某次请求只需要某个人的名字，但是在另外一次查询中你可能也想知道他的消费积分。名字可能要查询 user.userProfile 库，而且消费积分可能要查询第三方系统。本次查询输入的是单个 user_id，下次查询输入的可能就是 userId_list 了，为了解决这些查询的缓存问题，你可能会设置很多 key 或者每个用户设置 key-value 放入缓存，这些都不是很优美的解决方案，归根到底还是因为 GraphQL 太多灵活，服务器的缓存如何设计都跟不上客户端的灵活的查询方式。\n对于这个问题 Facebook 也有 DataLoader 的解决方案，当然只是 JS 版本的方案，其他语言的社区可能根本都没有对应的实现。按照我当初的调研这个东西真的不好用，还不如自己做缓存来得快。\nGraphQL 缓存不只对服务端不友好，同时对客户端也是一个挑战，需要用户自己做客户端的缓存，因为 GraphQL Query 只有一个路由，而且都是 POST 方式。\n网关问题 GraphQL 是强类型的，所以必须需要一个 schema 的存在。按照当初的实践经验，客户端有且只能存在一份 schema 文件，于是另外一个比较棘手的问题就出现了。\n假如我们的服务是类似下图这个样子：\n比如 server1 是商品服务，server2 是优惠服务，客户端如果要对接这两个服务的话，直接对接是不行的，因为客户端只能有一个 schema, 但是服务端却有两个 schema 文件。\n这种情况该如何处理呢？当初经过调研发现 JS 提供了 schema merge 的工具，而且仅仅是个工具。其他语言压根就没有这个玩意。\n这个的设计还会带来另外一个非常严重的问题，目前的 API 网关都是无法使用的。随着业务规模的扩大，走上微服务是迟早的事情，但是如果服务端全是基于 GraphQL 开发的，那么网关该如何处理呢？最近调研了下 APISIX 和 KONG 的最新版本，这两个业界有影响力的网关也仅仅是支持 GraphQL 协议的转发而已。\n在我看来，在如今微服务比较流行市场下，GraphQL 唯一比较契合的场景的就是将 BFF 的 REST 换成 GraphQL，该 BFF 即做网关也做业务。其实这样做，也不是很完美，即限定了客户端只能有这一个 BFF，同时也让 BFF 变得不纯粹起来。看到美团有篇介绍 GraphQL 的实践的文章，就是让 GraphQL 做的 BFF 的相关工作，不过他们没有将 GraphQL 暴露给客户端，而是在 GraphQL 之上又包裹了一层 HTTP 接口。\n复杂度问题 GraphQL 最大的好处就是客户端能按需查询，是便利了客户端，但是把问题的复杂度都移交给了服务器。服务器也不是想查就能查的，毕竟服务器也是资源限制的，不可能无限制的让客户端去索取。\nquery deep3 { viewer { albums { songs{ author { company { address { ... } } } } } } } 由于 GraphQL 要追求从一个类型能查到 schema 的任意类型。比如这样的查询，能无限嵌套下去，每个 Type 对服务器来说都是对应的查询，服务器肯定承受不了的。\n如何限制呢？GraphQL 提出的有复杂度和深度的相关概念，但是这两个值该如何去计算，只能靠服务器开发人员的估计。于是这样的场景就经常出现，开发初期约定复杂度 1000，过了两天客户端同学找了过来要提高到 3000，全是无尽的扯皮，不管设置多少，由于客户端查询的多样性总有不够用的情形出现。而且这个复杂度、深度是全局的，不是每一个 Query 能单独配置，这样就会造成这两个值最后变得可有可无。\n限流问题 限流也是 GraphQL 的最难解决的难题之一，服务端不可能没有限流的，不然服务器稳定性就保障不了。对于 REST 来说接口的路由都是固定不变的，针对于不同的 URI 做限流是很容做到的。但是 GraphQL 限流的难点在哪里呢？\nquery maliciousQuery { album(id: \"some-id\") { photos(first: 9999) { album { photos(first: 9999) { album { photos(first: 9999) { album { #... Repeat this 10000 times... } } } } } } } } 这个请求会导致什么问题呢？客户端会发起一个请求 maliciousQuery，这个请求会去查询 some-id 的 album，这个 album 获取这个相册里的最大 9999 张图片，每个图片又要查询到所属的相册，就这么无限制的嵌套下去。这样的查询，服务器根本就影响不来，上面说到的复杂度和深度其实有点用处，但是用处不大。\n曾经遇到这样的真实场景，GraphQL 项目已经部署线上，复杂度和深度也配置了，客户端同学在获取商品分页列表的同时也将对应商品详情以及商品详情的级联内容给取了出来，导致的结果服务器直接 OOM。原因跟上面这个例子很相似，就是嵌套的查询过多导致的。这个问题其实跟复杂度和深度是相关的，但是复杂度和深度真的是很难评估。\n所以 GraphQL 限流的难题就在于客户端只发起一次请求，但是在服务器端可能被放大无数倍。如何能够有效的评估某个值能让客户端的嵌套比较合理，根据实践经验来看，这个值不是官方提供的复杂度和深度能解决的。\n不过好消息 GraphQL 提供一种评估 GraphQL 限流的方式，另外一个中文版本的理论解析解决 GraphQL 的限流难题。理论是一回事，不过实施起来依然是困难重重。\n结论 本文主要介绍了我曾经经历过的 GraphQL 落地的一点感悟，距离如今也有一段时间了，GraphQL 留给我的印象就停留在这些无法解决的问题上。曾经有人咨询我想用 GraphQL 去重构某个服务，被我比较激动的给打消了这个念头。这篇文章可能也有写的不对的地方，欢迎同学们指出。\n写文章不易请大家帮忙点击 在看，点赞，分享。\n",
+  "wordCount" : "4136",
+  "inLanguage": "zh",
+  "datePublished": "2021-10-06T21:27:21+08:00",
+  "dateModified": "2021-10-06T21:27:21+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2021-10-06-graphql/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      聊聊我对 GraphQL 的一些认知
+    </h1>
+    <div class="post-meta"><span title='2021-10-06 21:27:21 +0800 CST'>2021年10月6日</span>&nbsp;·&nbsp;<span>9 分钟</span>&nbsp;·&nbsp;<span>4136 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#graphql-优势">GraphQL 优势</a></li>
+    <li><a href="#graphql-难题">GraphQL 难题</a>
+      <ul>
+        <li><a href="#社区活跃度问题">社区活跃度问题</a></li>
+        <li><a href="#缓存问题">缓存问题</a></li>
+        <li><a href="#网关问题">网关问题</a></li>
+        <li><a href="#复杂度问题">复杂度问题</a></li>
+        <li><a href="#限流问题">限流问题</a></li>
+      </ul>
+    </li>
+    <li><a href="#结论">结论</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/2018-07-16-graphql.png"></p>
+<p>每隔一段时间就能看到一篇 GraphQL 的文章，但是打开文章一看，基本上就是简单的介绍下 GraphQL 的特性。很多文章其实就是 github 上找个 GraphQL 的项目，然后按照对应的 demo 跑起来而已。有些文章明显是没有完整的项目实践经历，却在狂吹 GraphQL 的各种优点，让不熟悉 GraphQL 的同学以为这是神丹妙药，弄不好还要在项目中实践一番。</p>
+<p>因为项目的背景（后面会讲到），我有幸参与过 GraphQL 在实际项目中的落地，本篇文章我会谈谈我对 GraphQL 的一些理解，当然这个也仅供读者参考。</p>
+<h2 id="graphql-优势">GraphQL 优势<a hidden class="anchor" aria-hidden="true" href="#graphql-优势">#</a></h2>
+<p>不知道大家有没有遇到过这样的一些场景，某个服务有几十个接口，更有甚者上百个也是有可能的。APP 或者其他下游要封装一个功能，需要调用 10 个接口左右，可能这些接口还涉及到不同的团队。不管开发，联调，测试，还是对于调用方，整个链条功能太多了。随着这些功能经过多个版本的迭代升级后，新+旧版本的接口谁也不敢大规模改动了，只能在原来的基础上做代码拼接，这基本就是祖传代码的由来。大部分同学基本的代码素养是有的，但是也只能任由这些祖传代码慢慢腐烂，原因为很简单，谁也不敢保证改动之后功能是不是有遗漏的地方。</p>
+<p>有没有这样一个功能，将这些接口做一下聚合，然后将结果的集合返回给前端呢？在目前比较流行微服务架构体系下，有一个专门的中间层专门来处理这个事情，这个中间层叫 BFF（Backend For Frontend）。我曾经工作过的某公司想要将某业务的售卖相关功能给公司其他业务使用，但是接入方一看那么多接口，瞬间就决定不接了，逼不得已该业务平台紧急开发了 BFF 相关功能让其他业务方接入。</p>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/bff.png"></p>
+<p>有些同学在稍微大点规模的公司做的工作就是合并各种接口，然后返回给调用方，这基本上就是 BFF 的主要工作内容了。除了类似 BFF 组建接入平台的方式，是否还有其他的方式能够只发出一个请求就能获取到一系列的接口返回值呢？</p>
+<p>我在京东 APP 上随便截图了一个商品</p>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/graphql_jd.png"></p>
+<p>类似这个页面，当用户打开这个页面的时候，按照目前比较流行的 REST 接口，需要 APP 至少发起下面这些请求：</p>
+<ul>
+<li>获取商品详情接口</li>
+<li>获取商品价格、优惠相关的接口</li>
+<li>获取评价接口</li>
+<li>获取种草秀接口</li>
+<li>获取问答接口</li>
+</ul>
+<p>这些接口一般来说都比较重，里面有很多当前页面并不需要的字段，那有没有一种可能：APP 端发一次请求就能获取这个页面需要的所有字段，同时 APP 还能根据自己的需求只请求自己需要的字段呢？</p>
+<p>答案是肯定的，那就是 GraphQL。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-graphql" data-lang="graphql"><span class="line"><span class="cl"><span class="kd">query</span><span class="w"> </span><span class="nc">jdGoodsQuery</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">     </span><span class="py">goods</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">detail</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">pictures</span><span class="p">(</span><span class="py">first</span><span class="p">:</span><span class="w"> </span><span class="nc">10</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="py">pic_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="py">thumb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">spec</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="py">name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="py">size</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="py">weight</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">price</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">price</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">origin_price</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">market_price</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">comment</span><span class="p">(</span><span class="py">first</span><span class="p">:</span><span class="w"> </span><span class="nc">10</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">comment_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">topic_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">content</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">from_uid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">self_show</span><span class="p">(</span><span class="py">first</span><span class="p">:</span><span class="w"> </span><span class="nc">10</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">pic_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>对于上面京东商品详情的截图，类似这样的一个 Query 就可以把这个页面需要的所有的字段都获取到。</p>
+<p>对于 REST 接口还有另外一个比较棘手的问题。当业务升级的时候，接口不可避免的需要升级，一个比较常见的问题，某个字段在新版本升级后不需要了，如何优雅的处理旧接口以及旧字段呢？</p>
+<p>可能有些同学说，可以强行推动下游去升级，限定期限进行升级，如果下游不升级概不负责，这种方式基本只能自己欺骗自己了，因为当你接口下线导致业务方报错，这个责任只能你自己负责了。特别的，当某些接口是直接面对消费者时，这个问题会变得更加棘手。</p>
+<p>2016 年那会就职过的一家做 AI 产品的公司，上市了一款智能读书的儿童产品，其基本功能就是绘本图书翻一页读一页，这也算是 HomeAI 落地比较成功的产品了，这个产品在天猫、京东的销量还可以。在 AI 风口的那会，最开始的定位的功能就是读书，随着市场的拓展，功能也逐渐变得复杂起来，当时最痛苦的事情莫过于短短 3 个月内，接口版本号从 v1 增加到 v12。由于当时产品的理念认为强制升级是不优美的，不符合产品设计美学，导致这款产品是没有强制升级功能的，于是导致的结果是 v1 到 v12 的接口总是有用户在使用的。你可能会说发公告、短信通知用户在某个期限内升级，如果不升级，出现产品无法使用情况概不负责，这也是行不通的，特别那些用户付费的产品，如果万一不能使用的话，那 12315 是会找上门的。</p>
+<p>就在我们被无法下线的 API 接口折磨的时候，经过调研之后发现 GraphQL 正好有一个功能，“API 演进无需划分版本”，这不是瞌睡来了就有枕头吗，于是在技术负责人带领下（GraphQL 改造项目还没上线，他去了 Microsoft），我们开始推进 GraphQL 的改造工作。</p>
+<p>说到这里基本上就把 GraphQL 的最容易吸引人的优点介绍完了。我们要知道没有任何技术是“银弹”，当某些人给你狂吹某个技术的优点，而没有说这项技术的缺点限制，或者简略的一笔带过的时候，你就需要小心了，说不定你就是那个小白鼠。</p>
+<p>下面就进入我经历的 GraphQL 项目遇到的问题，也许我的处理方式是不正确，以下观点仅供参考。</p>
+<h2 id="graphql-难题">GraphQL 难题<a hidden class="anchor" aria-hidden="true" href="#graphql-难题">#</a></h2>
+<h3 id="社区活跃度问题">社区活跃度问题<a hidden class="anchor" aria-hidden="true" href="#社区活跃度问题">#</a></h3>
+<p>GraphQL 是由 Facebook 开发，Facebook 也成立了 GraphQL 基金会，但是 Facebook 官方只提供了 JS 版本的开源实现，其他语言的实现都是 GraphQL 对应语言的非官方社区实现的，这就造成不同语言的理解和实现是有差异的。比如 Graphql schema 的合并工具，只有 JS 官方实现有对应的实现。</p>
+<p>GraphQL 属于那种大家都觉得很不错，但是经过近 10 年的发展，依然是不温不火。</p>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/landscape_graphql.png"></p>
+<p>上面这个图是 GraphQL 官方的 <a href="https://landscape.graphql.org/" title="landscape">landscape</a>，你仔细看上面公司图标，一眼能看出来的大的公司只有 Github 了。Facebook 虽说是推出了 GraphQL 的规范以及 JS 的相关实现，但是他自己都没有放出有关 GraphQL 的实际接口，让人对这个技术的信任度都大打折扣。</p>
+<p>当你遇到 GraphQL 问题的时候，要么搜出来全是 JS 的相关实现，要么干脆就没有人回答，总之 GraphQL 相关社区看着文档很丰富，其实遇到问题时能搜到解决问题的有用的资料并不多。</p>
+<h3 id="缓存问题">缓存问题<a hidden class="anchor" aria-hidden="true" href="#缓存问题">#</a></h3>
+<p><a href="https://graphql.cn/learn/caching/" title="缓存">缓存</a>对于 REST 接口来说是很容解决的，但是在 GraphQL 中却变得非常复杂。由于 GraphQL 的特性，即便它操作的是同一个实体，每次查询可能都各不相同。</p>
+<p>举个例子，由于客户端可以自定义其需要的字段，如某次请求只需要某个人的名字，但是在另外一次查询中你可能也想知道他的消费积分。名字可能要查询 user.userProfile 库，而且消费积分可能要查询第三方系统。本次查询输入的是单个 user_id，下次查询输入的可能就是 userId_list 了，为了解决这些查询的缓存问题，你可能会设置很多 key 或者每个用户设置 key-value 放入缓存，这些都不是很优美的解决方案，归根到底还是因为 GraphQL 太多灵活，服务器的缓存如何设计都跟不上客户端的灵活的查询方式。</p>
+<p>对于这个问题 Facebook 也有 DataLoader 的解决方案，当然只是 JS 版本的方案，其他语言的社区可能根本都没有对应的实现。按照我当初的调研这个东西真的不好用，还不如自己做缓存来得快。</p>
+<p>GraphQL 缓存不只对服务端不友好，同时对客户端也是一个挑战，需要用户自己做客户端的缓存，因为 GraphQL Query 只有一个路由，而且都是 POST 方式。</p>
+<h3 id="网关问题">网关问题<a hidden class="anchor" aria-hidden="true" href="#网关问题">#</a></h3>
+<p>GraphQL 是强类型的，所以必须需要一个 schema 的存在。按照当初的实践经验，客户端有且只能存在一份 schema 文件，于是另外一个比较棘手的问题就出现了。</p>
+<p>假如我们的服务是类似下图这个样子：</p>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/grapqh_proxy.png"></p>
+<p>比如 server1 是商品服务，server2 是优惠服务，客户端如果要对接这两个服务的话，直接对接是不行的，因为客户端只能有一个 schema, 但是服务端却有两个 schema 文件。</p>
+<p>这种情况该如何处理呢？当初经过调研发现 JS 提供了 schema merge 的工具，而且仅仅是个工具。其他语言压根就没有这个玩意。</p>
+<p>这个的设计还会带来另外一个非常严重的问题，目前的 API 网关都是无法使用的。随着业务规模的扩大，走上微服务是迟早的事情，但是如果服务端全是基于 GraphQL 开发的，那么网关该如何处理呢？最近调研了下 APISIX 和 KONG 的最新版本，这两个业界有影响力的网关也仅仅是支持 GraphQL 协议的转发而已。</p>
+<p>在我看来，在如今微服务比较流行市场下，GraphQL 唯一比较契合的场景的就是将 BFF 的 REST 换成 GraphQL，该 BFF 即做网关也做业务。其实这样做，也不是很完美，即限定了客户端只能有这一个 BFF，同时也让 BFF 变得不纯粹起来。看到美团<a href="https://tech.meituan.com/2021/05/06/bff-graphql.html" title="有篇介绍 GraphQL 的实践的文章">有篇介绍 GraphQL 的实践的文章</a>，就是让 GraphQL 做的 BFF 的相关工作，不过他们没有将 GraphQL 暴露给客户端，而是在 GraphQL 之上又包裹了一层 HTTP 接口。</p>
+<h3 id="复杂度问题">复杂度问题<a hidden class="anchor" aria-hidden="true" href="#复杂度问题">#</a></h3>
+<p>GraphQL 最大的好处就是客户端能按需查询，是便利了客户端，但是把问题的复杂度都移交给了服务器。服务器也不是想查就能查的，毕竟服务器也是资源限制的，不可能无限制的让客户端去索取。</p>
+<pre tabindex="0"><code>query deep3 {
+  viewer {
+    albums {
+      songs{
+        author {
+          company {
+            address {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre><p>由于 GraphQL 要追求从一个类型能查到 schema 的任意类型。比如这样的查询，能无限嵌套下去，每个 Type 对服务器来说都是对应的查询，服务器肯定承受不了的。</p>
+<p>如何限制呢？GraphQL 提出的有复杂度和深度的相关概念，但是这两个值该如何去计算，只能靠服务器开发人员的估计。于是这样的场景就经常出现，开发初期约定复杂度 1000，过了两天客户端同学找了过来要提高到 3000，全是无尽的扯皮，不管设置多少，由于客户端查询的多样性总有不够用的情形出现。而且这个复杂度、深度是全局的，不是每一个 Query 能单独配置，这样就会造成这两个值最后变得可有可无。</p>
+<h3 id="限流问题">限流问题<a hidden class="anchor" aria-hidden="true" href="#限流问题">#</a></h3>
+<p>限流也是 GraphQL 的最难解决的难题之一，服务端不可能没有限流的，不然服务器稳定性就保障不了。对于 REST 来说接口的路由都是固定不变的，针对于不同的 URI 做限流是很容做到的。但是 GraphQL 限流的难点在哪里呢？</p>
+<pre tabindex="0"><code>query maliciousQuery {
+  album(id: &#34;some-id&#34;) {
+    photos(first: 9999) {
+      album {
+        photos(first: 9999) {
+          album {
+            photos(first: 9999) {
+              album {
+                #... Repeat this 10000 times...
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre><p>这个请求会导致什么问题呢？客户端会发起一个请求 maliciousQuery，这个请求会去查询 some-id 的 album，这个 album 获取这个相册里的最大 9999 张图片，每个图片又要查询到所属的相册，就这么无限制的嵌套下去。这样的查询，服务器根本就影响不来，上面说到的复杂度和深度其实有点用处，但是用处不大。</p>
+<p>曾经遇到这样的真实场景，GraphQL 项目已经部署线上，复杂度和深度也配置了，客户端同学在获取商品分页列表的同时也将对应商品详情以及商品详情的级联内容给取了出来，导致的结果服务器直接 OOM。原因跟上面这个例子很相似，就是嵌套的查询过多导致的。这个问题其实跟复杂度和深度是相关的，但是复杂度和深度真的是很难评估。</p>
+<p>所以 GraphQL 限流的难题就在于客户端只发起一次请求，但是在服务器端可能被放大无数倍。如何能够有效的评估某个值能让客户端的嵌套比较合理，根据实践经验来看，这个值不是官方提供的复杂度和深度能解决的。</p>
+<p>不过好消息 GraphQL 提供一种评估 <a href="https://medium.com/swlh/please-rate-limit-your-graphql-api-9832b5c64418" title="GraphQL 限流的方式">GraphQL 限流的方式</a>，另外一个中文版本的理论解析<a href="https://mp.weixin.qq.com/s/Vb3eIeGKrL5BDNqlrnVrnQ">解决 GraphQL 的限流难题</a>。理论是一回事，不过实施起来依然是困难重重。</p>
+<h2 id="结论">结论<a hidden class="anchor" aria-hidden="true" href="#结论">#</a></h2>
+<p>本文主要介绍了我曾经经历过的 GraphQL 落地的一点感悟，距离如今也有一段时间了，GraphQL 留给我的印象就停留在这些无法解决的问题上。曾经有人咨询我想用 GraphQL 去重构某个服务，被我比较激动的给打消了这个念头。这篇文章可能也有写的不对的地方，欢迎同学们指出。</p>
+<p>写文章不易请大家帮忙点击 在看，点赞，分享。</p>
+<p><img loading="lazy" src="https://cdn.jsdelivr.net/gh/georgehao/img/me.png"></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/go/">Go</a></li>
+      <li><a href="https://georgehao.github.io/tags/graphql/">Graphql</a></li>
+      <li><a href="https://georgehao.github.io/tags/bff/">Bff</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2021-10-07-getty/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Go 网络库 getty 的那些事</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2021-10-05-gin3/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>gin 源码阅读(3) - gin 路由的实现剖析</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on x"
+            href="https://x.com/intent/tweet/?text=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f&amp;hashtags=Go%2cgraphql%2cbff">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f&amp;title=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5&amp;summary=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f&title=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on telegram"
+            href="https://telegram.me/share/url?text=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 聊聊我对 GraphQL 的一些认知 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e8%81%8a%e8%81%8a%e6%88%91%e5%af%b9%20GraphQL%20%e7%9a%84%e4%b8%80%e4%ba%9b%e8%ae%a4%e7%9f%a5&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2021-10-06-graphql%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

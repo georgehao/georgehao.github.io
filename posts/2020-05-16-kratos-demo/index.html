@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 | HHFCodeRv</title>
+<meta name="keywords" content="golang, kratos">
+<meta name="description" content="本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节
+http 服务
+http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping.  关于ping 函数后面再具体看其作用
+如何添加一个新的 api 接口?
+// internal/server/http/server.go
+func initRouter(e *bm.Engine) {
+	e.Ping(ping)
+	g := e.Group(&#34;/kratos-demo&#34;)
+	{
+		g.GET(&#34;/start&#34;, howToStart)
+		g.GET(&#34;/sayHi&#34;, sayHi)
+		g.GET(&#34;/sayHello&#34;, func(context *bm.Context) {
+			svc.SayHello(context, &amp;pb.HelloReq{
+				Name: &#34;test&#34;,
+			})
+			context.JSON(&#34;success&#34;, nil)
+		})
+	}
+
+	v2Group := e.Group(&#34;/kratos-demo/v2&#34;)
+	{
+		v2Group.GET(&#34;/sayHi&#34;, sayHi)
+	}
+}
+
+func sayHi(c *bm.Context) {
+	c.JSON(&#34;hi&#34;, nil)
+}
+这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的">
+<meta name="author" content="haohongfan">
+<link rel="canonical" href="https://georgehao.github.io/posts/2020-05-16-kratos-demo/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://georgehao.github.io/images/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://georgehao.github.io/images/icon.png">
+<link rel="apple-touch-icon" href="https://georgehao.github.io/images/icon.png">
+<link rel="mask-icon" href="https://georgehao.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://georgehao.github.io/posts/2020-05-16-kratos-demo/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://georgehao.github.io/posts/2020-05-16-kratos-demo/">
+  <meta property="og:site_name" content="HHFCodeRv">
+  <meta property="og:title" content="Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子">
+  <meta property="og:description" content="本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节
+http 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用
+如何添加一个新的 api 接口?
+// internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(&#34;/kratos-demo&#34;) { g.GET(&#34;/start&#34;, howToStart) g.GET(&#34;/sayHi&#34;, sayHi) g.GET(&#34;/sayHello&#34;, func(context *bm.Context) { svc.SayHello(context, &amp;pb.HelloReq{ Name: &#34;test&#34;, }) context.JSON(&#34;success&#34;, nil) }) } v2Group := e.Group(&#34;/kratos-demo/v2&#34;) { v2Group.GET(&#34;/sayHi&#34;, sayHi) } } func sayHi(c *bm.Context) { c.JSON(&#34;hi&#34;, nil) } 这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-05-16T10:14:07+08:00">
+    <meta property="article:modified_time" content="2020-05-16T10:14:07+08:00">
+    <meta property="article:tag" content="Golang">
+    <meta property="article:tag" content="Kratos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子">
+<meta name="twitter:description" content="本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节
+http 服务
+http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping.  关于ping 函数后面再具体看其作用
+如何添加一个新的 api 接口?
+// internal/server/http/server.go
+func initRouter(e *bm.Engine) {
+	e.Ping(ping)
+	g := e.Group(&#34;/kratos-demo&#34;)
+	{
+		g.GET(&#34;/start&#34;, howToStart)
+		g.GET(&#34;/sayHi&#34;, sayHi)
+		g.GET(&#34;/sayHello&#34;, func(context *bm.Context) {
+			svc.SayHello(context, &amp;pb.HelloReq{
+				Name: &#34;test&#34;,
+			})
+			context.JSON(&#34;success&#34;, nil)
+		})
+	}
+
+	v2Group := e.Group(&#34;/kratos-demo/v2&#34;)
+	{
+		v2Group.GET(&#34;/sayHi&#34;, sayHi)
+	}
+}
+
+func sayHi(c *bm.Context) {
+	c.JSON(&#34;hi&#34;, nil)
+}
+这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://georgehao.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
+      "item": "https://georgehao.github.io/posts/2020-05-16-kratos-demo/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
+  "name": "Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子",
+  "description": "本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节\nhttp 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用\n如何添加一个新的 api 接口?\n// internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\u0026#34;/kratos-demo\u0026#34;) { g.GET(\u0026#34;/start\u0026#34;, howToStart) g.GET(\u0026#34;/sayHi\u0026#34;, sayHi) g.GET(\u0026#34;/sayHello\u0026#34;, func(context *bm.Context) { svc.SayHello(context, \u0026amp;pb.HelloReq{ Name: \u0026#34;test\u0026#34;, }) context.JSON(\u0026#34;success\u0026#34;, nil) }) } v2Group := e.Group(\u0026#34;/kratos-demo/v2\u0026#34;) { v2Group.GET(\u0026#34;/sayHi\u0026#34;, sayHi) } } func sayHi(c *bm.Context) { c.JSON(\u0026#34;hi\u0026#34;, nil) } 这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的\n",
+  "keywords": [
+    "golang", "kratos"
+  ],
+  "articleBody": "本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节\nhttp 服务 http 服务其实就比较简单, 开篇的Golang 大法好 ！！直接就能对外提供 http 服务. http server默认有两个函数howToStart, ping. 关于ping 函数后面再具体看其作用\n如何添加一个新的 api 接口?\n// internal/server/http/server.go func initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\"/kratos-demo\") { g.GET(\"/start\", howToStart) g.GET(\"/sayHi\", sayHi) g.GET(\"/sayHello\", func(context *bm.Context) { svc.SayHello(context, \u0026pb.HelloReq{ Name: \"test\", }) context.JSON(\"success\", nil) }) } v2Group := e.Group(\"/kratos-demo/v2\") { v2Group.GET(\"/sayHi\", sayHi) } } func sayHi(c *bm.Context) { c.JSON(\"hi\", nil) } 这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的\n解决方案: 在 internal/server/http 目录下创建代表不同功能的文件\n升级不同版本了, 可以v1.go, v2.go, 负责评论的叫 comment.go 负责收藏的叫 favorite.go grpc 服务 kratos-demo 默认是是支持 grpc 服务的, gprc 是需要 protobuf 支持的. 工程所有的 protobuf 应该都放在 api 目录下.\n通过kratos tool protoc --grpc --bm api.proto 生成两个文件 api.pb.go, api.bm.go\nprotobuf 的内容:\nservice Demo { rpc Ping(.google.protobuf.Empty) returns (.google.protobuf.Empty); rpc SayHello(HelloReq) returns (.google.protobuf.Empty); rpc SayHelloURL(HelloReq) returns (HelloResp) { option (google.api.http) = { get: \"/kratos-demo/say_hello\" }; }; } 当然要想使用 grpc 的话需要实现上面三个函数. kratos-demo 默认是实现这三个方法的, 不过在internal/service/service.go里面\n// SayHello grpc demo func. func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.Empty, err error) { reply = new(empty.Empty) fmt.Printf(\"hello %s\", req.Name) return } // SayHelloURL bm demo func. func (s *Service) SayHelloURL(ctx context.Context, req *pb.HelloReq) (reply *pb.HelloResp, err error) { reply = \u0026pb.HelloResp{ Content: \"hello \" + req.Name, } fmt.Printf(\"hello url %s\", req.Name) return } // Ping ping the resource. func (s *Service) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error) { return \u0026empty.Empty{}, s.dao.Ping(ctx) } 我们要注意的是, internal/server/grpc/server.go并没有调用这些方法的地方, grpc是如何调用起来的呢?\n我们上一文章说到, kratos 使用 wire 依赖注入将各种组件组合到一块\n// wire_gen.go server, err := grpc.New(serviceService) if err != nil { ... return nil, nil, err } 这里的 serviceService 就是 internal/service/service.go的 Service\n这里推荐使用 bloomrpc 来验证 grpc 接口\nhttp 调用 http 服务 不管 http 调用 http, 还是 http 调用 grpc, 官方 wiki 并没有过多的提及. 就看到这么一句话, 更加坑的地方在于找遍所有的地方竟然没有 http client 的配置文件的格式\n请进入internal/dao方法内，一般对资源的处理都会在这一层封装。对于client端，前提必须有对应proto文件生成的代码，那么有两种选择：\n拷贝proto文件到自己项目下并且执行代码生成 直接import服务端的api package 下面看 http 如何调用 http. 假设有一个策略服务(biz)通过角色服务(up)的check/role判断某个用户的角色是否满足\nkratos new biz // 创建策略服务 kratos new up // 创建角色服务 up proto文件, kratos tool protoc --grpc --bm api.proto 生成对应的 go 文件\n// api/api.proto syntax = \"proto3\"; import \"google/protobuf/empty.proto\"; package up.service.v1; option go_package = \"api\"; service Up { rpc Ping(.google.protobuf.Empty) returns (.google.protobuf.Empty); rpc CheckRole(CheckUpReq) returns (CheckUpResp); } message CheckUpReq { int32 Role = 1; } message CheckUpResp { bool Yes = 1; } 在 internal/service/service.go里面添加下面代码\nfunc (s *Service) CheckRole(ctx context.Context, req *pb.CheckUpReq) (resp *pb.CheckUpResp, err error) { log.Infoc(ctx, \"check role:%d\", req.Role) if req.Role == 10 { resp = \u0026pb.CheckUpResp{Yes: true} } else { resp = \u0026pb.CheckUpResp{Yes: false} } return } // Ping ping the resource. func (s *Service) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error) { return \u0026empty.Empty{}, s.dao.Ping(ctx) } 在 internal/server/http/server.go里面添加如下代码\ntype roleParam struct { RoleId int32 `form:\"roleId\"` } type roleResult struct { Yes bool `json:\"yes\"` } func checkRole(context *bm.Context) { var input roleParam if err := context.Bind(\u0026input); err != nil { context.JSON(nil, errors.New(\"client param error\")) return } resp, err := svc.CheckRole(context, \u0026pb.CheckUpReq{Role: input.RoleId}) if err != nil { context.JSON(nil, err) return } res := roleResult{Yes: resp.Yes} context.JSON(res, nil) } up服务已经可以了, 接下来看 biz 如何调用 up\nbiz 在configs/http.html里面添加下面配置\n[Server] addr = \"0.0.0.0:8020\" timeout = \"1s\" [Client] dial = \"2s\" timeout = \"100s\" keepAlive = \"60s\" timer = 1000 [httpClient.breaker] window = \"10s\" sleep = \"2000ms\" bucket = 10 ratio = 0.5 request = 100 在 internal/dao/http.go下添加下面代码\npackage dao import ( \"github.com/go-kratos/kratos/pkg/conf/paladin\" \"github.com/go-kratos/kratos/pkg/net/http/blademaster\" ) func NewHttpClient() *blademaster.Client { var cfg blademaster.ClientConfig var ct paladin.TOML if err := paladin.Get(\"http.toml\").Unmarshal(\u0026ct); err != nil { return nil } if err := ct.Get(\"Client\").UnmarshalTOML(\u0026cfg); err != nil { return nil } return blademaster.NewClient(\u0026cfg) } 在 internal/dao/dao.go里面添加下面代码\ntype dao struct { db *sql.DB redis *redis.Redis mc *memcache.Memcache cache *fanout.Fanout demoExpire int32 rpcClient api.UpClient httpClient blademaster.Client } // .... var grpcClient api.UpClient grpcClient, err = NewGrpcClient() if err != nil { return } d = \u0026dao{ db: db, redis: r, mc: mc, cache: fanout.New(\"cache\"), demoExpire: int32(time.Duration(cfg.DemoExpire) / time.Second), rpcClient: grpcClient, httpClient: *NewHttpClient(), } func (d *dao) CheckRole(ctx context.Context, req *api.CheckUpReq) (resp *api.CheckUpResp, err error) { params := url.Values{} params.Set(\"roleId\", fmt.Sprintf(\"%d\", req.Role)) var resp1 struct { Code int `json:\"code\"` Data roleResult `json:\"data\"` } upUrl := \"http://127.0.0.1:8000/up/check_role\" if err = d.httpClient.Get(context.Background(), upUrl, \"\", params, \u0026resp1); err != nil { return nil, err } if resp1.Code != 0 { err = errors.Errorf(\"up url(%s) res(%+v) err(%+v)\", upUrl+\"?\"+params.Encode(), resp, ecode.Int(resp1.Code)) return } resp = \u0026api.CheckUpResp{ Yes: resp1.Data.Yes, } return } 在 internal/service/service.go下添加\n//... func (s *Service) CheckRole(ctx context.Context, req *pb.CheckUpReq) (resp *pb.CheckUpResp, err error) { log.Infoc(ctx, \"check role:%d\", req.Role) resp, err = s.dao.CheckRole(ctx, req) return } 在 internal/server/http/server.go里面添加\nfunc initRouter(e *bm.Engine) { e.Ping(ping) g := e.Group(\"/zbbiz\") { g.GET(\"/check_role\", checkRole) } } func ping(ctx *bm.Context) { } type roleParam struct { RoleId int32 `form:\"roleId\"` } func checkRole(context *bm.Context) { var input roleParam if err := context.Bind(\u0026input); err != nil { context.JSON(nil, ecode.RequestErr) return } resp, err := svc.CheckRole(context, \u0026pb.CheckUpReq{Role: input.RoleId}) if err != nil { context.JSON(nil, err) return } if resp == nil { context.JSON(nil, errors.New(\"resp is nil\")) return } cr := model.CheckRole{ Yes: resp.Yes, } context.JSON(cr, nil) } 至此, http 调用 http 已经大功告成 !\nhttp 调用 grpc 服务 Grpc 的话, 其实 wiki基本上说明白了怎么用了. 唯一要注意的地方 使用discovery 来做服务发现时, 切记要先去安装discovery, 看issue问为何启动报错, 多半是这个问题\n我这里就先使用 etcd 来做服务发现. 如果安装 etcd 就略过了\nup 注册服务 在 cmd/main.go 里面添加下面代码, 其他的保持跟 http 一样即可\netcdV3Conf := clientv3.Config{ Endpoints: []string{\"127.0.0.1:2380\"}, DialTimeout: time.Second * time.Duration(30), DialOptions: []grpc.DialOption{grpc.WithBlock()}, } etcdBuilder, err := etcd.New(\u0026etcdV3Conf) if err != nil { panic(err) } ip := \"0.0.0.0\" port := \"9002\" hn, _ := os.Hostname() ins := \u0026naming.Instance{ Zone: \"test\", Env: \"dev\", AppID: \"demo.service.up\", Hostname: hn, Addrs: []string{ \"grpc://\" + ip + \":\" + port, }, } cancel, err := etcdBuilder.Register(context.Background(), ins) if err != nil { panic(err) } defer cancel() 客户端调用 在 configs/grpc.toml 添加下面内容\n[Server] addr = \"0.0.0.0:9005\" timeout = \"1s\" [Client] timeout = \"1s\" timer = 1000 在 internal/dao 下添加 grpc.go\n//const target = \"direct://default/127.0.0.1:9002\" const AppID = \"demo.service.up\" // NOTE: example func init() { etcdV3Conf := clientv3.Config{ Endpoints: []string{\"127.0.0.1:2380\"}, DialTimeout: time.Second * time.Duration(30), DialOptions: []grpc.DialOption{grpc.WithBlock()}, } resolver.Register(etcd.Builder(\u0026etcdV3Conf)) } func NewGrpcClient() (grpcClient api.UpClient, err error) { cfg := \u0026warden.ClientConfig{} var ct paladin.TOML if err := paladin.Get(\"grpc.toml\").Unmarshal(\u0026ct); err != nil { return nil, err } if err := ct.Get(\"Client\").UnmarshalTOML(\u0026cfg); err != nil { return nil, err } client := warden.NewClient(cfg) //cc, err := client.Dial(context.Background(), target) //cc, err := client.Dial(context.Background(), \"discovery://default/\"+AppID) cc, err := client.Dial(context.Background(), \"etcd://default/\"+AppID) if err != nil { return nil, err } return api.NewUpClient(cc), nil } 在 internal/dao/dao.go添加下面内容\ntype dao struct { db *sql.DB redis *redis.Redis mc *memcache.Memcache cache *fanout.Fanout demoExpire int32 rpcClient api.UpClient httpClient blademaster.Client } // ... func (d *dao) CheckRole(ctx context.Context, req *api.CheckUpReq) (resp *api.CheckUpResp, err error) { resp, err = d.rpcClient.CheckRole(ctx, req) return } 其他的跟 http 的调用保持一致, 至此 http 调用 grpc 基本完事\n总结 本篇文章以 demo 为主, 所有的代码都会传至 github: https://github.com/georgehao/kratos-demo\n",
+  "wordCount" : "2116",
+  "inLanguage": "zh",
+  "datePublished": "2020-05-16T10:14:07+08:00",
+  "dateModified": "2020-05-16T10:14:07+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "haohongfan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://georgehao.github.io/posts/2020-05-16-kratos-demo/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "HHFCodeRv",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://georgehao.github.io/images/icon.png"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://georgehao.github.io/" accesskey="h" title="HHFCodeRv (Alt + H)">
+                <img src="https://georgehao.github.io/images/icon.png" alt="" aria-label="logo"
+                    height="35">HHFCodeRv</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://georgehao.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://gohandbook1.haohongfan.com" title="Go 源码分析与实战">
+                    <span>Go 源码分析与实战</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/archive/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://georgehao.github.io/friends/friends/" title="好友推荐">
+                    <span>好友推荐</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://georgehao.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://georgehao.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子
+    </h1>
+    <div class="post-meta"><span title='2020-05-16 10:14:07 +0800 CST'>2020年5月16日</span>&nbsp;·&nbsp;<span>5 分钟</span>&nbsp;·&nbsp;<span>2116 字</span>&nbsp;·&nbsp;<span>haohongfan</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#http-服务">http 服务</a></li>
+    <li><a href="#grpc-服务">grpc 服务</a></li>
+    <li><a href="#http-调用-http-服务">http 调用 http 服务</a>
+      <ul>
+        <li>
+          <ul>
+            <li>
+              <ul>
+                <li><a href="#up">up</a></li>
+                <li><a href="#biz">biz</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#http-调用-grpc-服务">http 调用 grpc 服务</a>
+      <ul>
+        <li><a href="#up-注册服务">up 注册服务</a></li>
+        <li><a href="#客户端调用">客户端调用</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本篇主要介绍四种使用 kratos 的例子. 前情透漏, 这一篇的篇幅比较长, 如果已经会用 Kratos 的可以跳过这一节</p>
+<h2 id="http-服务">http 服务<a hidden class="anchor" aria-hidden="true" href="#http-服务">#</a></h2>
+<p>http 服务其实就比较简单, 开篇的<code>Golang 大法好 ！！</code>直接就能对外提供 http 服务. http server默认有两个函数<code>howToStart</code>, <code>ping</code>.  关于ping 函数后面再具体看其作用</p>
+<p>如何添加一个新的 api 接口?</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// internal/server/http/server.go</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">initRouter</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Engine</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">e</span><span class="p">.</span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ping</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nf">Group</span><span class="p">(</span><span class="s">&#34;/kratos-demo&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/start&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">howToStart</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/sayHi&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">sayHi</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/sayHello&#34;</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">context</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">svc</span><span class="p">.</span><span class="nf">SayHello</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HelloReq</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;test&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="s">&#34;success&#34;</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">v2Group</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nf">Group</span><span class="p">(</span><span class="s">&#34;/kratos-demo/v2&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">v2Group</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/sayHi&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">sayHi</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">sayHi</span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="s">&#34;hi&#34;</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>这里你会不会想所有的 api controller 全部都放在一个 server.go, 后面会不会变得不可维护? 答案肯定的</p>
+<p>解决方案: 在 <code>internal/server/http</code> 目录下创建代表不同功能的文件</p>
+<ol>
+<li>升级不同版本了, 可以v1.go, v2.go,</li>
+<li>负责评论的叫 comment.go</li>
+<li>负责收藏的叫 favorite.go</li>
+</ol>
+<h2 id="grpc-服务">grpc 服务<a hidden class="anchor" aria-hidden="true" href="#grpc-服务">#</a></h2>
+<p>kratos-demo 默认是是支持 grpc 服务的, gprc 是需要 protobuf 支持的. 工程所有的 protobuf 应该都放在 api 目录下.</p>
+<p>通过<code>kratos tool protoc --grpc --bm api.proto</code> 生成两个文件 <code>api.pb.go</code>, <code>api.bm.go</code></p>
+<p>protobuf 的内容:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-protobuf" data-lang="protobuf"><span class="line"><span class="cl"><span class="kd">service</span> <span class="n">Demo</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>  <span class="k">rpc</span> <span class="n">Ping</span><span class="p">(</span><span class="o">.</span><span class="n">google.protobuf.Empty</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="o">.</span><span class="n">google.protobuf.Empty</span><span class="p">);</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>  <span class="k">rpc</span> <span class="n">SayHello</span><span class="p">(</span><span class="n">HelloReq</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="o">.</span><span class="n">google.protobuf.Empty</span><span class="p">);</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>  <span class="k">rpc</span> <span class="n">SayHelloURL</span><span class="p">(</span><span class="n">HelloReq</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloResp</span><span class="p">)</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="k">option</span> <span class="p">(</span><span class="n">google.api.http</span><span class="p">)</span> <span class="o">=</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>      <span class="n">get</span><span class="o">:</span> <span class="s">&#34;/kratos-demo/say_hello&#34;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="p">};</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>  <span class="p">};</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
+</span></span></span></code></pre></div><p>当然要想使用 grpc 的话需要实现上面三个函数. kratos-demo 默认是实现这三个方法的, 不过在<code>internal/service/service.go</code>里面</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// SayHello grpc demo func.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">SayHello</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HelloReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">reply</span><span class="w"> </span><span class="o">*</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">reply</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">new</span><span class="p">(</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;hello %s&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Name</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// SayHelloURL bm demo func.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">SayHelloURL</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HelloReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">reply</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HelloResp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">reply</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HelloResp</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;hello &#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;hello url %s&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Name</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// Ping ping the resource.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">{},</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">dao</span><span class="p">.</span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>我们要注意的是, <code>internal/server/grpc/server.go</code>并没有调用这些方法的地方, grpc是如何调用起来的呢?</p>
+<p>我们上一文章说到, kratos 使用 wire 依赖注入将各种组件组合到一块</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// wire_gen.go</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">server</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">grpc</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">serviceService</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="o">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>这里的 <code>serviceService</code> 就是 <code>internal/service/service.go</code>的 <code>Service</code></p>
+<p>这里推荐使用 <a href="https://github.com/uw-labs/bloomrpc">bloomrpc</a> 来验证 grpc 接口</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/kratos-demo-bloomrpc.png"></p>
+<h2 id="http-调用-http-服务">http 调用 http 服务<a hidden class="anchor" aria-hidden="true" href="#http-调用-http-服务">#</a></h2>
+<p>不管 http 调用 http, 还是 http 调用 grpc, 官方 wiki 并没有过多的提及. 就看到这么<a href="https://github.com/go-kratos/kratos/blob/master/doc/wiki-cn/warden-quickstart.md#client%E8%B0%83%E7%94%A8">一句话</a>, 更加坑的地方在于找遍所有的地方竟然没有 http client 的配置文件的格式</p>
+<blockquote>
+<p>请进入internal/dao方法内，一般对资源的处理都会在这一层封装。对于client端，前提必须有对应proto文件生成的代码，那么有两种选择：</p>
+<ol>
+<li>拷贝proto文件到自己项目下并且执行代码生成</li>
+<li>直接import服务端的api package</li>
+</ol>
+</blockquote>
+<p>下面看 http 如何调用 http. 假设有一个策略服务(biz)通过角色服务(up)的<code>check/role</code>判断某个用户的角色是否满足</p>
+<pre tabindex="0"><code>kratos new biz // 创建策略服务
+kratos new up  // 创建角色服务
+</code></pre><h5 id="up">up<a hidden class="anchor" aria-hidden="true" href="#up">#</a></h5>
+<p>proto文件, <code>kratos tool protoc --grpc --bm api.proto</code> 生成对应的 go 文件</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-proto" data-lang="proto"><span class="line"><span class="cl"><span class="c1">// api/api.proto
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">syntax</span> <span class="o">=</span> <span class="s">&#34;proto3&#34;</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">import</span> <span class="s">&#34;google/protobuf/empty.proto&#34;</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="kn">package</span> <span class="nn">up</span><span class="o">.</span><span class="n">service.v1</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">option</span> <span class="n">go_package</span> <span class="o">=</span> <span class="s">&#34;api&#34;</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="kd">service</span> <span class="n">Up</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="k">rpc</span> <span class="n">Ping</span><span class="p">(</span><span class="o">.</span><span class="n">google.protobuf.Empty</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="o">.</span><span class="n">google.protobuf.Empty</span><span class="p">);</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="k">rpc</span> <span class="n">CheckRole</span><span class="p">(</span><span class="n">CheckUpReq</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CheckUpResp</span><span class="p">);</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="kd">message</span> <span class="nc">CheckUpReq</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="kt">int32</span> <span class="n">Role</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="kd">message</span> <span class="nc">CheckUpResp</span> <span class="p">{</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="kt">bool</span> <span class="n">Yes</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
+</span></span></span></code></pre></div><p>在 <code>internal/service/service.go</code>里面添加下面代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">resp</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Infoc</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;check role:%d&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Role</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Role</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">resp</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">{</span><span class="nx">Yes</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">resp</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">{</span><span class="nx">Yes</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// Ping ping the resource.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">empty</span><span class="p">.</span><span class="nx">Empty</span><span class="p">{},</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">dao</span><span class="p">.</span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在 <code>internal/server/http/server.go</code>里面添加如下代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">roleParam</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">RoleId</span><span class="w"> </span><span class="kt">int32</span><span class="w"> </span><span class="s">`form:&#34;roleId&#34;`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">roleResult</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Yes</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="s">`json:&#34;yes&#34;`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">checkRole</span><span class="p">(</span><span class="nx">context</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="nx">roleParam</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nf">Bind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">input</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;client param error&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">.</span><span class="nx">RoleId</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">res</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">roleResult</span><span class="p">{</span><span class="nx">Yes</span><span class="p">:</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Yes</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>up服务已经可以了, 接下来看 biz 如何调用 up</p>
+<h5 id="biz">biz<a hidden class="anchor" aria-hidden="true" href="#biz">#</a></h5>
+<p>在<code>configs/http.html</code>里面添加下面配置</p>
+<pre tabindex="0"><code>[Server]
+    addr = &#34;0.0.0.0:8020&#34;
+    timeout = &#34;1s&#34;
+[Client]
+    dial = &#34;2s&#34;
+    timeout = &#34;100s&#34;
+    keepAlive = &#34;60s&#34;
+    timer = 1000
+    [httpClient.breaker]
+    window  = &#34;10s&#34;
+    sleep   = &#34;2000ms&#34;
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+</code></pre><p>在 <code>internal/dao/http.go</code>下添加下面代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nx">dao</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;github.com/go-kratos/kratos/pkg/conf/paladin&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;github.com/go-kratos/kratos/pkg/net/http/blademaster&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">NewHttpClient</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">blademaster</span><span class="p">.</span><span class="nx">Client</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">cfg</span><span class="w"> </span><span class="nx">blademaster</span><span class="p">.</span><span class="nx">ClientConfig</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">ct</span><span class="w"> </span><span class="nx">paladin</span><span class="p">.</span><span class="nx">TOML</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">paladin</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http.toml&#34;</span><span class="p">).</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ct</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ct</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;Client&#34;</span><span class="p">).</span><span class="nf">UnmarshalTOML</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cfg</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">blademaster</span><span class="p">.</span><span class="nf">NewClient</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cfg</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在 <code>internal/dao/dao.go</code>里面添加下面代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">dao</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">db</span><span class="w">         </span><span class="o">*</span><span class="nx">sql</span><span class="p">.</span><span class="nx">DB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">redis</span><span class="w">      </span><span class="o">*</span><span class="nx">redis</span><span class="p">.</span><span class="nx">Redis</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mc</span><span class="w">         </span><span class="o">*</span><span class="nx">memcache</span><span class="p">.</span><span class="nx">Memcache</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cache</span><span class="w">      </span><span class="o">*</span><span class="nx">fanout</span><span class="p">.</span><span class="nx">Fanout</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">demoExpire</span><span class="w"> </span><span class="kt">int32</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rpcClient</span><span class="w">  </span><span class="nx">api</span><span class="p">.</span><span class="nx">UpClient</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">httpClient</span><span class="w"> </span><span class="nx">blademaster</span><span class="p">.</span><span class="nx">Client</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ....</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">var</span><span class="w"> </span><span class="nx">grpcClient</span><span class="w"> </span><span class="nx">api</span><span class="p">.</span><span class="nx">UpClient</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">grpcClient</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">NewGrpcClient</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">d</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">dao</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">db</span><span class="p">:</span><span class="w">         </span><span class="nx">db</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">redis</span><span class="p">:</span><span class="w">      </span><span class="nx">r</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mc</span><span class="p">:</span><span class="w">         </span><span class="nx">mc</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cache</span><span class="p">:</span><span class="w">      </span><span class="nx">fanout</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;cache&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">demoExpire</span><span class="p">:</span><span class="w"> </span><span class="nb">int32</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">cfg</span><span class="p">.</span><span class="nx">DemoExpire</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rpcClient</span><span class="p">:</span><span class="w">  </span><span class="nx">grpcClient</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">httpClient</span><span class="p">:</span><span class="w"> </span><span class="o">*</span><span class="nf">NewHttpClient</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">d</span><span class="w"> </span><span class="o">*</span><span class="nx">dao</span><span class="p">)</span><span class="w"> </span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">api</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">resp</span><span class="w"> </span><span class="o">*</span><span class="nx">api</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">params</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">url</span><span class="p">.</span><span class="nx">Values</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">params</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;roleId&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Role</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">resp1</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Code</span><span class="w"> </span><span class="kt">int</span><span class="w">        </span><span class="s">`json:&#34;code&#34;`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Data</span><span class="w"> </span><span class="nx">roleResult</span><span class="w"> </span><span class="s">`json:&#34;data&#34;`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">upUrl</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&#34;http://127.0.0.1:8000/up/check_role&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">httpClient</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">upUrl</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">resp1</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">resp1</span><span class="p">.</span><span class="nx">Code</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;up url(%s) res(%+v) err(%+v)&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">upUrl</span><span class="o">+</span><span class="s">&#34;?&#34;</span><span class="o">+</span><span class="nx">params</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(),</span><span class="w"> </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">ecode</span><span class="p">.</span><span class="nf">Int</span><span class="p">(</span><span class="nx">resp1</span><span class="p">.</span><span class="nx">Code</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">api</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Yes</span><span class="p">:</span><span class="w"> </span><span class="nx">resp1</span><span class="p">.</span><span class="nx">Data</span><span class="p">.</span><span class="nx">Yes</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在 <code>internal/service/service.go</code>下添加</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="cp">//...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">resp</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Infoc</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;check role:%d&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Role</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">dao</span><span class="p">.</span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在 <code>internal/server/http/server.go</code>里面添加</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">initRouter</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Engine</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">e</span><span class="p">.</span><span class="nf">Ping</span><span class="p">(</span><span class="nx">ping</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nf">Group</span><span class="p">(</span><span class="s">&#34;/zbbiz&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/check_role&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">checkRole</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">ping</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">type</span><span class="w"> </span><span class="nx">roleParam</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">RoleId</span><span class="w"> </span><span class="kt">int32</span><span class="w"> </span><span class="s">`form:&#34;roleId&#34;`</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">checkRole</span><span class="p">(</span><span class="nx">context</span><span class="w"> </span><span class="o">*</span><span class="nx">bm</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="nx">roleParam</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nf">Bind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">input</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ecode</span><span class="p">.</span><span class="nx">RequestErr</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">.</span><span class="nx">RoleId</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">resp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;resp is nil&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">model</span><span class="p">.</span><span class="nx">CheckRole</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Yes</span><span class="p">:</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Yes</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">context</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">cr</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>至此, http 调用 http 已经大功告成 !</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/http-http.png">
+<img loading="lazy" src="https://images.haohongfan.com/http-up.png"></p>
+<h2 id="http-调用-grpc-服务">http 调用 grpc 服务<a hidden class="anchor" aria-hidden="true" href="#http-调用-grpc-服务">#</a></h2>
+<p>Grpc 的话, 其实 <a href="https://github.com/go-kratos/kratos/blob/master/doc/wiki-cn/warden-resolver.md">wiki</a>基本上说明白了怎么用了. 唯一要注意的地方 <strong>使用discovery</strong> 来做服务发现时, 切记要先去安装<a href="https://github.com/bilibili/discovery">discovery</a>, 看<a href="https://github.com/go-kratos/kratos/issues/506">issue</a>问为何启动报错, 多半是这个问题</p>
+<p>我这里就先使用 etcd 来做服务发现. 如果安装 etcd 就略过了</p>
+<h3 id="up-注册服务">up 注册服务<a hidden class="anchor" aria-hidden="true" href="#up-注册服务">#</a></h3>
+<p>在 <code>cmd/main.go</code> 里面添加下面代码, 其他的保持跟 http 一样即可</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">etcdV3Conf</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">clientv3</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Endpoints</span><span class="p">:</span><span class="w">   </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&#34;127.0.0.1:2380&#34;</span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">DialTimeout</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">DialOptions</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">grpc</span><span class="p">.</span><span class="nx">DialOption</span><span class="p">{</span><span class="nx">grpc</span><span class="p">.</span><span class="nf">WithBlock</span><span class="p">()},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">etcdBuilder</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">etcd</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">etcdV3Conf</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">ip</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&#34;0.0.0.0&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">port</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&#34;9002&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">hn</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nf">Hostname</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">ins</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">naming</span><span class="p">.</span><span class="nx">Instance</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Zone</span><span class="p">:</span><span class="w">     </span><span class="s">&#34;test&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Env</span><span class="p">:</span><span class="w">      </span><span class="s">&#34;dev&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">AppID</span><span class="p">:</span><span class="w">    </span><span class="s">&#34;demo.service.up&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Hostname</span><span class="p">:</span><span class="w"> </span><span class="nx">hn</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Addrs</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="s">&#34;grpc://&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">ip</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&#34;:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">port</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nx">cancel</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">etcdBuilder</span><span class="p">.</span><span class="nf">Register</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">ins</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">defer</span><span class="w"> </span><span class="nf">cancel</span><span class="p">()</span><span class="w">
+</span></span></span></code></pre></div><h3 id="客户端调用">客户端调用<a hidden class="anchor" aria-hidden="true" href="#客户端调用">#</a></h3>
+<p>在 <code>configs/grpc.toml</code> 添加下面内容</p>
+<pre tabindex="0"><code>[Server]
+    addr = &#34;0.0.0.0:9005&#34;
+    timeout = &#34;1s&#34;
+
+[Client]
+     timeout = &#34;1s&#34;
+     timer = 1000
+</code></pre><p>在 <code>internal/dao</code> 下添加 grpc.go</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="cp">//const target = &#34;direct://default/127.0.0.1:9002&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">const</span><span class="w"> </span><span class="nx">AppID</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#34;demo.service.up&#34;</span><span class="w"> </span><span class="c1">// NOTE: example</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">init</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">etcdV3Conf</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">clientv3</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Endpoints</span><span class="p">:</span><span class="w">   </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&#34;127.0.0.1:2380&#34;</span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">DialTimeout</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">DialOptions</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">grpc</span><span class="p">.</span><span class="nx">DialOption</span><span class="p">{</span><span class="nx">grpc</span><span class="p">.</span><span class="nf">WithBlock</span><span class="p">()},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resolver</span><span class="p">.</span><span class="nf">Register</span><span class="p">(</span><span class="nx">etcd</span><span class="p">.</span><span class="nf">Builder</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">etcdV3Conf</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="nf">NewGrpcClient</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="nx">grpcClient</span><span class="w"> </span><span class="nx">api</span><span class="p">.</span><span class="nx">UpClient</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cfg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">warden</span><span class="p">.</span><span class="nx">ClientConfig</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">ct</span><span class="w"> </span><span class="nx">paladin</span><span class="p">.</span><span class="nx">TOML</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">paladin</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;grpc.toml&#34;</span><span class="p">).</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ct</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ct</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;Client&#34;</span><span class="p">).</span><span class="nf">UnmarshalTOML</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cfg</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">client</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">warden</span><span class="p">.</span><span class="nf">NewClient</span><span class="p">(</span><span class="nx">cfg</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="cp">//cc, err := client.Dial(context.Background(), target)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="cp">//cc, err := client.Dial(context.Background(), &#34;discovery://default/&#34;+AppID)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cc</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nf">Dial</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span><span class="w"> </span><span class="s">&#34;etcd://default/&#34;</span><span class="o">+</span><span class="nx">AppID</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">api</span><span class="p">.</span><span class="nf">NewUpClient</span><span class="p">(</span><span class="nx">cc</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>在 <code>internal/dao/dao.go</code>添加下面内容</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">dao</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">db</span><span class="w">         </span><span class="o">*</span><span class="nx">sql</span><span class="p">.</span><span class="nx">DB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">redis</span><span class="w">      </span><span class="o">*</span><span class="nx">redis</span><span class="p">.</span><span class="nx">Redis</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mc</span><span class="w">         </span><span class="o">*</span><span class="nx">memcache</span><span class="p">.</span><span class="nx">Memcache</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">cache</span><span class="w">      </span><span class="o">*</span><span class="nx">fanout</span><span class="p">.</span><span class="nx">Fanout</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">demoExpire</span><span class="w"> </span><span class="kt">int32</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rpcClient</span><span class="w">  </span><span class="nx">api</span><span class="p">.</span><span class="nx">UpClient</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">httpClient</span><span class="w"> </span><span class="nx">blademaster</span><span class="p">.</span><span class="nx">Client</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">d</span><span class="w"> </span><span class="o">*</span><span class="nx">dao</span><span class="p">)</span><span class="w"> </span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">api</span><span class="p">.</span><span class="nx">CheckUpReq</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">resp</span><span class="w"> </span><span class="o">*</span><span class="nx">api</span><span class="p">.</span><span class="nx">CheckUpResp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">rpcClient</span><span class="p">.</span><span class="nf">CheckRole</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>其他的跟 http 的调用保持一致, 至此 http 调用 grpc 基本完事</p>
+<p><img loading="lazy" src="https://images.haohongfan.com/http-grpc.png"></p>
+<h2 id="总结">总结<a hidden class="anchor" aria-hidden="true" href="#总结">#</a></h2>
+<p>本篇文章以 demo 为主, 所有的代码都会传至 github: <a href="https://github.com/georgehao/kratos-demo">https://github.com/georgehao/kratos-demo</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://georgehao.github.io/tags/golang/">Golang</a></li>
+      <li><a href="https://georgehao.github.io/tags/kratos/">Kratos</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://georgehao.github.io/posts/2020-05-22-kratos-fanout/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Bilibili Kratos 框架源码分析(3) -- fanout异步</span>
+  </a>
+  <a class="next" href="https://georgehao.github.io/posts/2020-05-08-kratos-flow/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Bilibili Kratos 框架源码分析(1) -- 启动流程</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on x"
+            href="https://x.com/intent/tweet/?text=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f&amp;hashtags=golang%2ckratos">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f&amp;title=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90&amp;summary=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90&amp;source=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f&title=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on whatsapp"
+            href="https://api.whatsapp.com/send?text=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90%20-%20https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on telegram"
+            href="https://telegram.me/share/url?text=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90&amp;url=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bilibili Kratos 框架源码分析(2) -- Kratos 一些简单例子 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Bilibili%20Kratos%20%e6%a1%86%e6%9e%b6%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%282%29%20--%20Kratos%20%e4%b8%80%e4%ba%9b%e7%ae%80%e5%8d%95%e4%be%8b%e5%ad%90&u=https%3a%2f%2fgeorgehao.github.io%2fposts%2f2020-05-16-kratos-demo%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© 2021 <a href="https://georgehao.github.io/">haohongfan</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = '复制';
+
+        function copyingDone() {
+            copybutton.innerHTML = '已复制！';
+            setTimeout(() => {
+                copybutton.innerHTML = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

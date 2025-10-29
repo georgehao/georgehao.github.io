@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Compose on HHFCodeRv</title>
+    <link>https://georgehao.github.io/tags/compose/</link>
+    <description>Recent content in Compose on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Wed, 13 Jun 2018 21:59:26 +0800</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/tags/compose/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Compose Transporter -- 基于阿里云MongoDB和ES之间的数据同步</title>
+      <link>https://georgehao.github.io/posts/2018-06-13-compose-transporter/</link>
+      <pubDate>Wed, 13 Jun 2018 21:59:26 +0800</pubDate>
+      <guid>https://georgehao.github.io/posts/2018-06-13-compose-transporter/</guid>
+      <description>&lt;h2 id=&#34;工具选型&#34;&gt;工具选型&lt;/h2&gt;
+&lt;p&gt;主要查看&lt;a href=&#34;https://code.likeagirl.io/5-different-ways-to-synchronize-data-from-mongodb-to-elasticsearch-d8456b83d44f&#34;&gt;这篇文章&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb-labs/mongo-connector&#34;&gt;mongo-connector&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/richardwilly98/elasticsearch-river-mongodb&#34;&gt;elasticsearch-river-mongodb&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html&#34;&gt;Logstash&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/compose/transporter&#34;&gt;transporter&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.compose.com/articles/mongoosastic-the-power-of-mongodb-and-elasticsearch-together/&#34;&gt;Mongoosastic&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;mongo-connector&lt;/code&gt;是&lt;a href=&#34;https://github.com/mongodb-labs/mongo-connector&#34;&gt;mongodb-labs&lt;/a&gt;官方的开源项目. 但是官方不在支持, 关闭了&lt;code&gt;issue&lt;/code&gt;, 导致很多问题无法找到答案, 也就无法解决遇到的问题&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;mongo-connector is not currently supported by MongoDB, Inc. If any community members would like to take over maintenance, please contact &lt;a href=&#34;mailto:seth.payne@mongodb.com&#34;&gt;seth.payne@mongodb.com&lt;/a&gt;`&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;elasticsearch-river-mongodb&lt;/code&gt;不支持&lt;code&gt;elasticsearch&lt;/code&gt;5.0以版本.&lt;/p&gt;
+&lt;p&gt;最终选择&lt;code&gt;Transporter&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;选择transporter原因&#34;&gt;选择&lt;code&gt;Transporter&lt;/code&gt;原因&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;项目活跃度较高&lt;/li&gt;
+&lt;li&gt;实时同步&lt;/li&gt;
+&lt;li&gt;配置简单&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;golang&lt;/code&gt;写的(golang忠实粉丝)&lt;/li&gt;
+&lt;li&gt;IBM公司产品&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;开头文章提到的问题:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

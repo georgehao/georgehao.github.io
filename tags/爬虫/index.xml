@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>爬虫 on HHFCodeRv</title>
+    <link>https://georgehao.github.io/tags/%E7%88%AC%E8%99%AB/</link>
+    <description>Recent content in 爬虫 on HHFCodeRv</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>zh</language>
+    <copyright>2021 haohongfan</copyright>
+    <lastBuildDate>Tue, 03 Oct 2017 13:44:30 +0000</lastBuildDate>
+    <atom:link href="https://georgehao.github.io/tags/%E7%88%AC%E8%99%AB/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>爬虫小试-抓取JD图片</title>
+      <link>https://georgehao.github.io/posts/2017-10-03-spider-jd/</link>
+      <pubDate>Tue, 03 Oct 2017 13:44:30 +0000</pubDate>
+      <guid>https://georgehao.github.io/posts/2017-10-03-spider-jd/</guid>
+      <description>&lt;p&gt;因为项目需要, 要抓取京东一些图片, 来进行分析使用.如&lt;code&gt;https://item.jd.com/bigimage.aspx?id=11921955&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/jd.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我们想抓取的就是这个图片右侧的8张图片. 进过分析这个系列&lt;code&gt;html&lt;/code&gt;源码, 发现8张图片的地址在&lt;code&gt;js&lt;/code&gt;数组中.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl https://item.jd.com/bigimage.aspx?id=11921955
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://images.haohongfan.com/js_array.png?imageView2/2/w/800/h/500&#34;&gt;&lt;/p&gt;
+&lt;p&gt;如果利用常规的&lt;code&gt;requests + BeautifulSoup&lt;/code&gt;的话, 感觉只获取这个js数组就是一个挺麻烦的事情. 因为直接使用&lt;code&gt;requests&lt;/code&gt;获取到的页面, 没有动态加载js数据.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
